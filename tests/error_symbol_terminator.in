@@ -1,0 +1,9 @@
+# This map is missing ';' or ':' after a identifier
+
+release
+{
+    global:
+        symbol_without_terminator
+    local:
+        *;
+};

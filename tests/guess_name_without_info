@@ -1,0 +1,15 @@
+# This map is well formed. This is used to test name guessing without any info
+
+release
+{
+    global:
+        global_symbol;
+} base;
+
+base
+{
+    global:
+        base_symbol;
+    local:
+        *;
+};

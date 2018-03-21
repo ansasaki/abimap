@@ -1,0 +1,15 @@
+# This map is well defined. It is used to test name guessing
+
+libx_1_1_0
+{
+    global:
+        symbol;
+} libx_1_0_0;
+
+libx_1_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+};

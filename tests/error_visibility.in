@@ -1,0 +1,9 @@
+# This map is missing the visibility scope
+
+release
+{
+        symbol_without_scope;
+    local:
+        *;
+};
+

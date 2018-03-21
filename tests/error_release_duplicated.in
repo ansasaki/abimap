@@ -1,0 +1,21 @@
+# This map contain a duplicated release name
+
+release
+{
+    global:
+        symbol;
+} base;
+
+release
+{
+    global:
+        other_symbol;
+} base;
+
+base
+{
+    global:
+        another_symbol;
+    local:
+        *;
+};

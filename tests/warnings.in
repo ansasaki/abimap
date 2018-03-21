@@ -1,0 +1,69 @@
+# Normal comment
+	 # comment with spaces in the beginning
+		# comment with tabs in the beginning
+
+new_release
+{
+    global:
+        symbol; symbol_in_line;
+        other_symbol;
+        # Comment in the middle of the code
+        symbol_with_space_before_semicolon      ;
+    local:
+        local_symbol; #comment with valid content before asdsadsadsa
+        other_local_symbol;
+} previous;
+
+previous
+{
+    global:
+        some_symbol;
+    local:
+        more_symbol;
+} base;
+
+previous_in_other_branch
+{
+    global:
+        symbol;
+} base;
+
+with_duplicate
+{
+    global:
+        duplicate;
+        duplicate;
+} base;
+
+with_wildcard_and_dependency
+{
+    global:
+        symbols;
+    local:
+        *;
+} base;
+
+with_wildcard_in_global
+{
+    global:
+        *;
+    local:
+        symbol;
+} base;
+
+base
+# Comment
+#
+        # Other comment
+{
+    global     :symbol_inline_with_visibility;
+    local:
+        local_symbol;
+        # wildcard well placed (in base version, local scope)
+        *;
+};
+
+# comments in the middle
+#
+#
+
