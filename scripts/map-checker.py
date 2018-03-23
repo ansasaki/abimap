@@ -39,6 +39,23 @@ def bump_version(version, abi_break):
                 new_version.append(0)
     return new_version
 
+def clean_symbols(symbols):
+    """
+    Receives a list of lines read from the input and returns a list of words
+    """
+    clean = []
+
+    while symbols:
+        line = symbols.pop()
+        parts = re.split(r'\W+', line)
+        if parts:
+            for symbol in parts:
+                m = re.match(r'\w+', symbol)
+                if m:
+                    clean.append(m.group())
+
+    return clean
+
 class ParserError(Exception):
     """
     Exception type raised by the map parser
@@ -403,38 +420,40 @@ class Map:
         for release in self.releases:
             for scope, symbols in release.symbols:
                 if scope == 'local':
-                    if "*" in symbols:
-                        message = "INFO: %s" %(release.name)
-                        message += " contains the local \'*\' wildcard"
-                        infos.append(message)
-                        if release.previous:
-                            # Release contain predecessor version and local: *;
-                            message = "WARNING: %s" %(release.name)
-                            message += " should not contain the local wildcard"
-                            message += " because it is not the base version"
-                            message += " (it refers to version"
-                            message += " \'%s\' as its" %(release.previous)
-                            message += " predecessor)"
-                            warnings.append(message)
-                        else:
-                            # Release seems to be base: empty predecessor
+                    if symbols:
+                        if "*" in symbols:
                             message = "INFO: %s" %(release.name)
-                            message += " seems to be the base version"
+                            message += " contains the local \'*\' wildcard"
                             infos.append(message)
-                            seems_base.append(release.name)
+                            if release.previous:
+                                # Release contain predecessor version and local: *;
+                                message = "WARNING: %s" %(release.name)
+                                message += " should not contain the local wildcard"
+                                message += " because it is not the base version"
+                                message += " (it refers to version"
+                                message += " \'%s\' as its" %(release.previous)
+                                message += " predecessor)"
+                                warnings.append(message)
+                            else:
+                                # Release seems to be base: empty predecessor
+                                message = "INFO: %s" %(release.name)
+                                message += " seems to be the base version"
+                                infos.append(message)
+                                seems_base.append(release.name)
 
-                        # Append to the list of releases which contain the
-                        # wildcard '*'
-                        have_wildcard.append((release.name, scope))
+                            # Append to the list of releases which contain the
+                            # wildcard '*'
+                            have_wildcard.append((release.name, scope))
                 elif scope == 'global':
-                    if "*" in symbols:
-                        # Release contains '*' wildcard in global scope
-                        message = "WARNING: %s contains the" %(release.name)
-                        message += " \'*\' wildcard in global scope."
-                        message += " It is probably exporting"
-                        message += " symbols it should not."
-                        warnings.append(message)
-                        have_wildcard.append((release.name, scope))
+                    if symbols:
+                        if "*" in symbols:
+                            # Release contains '*' wildcard in global scope
+                            message = "WARNING: %s contains the" %(release.name)
+                            message += " \'*\' wildcard in global scope."
+                            message += " It is probably exporting"
+                            message += " symbols it should not."
+                            warnings.append(message)
+                            have_wildcard.append((release.name, scope))
                 else:
                     # Release contains unknown visibility scopes (not global or
                     # local)
@@ -754,13 +773,14 @@ class Release:
         for scope, symbols in self.symbols:
             seen = []
             release_dups = []
-            for symbol in symbols:
-                if symbol not in seen:
-                    seen.append(symbol)
-                else:
-                    release_dups.append(symbol)
-            if release_dups:
-                duplicates.append((scope, set(release_dups)))
+            if symbols:
+                for symbol in symbols:
+                    if symbol not in seen:
+                        seen.append(symbol)
+                    else:
+                        release_dups.append(symbol)
+                if release_dups:
+                    duplicates.append((scope, set(release_dups)))
         return duplicates
 
     def __next__(self):
@@ -836,6 +856,9 @@ def update(args):
         for line in lines:
             new_symbols.extend(line.split())
 
+    # Clean the input removing invalid symbols
+    new_symbols = clean_symbols(new_symbols)
+
     # All symbols read
     new_set = set(new_symbols)
 
@@ -884,7 +907,21 @@ def update(args):
     latest = cur_map.guess_latest_release()
 
     # TODO Add stuff to help name guesser?
-    # TODO Order the releases ?
+    if added:
+        r = Release()
+        # Guess the name for the new release
+        r.name = cur_map.guess_name()
+        r.name.upper()
+
+        # Add the symbols added to global scope
+        r.symbols.append(('global', added))
+
+        # Add the name for the previous release
+        r.previous = latest[0]
+
+        # Put the release on the map
+        cur_map.releases.append(r)
+
     if removed:
         print("ABI break detected: symbols were removed since last"
         " version")
@@ -894,6 +931,7 @@ def update(args):
 
         # Guess the name of the new release
         r.name = cur_map.guess_name(abi_break=True)
+        r.name.upper()
 
         # Remove the symbols to be removed
         for symbol in removed:
@@ -909,6 +947,69 @@ def update(args):
         # Put the release on the map
         new_map.releases.append(r)
 
+        # Substitute the map
+        cur_map = new_map
+
+    # Do a structural check
+    cur_map.check()
+
+    # Sort the releases putting the new release and dependencies first
+    cur_map.sort_releases_nice(r.name)
+
+    # Write out to the output
+    args.out.write("# This map file was automatically updated with"
+    " map-checker\n\n")
+    args.out.write(cur_map.__str__())
+
+#TODO
+def new(args):
+    print("Command: new")
+    print(args)
+
+    name = ''
+
+    if args.release:
+        name = args.release
+    elif args.name and args.version:
+        #TODO: parse version and check
+        name = args.name + args.version
+    else:
+        #TODO: Create error
+        print("ERROR: Is necessary to provide either release name or name and"
+        " version")
+
+    # Generate the list of the new symbols
+    new_symbols = []
+    if args.input:
+        with open(arsg.input, "r") as symbols_fp:
+            lines = symbols_sp.readlines()
+            for line in lines:
+                new_symbols.extend(line.split())
+    else:
+        # Read from stdin
+        lines = sys.stdin.readlines()
+        for line in lines:
+            new_symbols.extend(line.split())
+
+    # Clean the input removing invalid symbols
+    new_symbols = clean_symbols(new_symbols)
+
+    if new_symbols:
+        new_map = Map()
+        r = Release()
+
+        # Set the name of the new release
+        r.name = name.upper()
+
+        # Add the symbols to global scope
+        r.symbols.append(('global', new_symbols))
+
+        # Add the wildcard to the local symbols
+        r.symbols.append(('local', ['*']))
+
+        # Put the release on the map
+        new_map.releases.append(r)
+
         # Do a structural check
         new_map.check()
 
@@ -916,39 +1017,14 @@ def update(args):
         new_map.sort_releases_nice(r.name)
 
         # Write out to the output
-        args.out.write("# This map file was automatically updated with"
+        args.out.write("# This map file was created with"
         " map-checker\n\n")
         args.out.write(new_map.__str__())
     else:
-        if added:
-            r = Release()
-            # Guess the name for the new release
-            r.name = cur_map.guess_name()
+        #TODO Make this a warning
+        print("WARNING: No valid symbols provided")
 
-            # Add the symbols added to global scope
-            r.symbols.append(('global', added))
-
-            # Add the name for the previous release
-            r.previous = latest[0]
-
-            # Put the release on the map
-            cur_map.releases.append(r)
-
-            # Do a structural check
-            cur_map.check()
-
-            # Sort the releases putting the new release and dependencies first
-            cur_map.sort_releases_nice(r.name)
-
-            # Write out to the output
-            args.out.write("# This map file was automatically updated with"
-            " map-checker\n\n")
-            args.out.write(cur_map.__str__())
-
-#TODO
-def new(args):
-    print("Command: new")
-    print(args)
+# User interface
 
 # Main arguments parser
 parser = argparse.ArgumentParser(description='Helper tools for linker version'
@@ -960,11 +1036,13 @@ type=argparse.FileType('w'), default='-')
 # Subcommands parser
 subparsers = parser.add_subparsers(title='Subcommands', description='Valid'
 ' subcommands:', help='These subcommands have their own set of options')
+
 # Compare subcommand parser
 parser_cmp = subparsers.add_parser('compare', help='Compare two map files')
 parser_cmp.add_argument('-n', '--new', help='The new map', required=True)
 parser_cmp.add_argument('-o', '--old', help='The old map', required=True)
 parser_cmp.set_defaults(func=compare)
+
 # Update subcommand parser
 parser_up = subparsers.add_parser('update', help='Update the map file')
 parser_up.add_argument('file', help='The map file to be updated')
@@ -979,15 +1057,16 @@ group.add_argument('-s', '--symbols', help='Compare the given symbol list with'
 ' the current map file and update accordingly. May break the ABI.',
 action='store_true')
 parser_up.set_defaults(func=update)
+
 # New subcommand parser
 parser_new = subparsers.add_parser('new', help='Create a new map file')
 parser_new.add_argument('file', help='The map file to be created')
+parser_new.add_argument('-i', '--in', help='Read from a file instead of stdio',
+dest='input')
 parser_new.add_argument('-n', '--name', help='The name of the library (e.g. libx)')
-parser_new.add_argument('-v', '--version', help='The release version (e.g. 1_0_0)') #TODO list of ints
+parser_new.add_argument('-v', '--version', help='The release version (e.g. 1_0_0)')
 parser_new.add_argument('-r', '--release', help='The full name of the release'
 ' to be used (e.g. LIBX_1_0_0)')
-parser_new.add_argument('-p', '--previous', help='The full name of the previous'
-' release (e.g. LIBX_0_9_8)')
 parser_new.set_defaults(func=new)
 
 args = parser.parse_args()
