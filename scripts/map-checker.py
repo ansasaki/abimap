@@ -824,6 +824,10 @@ def compare(args):
     print("Command: compare")
     print(args)
 
+    old_map = Map(filename=args.old)
+    new_map = Map(filename=args.new)
+
+
 #TODO
 def update(args):
     """
@@ -923,8 +927,10 @@ def update(args):
         cur_map.releases.append(r)
 
     if removed:
-        print("ABI break detected: symbols were removed since last"
-        " version")
+        if args.care:
+            raise Exception("ABI break detected: symbols would be removed")
+
+        #TODO: Set verbosity
         print("Merging all symbols in a single new release")
         new_map = Map()
         r = Release()
@@ -961,7 +967,6 @@ def update(args):
     " map-checker\n\n")
     args.out.write(cur_map.__str__())
 
-#TODO
 def new(args):
     print("Command: new")
     print(args)
@@ -1048,6 +1053,8 @@ parser_up = subparsers.add_parser('update', help='Update the map file')
 parser_up.add_argument('file', help='The map file to be updated')
 parser_up.add_argument('-i', '--in', help='Read from a file instead of stdio',
 dest='input')
+parser_up.add_argument('-c', '--care', help='Does not continue if the ABI would'
+' break', action='store_true')
 group = parser_up.add_mutually_exclusive_group(required=True)
 group.add_argument('-a', '--add', help='Adds the symbols to the map file.',
 action='store_true')
@@ -1063,8 +1070,10 @@ parser_new = subparsers.add_parser('new', help='Create a new map file')
 parser_new.add_argument('file', help='The map file to be created')
 parser_new.add_argument('-i', '--in', help='Read from a file instead of stdio',
 dest='input')
-parser_new.add_argument('-n', '--name', help='The name of the library (e.g. libx)')
-parser_new.add_argument('-v', '--version', help='The release version (e.g. 1_0_0)')
+parser_new.add_argument('-n', '--name', help='The name of the library'
+' (e.g. libx)')
+parser_new.add_argument('-v', '--version', help='The release version'
+' (e.g. 1_0_0)')
 parser_new.add_argument('-r', '--release', help='The full name of the release'
 ' to be used (e.g. LIBX_1_0_0)')
 parser_new.set_defaults(func=new)
