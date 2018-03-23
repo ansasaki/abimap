@@ -671,6 +671,30 @@ class Map:
         # Return the combination of the prefix and version
         return new_prefix + new_suffix
 
+    def sort_releases_nice(self, top_release):
+        """
+        Sort the releases contained in a map file putting the dependencies of
+        top_release first
+        """
+
+        self.releases.sort(key=lambda release: release.name)
+        dependencies = self.dependencies()
+        top_dependency = (dependency for dependency in dependencies if
+        dependency[0] == top_release).next()
+
+        new_list = []
+        index = 0
+
+        while self.releases:
+            release = self.releases.pop()
+            if release.name in top_dependency:
+                new_list.insert(index, release)
+                index += 1
+            else:
+                new_list.append(release)
+
+        self.releases = new_list
+
     # To make iterable
     def __next__(self):
         """
@@ -888,6 +912,9 @@ def update(args):
         # Do a structural check
         new_map.check()
 
+        # Sort the releases putting the new release and dependencies first
+        new_map.sort_releases_nice(r.name)
+
         # Write out to the output
         args.out.write("# This map file was automatically updated with"
         " map-checker\n\n")
@@ -909,6 +936,9 @@ def update(args):
 
             # Do a structural check
             cur_map.check()
+
+            # Sort the releases putting the new release and dependencies first
+            cur_map.sort_releases_nice(r.name)
 
             # Write out to the output
             args.out.write("# This map file was automatically updated with"
