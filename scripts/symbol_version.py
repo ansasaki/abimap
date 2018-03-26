@@ -1,27 +1,130 @@
+#!/usr/bin/env python
 import sys
 import re
-import os
 
 import argparse
 
-def get_info_from_release(release):
+# Errors severity/verbosity
+QUIET = 0
+ERROR = 1
+WARNING = 2
+INFO = 3
+DEBUG = 4
+
+SEVERITY_MSG = {1 : '[ERROR] ',
+                2 : '[WARNING] ',
+                3 : '[INFO] ',
+                4 : '[DEBUG] '}
+
+VERBOSITY_MAP = {'quiet'    : QUIET,
+                 'error'    : ERROR,
+                 'warning'  : WARNING,
+                 'info'     : INFO,
+                 'debug'    : DEBUG}
+
+# Set global verbosity default
+global_verbosity = WARNING
+
+# Global functions
+
+# Information printer helpers
+def print_msg(message):
+    if global_verbosity > QUIET:
+        print(message)
+
+def print_info(message):
+    if global_verbosity >= INFO:
+        print(SEVERITY_MSG[INFO] + message)
+
+def print_warning(message):
+    if global_verbosity >= WARNING:
+        print(SEVERITY_MSG[WARNING] + message)
+
+def print_error(message):
+    if global_verbosity >= ERROR:
+        print(SEVERITY_MSG[ERROR] + message)
+
+def print_debug(message):
+    if global_verbosity >= DEBUG:
+        print(SEVERITY_MSG[DEBUG] + message)
+
+def get_version_from_string(version_string):
+    m = re.findall(r'[a-zA-Z0-9]+', version_string)
+
+    if m:
+        if len(m) < 2:
+            print_warning("Provide at least a major and a minor version digit"
+            " (eg. '1.2.3' or '1_2')")
+        if len(m) > 3:
+            print_warning("Version has too many parts; provide 3 or less"
+            "( e.g. '0.1.2')")
+    else:
+        print_error("Could not get version parts. Provide digits separated by"
+        " non-alphanumeric characters. (e.g. 0_1_2 or 0.1.2)")
+
+    version = []
+    for i in m:
+        version.append(int(i))
+
+    return version
+
+def get_info_from_release_string(release):
+    """
+    Get the information from a release name
+
+    The given string is split in a prefix (usually the name of the lib) and a
+    suffix (the version part, e.g. '_1_4_7'). A list with the version info
+    converted to ints is also contained in the returned list.
+    The 
+
+    :param release: A string in format 'LIBX_1_0_0' or similar
+    :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
+    """
     version = [None, None, None]
     ver_suffix = ''
     prefix = ''
+    tail = ''
 
+    # Search for the first ocurrence of a version like sequence
     m = re.search(r'_+[0-9]+', release)
     if m:
+        # If found, remove the version like sequence to get the prefix
         prefix = release[:m.start()]
+        tail = release[m.start():]
+    else:
+        # The release does not have version info, but can have trailing '_'
+        m = re.search(r'_+$', release)
+        if m:
+            # If so, remove the trailing '_'
+            prefix = release[:m.start()]
+        else:
+            # Otherwise the prefix is the whole release name
+            prefix = release
 
-    m = re.search(r'_([0-9]+)_*([0-9]*)_*([0-9]*)$', release)
-    if m:
-        for i in range(1, 4):
-            if m.group(i):
-                version[i - 1] = int(m.group(i))
-                ver_suffix += "_%s" %(m.group(i))
+    if tail:
+        # Search and get the version information
+        #m = re.search(r'_([0-9]+)_*([0-9]*)_*([0-9]*)$', release)
+        version = get_version_from_string(tail)
+        if version:
+            for i in version:
+                ver_suffix += "_%d" %(i)
+
+    # Return the information got
     return [release, prefix, ver_suffix, version]
 
+# TODO: Make bump strategy customizable
 def bump_version(version, abi_break):
+    """
+    Bump a version depending if the ABI was broken or not
+
+    If the ABI was broken, CUR is bumped; AGE and REV are set to zero.
+    Otherwise, CUR is kept, AGE is bumped, and REV is set to zero.
+    This also works with versions without the REV component (e.g. [1, 4, None])
+
+    :param version:     A list in format [CUR, AGE, REV]
+    :param abi_break:   A boolean indication if the ABI was broken
+    :returns:           A list in format [CUR, AGE, REV]
+    """
     new_version = []
     if abi_break:
         if (version[0] != None):
@@ -42,9 +145,13 @@ def bump_version(version, abi_break):
 def clean_symbols(symbols):
     """
     Receives a list of lines read from the input and returns a list of words
-    """
-    clean = []
 
+    :param symbols: A list of lines containing symbols
+    :returns:       A list of the obtained symbols
+    """
+
+    # Split the lines into potential symbols and remove invalid characters
+    clean = []
     while symbols:
         line = symbols.pop()
         parts = re.split(r'\W+', line)
@@ -56,49 +163,56 @@ def clean_symbols(symbols):
 
     return clean
 
+# Error classes
+
 class ParserError(Exception):
     """
     Exception type raised by the map parser
     """
 
-    INFO = 0
-    WARNING = 1
-    ERROR = 2
-
-    severity_msg = {0 : 'INFO',
-                    1 : 'WARNING',
-                    2 : 'ERROR'}
-
     def __str__(self):
         content = ''
-        content += "%s: in line %d, column %d: %s\n" %(
-            self.severity_msg[self.severity],
-            self.line + 1,
-            self.column,
-            self.message)
+        content += SEVERITY_MSG[self.severity]
+        content += 'in line %d, ' %(self.line + 1)
+        content += 'column %d: ' %(self.column)
+        content += "%s\n" %(self.message)
         content += self.context
         content += " " * (self.column - 1)
         content += '^'
         return content
 
     def __init__(self, context, line, column, message, severity=ERROR):
+        """
+        The constructor
+
+        :param context:     The line where the error was detected
+        :param line:        The index of the line where the error was detected
+        :param column:      The index of the column where the error was detected
+        :param message:     The error message
+        :param severity:    Can be INFO, WARNING, ERROR, or DEBUG
+        """
         self.context = context
         self.line = line
         self.column = column
         self.message = message
         self.severity = severity
 
-#TODO
 class DependencyError(Exception):
     """
     Exception type raised by dependency checker
     """
 
     def __str__(self):
-        return self.message
+        content = ''
+        content += '%s: ' %(SEVERITY_MSG[self.severity])
+        content += self.message
+        return content
 
-    def __init__(self, message):
+    def __init__(self, message, severity = ERROR):
         self.message = message
+        self.severity = severity
+
+# Map class
 
 class Map:
     """
@@ -131,8 +245,7 @@ class Map:
                         continue
                     # Searching for a release name
                     if state == 0:
-                        if self.debug != 0:
-                            print(">>Name")
+                        print_debug(">>Name")
                         m = re.match(r'\w+', line[column:])
                         if m == None:
                             raise ParserError(lines[last[0]], last[0],
@@ -152,12 +265,11 @@ class Map:
                             if has_duplicate:
                                 raise ParserError(lines[index], index,
                                 column, "Duplicated Release identifier \'%s\'"
-                                %(name), severity = ParserError.WARNING)
+                                %(name), severity = WARNING)
                             continue
                     # Searching for the '{'
                     elif state == 1:
-                        if self.debug != 0:
-                            print(">>Opening")
+                        print_debug(">>Opening")
                         m = re.match(r'\{', line[column:])
                         if m == None:
                             raise ParserError(lines[last[0]], last[0], last[1],
@@ -169,12 +281,10 @@ class Map:
                             state += 1
                             continue
                     elif state == 2:
-                        if self.debug != 0:
-                            print(">>Element")
+                        print_debug(">>Element")
                         m = re.match(r'\}', line[column:])
                         if m != None:
-                            if self.debug != 0:
-                                print(">>Release closer, jump to Previous")
+                            print_debug(">>Release closer, jump to Previous")
                             column += m.end()
                             last = (index, column)
                             state = 4
@@ -192,8 +302,7 @@ class Map:
                             state += 1
                             continue
                     elif state == 3:
-                        if self.debug != 0:
-                            print(">>Element closer")
+                        print_debug(">>Element closer")
                         m = re.match(r';', line[column:])
                         if m == None:
                             # It was not Symbol. Maybe a new visibility.
@@ -221,7 +330,7 @@ class Map:
                                     " scope before \'%s\'." 
                                     " Symbols considered in \'global:\'"
                                     %(identifier),
-                                    severity = ParserError.WARNING)
+                                    severity = WARNING)
                             else:
                                 # Symbol found
                                 v[1].append(identifier)
@@ -231,12 +340,10 @@ class Map:
                                 state = 2
                                 continue
                     elif state == 4:
-                        if self.debug != 0:
-                            print(">>Previous")
+                        print_debug(">>Previous")
                         m = re.match(r'^;', line[column:])
                         if m != None:
-                            if self.debug != 0:
-                                print(">>Empty previous")
+                            print_debug(">>Empty previous")
                             column += m.end()
                             last = (index, column)
                             # Move back the state to find other releases
@@ -254,8 +361,7 @@ class Map:
                             state += 1
                             continue
                     elif state == 5:
-                        if self.debug != 0:
-                            print(">>Previous closer")
+                        print_debug(">>Previous closer")
                         m = re.match(r'^;', line[column:])
                         if m == None:
                             raise ParserError(lines[last[0]], last[0], last[1],
@@ -273,8 +379,9 @@ class Map:
                         raise ParserError(lines[last[0]], last[0], last[1], "Unknown"
                             "parser state")
                 except ParserError as e:
-                    if e.severity != e.ERROR:
-                        print(e)
+                    # If the exception was not an error, continue
+                    if e.severity != ERROR:
+                        print_msg(e)
                         pass
                     else:
                         raise e
@@ -347,16 +454,20 @@ class Map:
         """
         Construct the dependencies lists
 
+        Contruct a list of dependency lists. Each dependency list contain the
+        names of the releases in a dependency path.
+        The heads of the dependencies lists are the releases not refered as a
+        previous release in any release.
+
         :returns:   A list containing the dependencies lists
         """
 
         def get_dependency(releases, current):
             found = [release for release in releases if release.name == current]
             if not found:
-                raise DependencyError("ERROR: release \'%s\' not found"
-                %(current))
+                raise DependencyError("release \'%s\' not found" %(current))
             if len(found) > 1:
-                raise DependencyError("ERROR: defined more than 1 release"
+                raise DependencyError("defined more than 1 release "
                 "\'%s\'" %(current))
             return found[0].previous
 
@@ -371,7 +482,7 @@ class Map:
                 while dep:
                     if dep in current:
                         msg = ''
-                        msg += "ERROR: circular dependency detected!\n"
+                        msg += "Circular dependency detected!\n"
                         msg += "    "
                         for i in current:
                             msg += "%s->" %(i)
@@ -398,8 +509,6 @@ class Map:
         Check the map structure
         """
 
-        infos = []
-        warnings = []
         have_wildcard = []
         seems_base = []
 
@@ -407,14 +516,14 @@ class Map:
         d = self.duplicates()
         if d:
             for release, duplicates in d:
-                message = 'WARNING: Duplicates found in release %s:' %(release)
-                warnings.append(message)
+                message = 'Duplicates found in release %s:' %(release)
+                print_warning(message)
                 for scope, symbols in duplicates:
                     message = ' ' * 4 + scope + ':'
-                    warnings.append(message)
+                    print_warning(message)
                     for symbol in symbols:
                         message = ' ' * 8 + symbol
-                        warnings.append(message)
+                        print_warning(message)
 
         # Check '*' wildcard usage
         for release in self.releases:
@@ -422,23 +531,23 @@ class Map:
                 if scope == 'local':
                     if symbols:
                         if "*" in symbols:
-                            message = "INFO: %s" %(release.name)
+                            message = "%s" %(release.name)
                             message += " contains the local \'*\' wildcard"
-                            infos.append(message)
+                            print_info(message)
                             if release.previous:
                                 # Release contain predecessor version and local: *;
-                                message = "WARNING: %s" %(release.name)
+                                message = "%s" %(release.name)
                                 message += " should not contain the local wildcard"
                                 message += " because it is not the base version"
                                 message += " (it refers to version"
                                 message += " \'%s\' as its" %(release.previous)
                                 message += " predecessor)"
-                                warnings.append(message)
+                                print_warning(message)
                             else:
                                 # Release seems to be base: empty predecessor
-                                message = "INFO: %s" %(release.name)
+                                message = "%s" %(release.name)
                                 message += " seems to be the base version"
-                                infos.append(message)
+                                print_info(message)
                                 seems_base.append(release.name)
 
                             # Append to the list of releases which contain the
@@ -448,65 +557,55 @@ class Map:
                     if symbols:
                         if "*" in symbols:
                             # Release contains '*' wildcard in global scope
-                            message = "WARNING: %s contains the" %(release.name)
+                            message = "%s contains the" %(release.name)
                             message += " \'*\' wildcard in global scope."
                             message += " It is probably exporting"
                             message += " symbols it should not."
-                            warnings.append(message)
+                            print_warning(message)
                             have_wildcard.append((release.name, scope))
                 else:
                     # Release contains unknown visibility scopes (not global or
                     # local)
-                    message = "WARNING: %s" %(release.name)
+                    message = "%s" %(release.name)
                     message += " contains unknown"
                     message += " scope named \'%s\'" %(scope)
                     message += " (different from \'global\' and \'local\')"
-                    warnings.append(message)
+                    print_warning(message)
 
         if have_wildcard:
             if len(have_wildcard) > 1:
                 # The '*' wildcard was found in more than one place
-                message = "WARNING: The \'*\' wildcard was found in more than"
+                message = "The \'*\' wildcard was found in more than"
                 message += " one place:"
-                warnings.append(message)
+                print_warning(message)
                 for name, scope in have_wildcard:
-                    warnings.append(" " * 4 + "%s: in \'%s\'" %(name, scope))
+                    print_warning(" " * 4 + "%s: in \'%s\'" %(name, scope))
         else:
-            warnings.append("WARNING: the \'*\' wildcard was not found")
+            print_warning("The \'*\' wildcard was not found")
 
         if seems_base:
             if len(seems_base) > 1:
                 # There is more than one release without predecessor and
                 # containing '*' wildcard in local scope
-                message = "WARNING: More than one release seems the base"
+                message = "More than one release seems the base"
                 " version (contains the local wildcard and does not have a"
                 " predecessor version):"
-                warnings.append(message)
+                print_warning(message)
                 for name in seems_base:
-                    warnings.append(" " * 4 + "%s" %(name))
+                    print_warning(" " * 4 + "%s" %(name))
         else:
-            warnings.append("WARNING: No base version release found")
+            print_warning("No base version release found")
 
         try:
             dependencies = self.dependencies()
-            print("Found dependencies: ")
+            print_info("Found dependencies: ")
             for release in dependencies:
                 cur = '    '
                 for dep in release:
                     cur += "%s->" %(dep)
-                print(cur)
+                print_info(cur)
         except DependencyError as e:
-            print(e)
-
-        # Print all warnings
-        if warnings:
-            for warning in warnings:
-                print(warning)
-
-        # Print all infos
-        if infos:
-            for info in infos:
-                print(info)
+            print_error(e)
 
     def guess_latest_release(self):
         """
@@ -515,7 +614,7 @@ class Map:
         :returns:   A list [release, prefix, suffix, version[CUR, AGE, REV]] 
         """
         if not self.init:
-            print("Map not initialized, try to read a file first")
+            print_error("Map not initialized, try to read a file first")
             return ''
 
         deps = self.dependencies()
@@ -524,11 +623,9 @@ class Map:
 
         latest = [None, None, '_0_0_0', None]
         for release in heads:
-            info = get_info_from_release(release)
+            info = get_info_from_release_string(release)
             if info[2] > latest[2]:
                 latest = info
-
-        #TODO If not max_head[4] --> use longest dependency ?
 
         return latest
 
@@ -551,31 +648,23 @@ class Map:
         version (e.g. [CURRENT, AGE, RELEASE])
         """
 
-        # Check if the map object was initialized
-        if not self.init:
-            print("Map not initialized, try to read a file first")
-            # TODO raise error instead
-            return ''
-
-        # If the new release name was given, just use it
-        if new_release:
-            if self.debug != 0:
-                print("[guess]: New release found, using it")
-            return new_release
-
         # If the two required parts were given, just combine and return
         if new_prefix:
             if new_suffix:
-                if self.debug != 0:
-                    print("[guess]: Two parts found, using them")
-                return new_prefix + new_suffix
+                print_debug("[guess]: Two parts found, using them")
+                return new_prefix.upper() + new_suffix
             elif new_ver:
-                if self.debug != 0:
-                    print("[guess]: Prefix and version found, using them")
+                print_debug("[guess]: Prefix and version found, using them")
                 new_suffix = ''
                 for i in new_ver:
                     new_suffix += '_%d' %(i)
-                return new_prefix + new_suffix
+                return new_prefix.upper() + new_suffix
+
+        # If the new release name was given (and could not be parsed), use it
+        if new_release:
+            print_debug("[guess]: New release found, using it")
+            return new_release.upper()
+
 
         # The two parts necessary to make the release name
         # new_prefix
@@ -598,9 +687,8 @@ class Map:
 
         # If a previous release was given, extract info and check it
         if prev_release:
-            if self.debug != 0:
-                print("[guess]: Previous release found")
-            prev_info = get_info_from_release(prev_release)
+            print_debug("[guess]: Previous release found")
+            prev_info = get_info_from_release_string(prev_release)
             # If the prefix was successfully extracted 
             if info[1]:
                 # Use it as the new prefix, if none was given
@@ -614,13 +702,11 @@ class Map:
 
         if not new_prefix:
             if prev_prefix:
-                if self.debug != 0:
-                    print("[guess]: Using previous prefix as the new")
+                print_debug("[guess]: Using previous prefix as the new")
                 # Reuse the prefix from the previous release, if available
                 new_prefix = prev_prefix
             else:
-                if self.debug != 0:
-                    print("[guess]: Trying to find common prefix")
+                print_debug("[guess]: Trying to find common prefix")
                 # Find a common prefix between all releases
                 names = [release.name for release in self.releases]
                 if names:
@@ -636,15 +722,13 @@ class Map:
 
                     # If a common prefix was found, use it
                     if new_prefix:
-                        if self.debug != 0:
-                            print("[guess]: Common prefix found")
+                        print_debug("[guess]: Common prefix found")
                         # Search and remove any version info found as prefix
                         m = re.search(r'_+[0-9]+|_+$', new_prefix)
                         if m:
                             new_prefix = new_prefix[:m.start()]
                     else:
-                        if self.debug != 0:
-                            print("[guess]: Using prefix from latest")
+                        print_debug("[guess]: Using prefix from latest")
                         # Try to use the latest_release prefix
                         head = self.guess_latest_release()
                         new_prefix = head[1]
@@ -652,31 +736,26 @@ class Map:
         # At this point, new_prefix can still be None
 
         if not new_suffix:
-            if self.debug != 0:
-                print("[guess]: Guessing new suffix")
+            print_debug("[guess]: Guessing new suffix")
 
             # If the new version was given, make the suffix from it
             if new_ver:
-                if self.debug != 0:
-                    print("[guess]: Using new version to make suffix")
+                print_debug("[guess]: Using new version to make suffix")
                 new_suffix = ''
                 for i in new_ver:
                     new_suffix += "_%d" %(i)
 
             elif not prev_ver:
-                if self.debug != 0:
-                    print("[guess]: Guessing latest release to make suffix")
+                print_debug("[guess]: Guessing latest release to make suffix")
                 # Guess the latest release
                 head = self.guess_latest_release()
                 if head[3]:
-                    if self.debug != 0:
-                        print("[guess]: Got suffix from latest")
+                    print_debug("[guess]: Got suffix from latest")
                     prev_ver = head[3]
 
             if not new_suffix:
                 if prev_ver:
-                    if self.debug != 0:
-                        print("[guess]: Bumping release")
+                    print_debug("[guess]: Bumping release")
                     new_ver = bump_version(prev_ver, abi_break)
                     new_suffix = ''
                     for i in new_ver:
@@ -685,10 +764,11 @@ class Map:
 
         if not new_prefix or not new_suffix:
             # ERROR: could not guess the name
-            raise Exception("Could not guess the name")
+            raise Exception("Insufficient information to guess the new release"
+            " name. Releases found do not have version information.")
 
         # Return the combination of the prefix and version
-        return new_prefix + new_suffix
+        return new_prefix.upper() + new_suffix
 
     def sort_releases_nice(self, top_release):
         """
@@ -739,11 +819,9 @@ class Map:
         return content
 
     # Constructor
-    def __init__(self, debug=0, filename=None):
+    def __init__(self, verbosity=ERROR, filename=None):
         # The state
         self.init = False
-        # For debugging
-        self.debug = debug
         # For iterator
         self.index = 0
         self.releases = []
@@ -819,14 +897,44 @@ class Release:
         self.index = 0
         self.symbols = []
 
+def check_files(out_arg, out_name, in_arg, in_name):
+    # Check if the first file exists
+    if os.path.isfile(out_name):
+        # Check if given input file is the same as output
+        if os.path.isfile(in_name):
+            if os.path.samefile(out_name, in_name):
+                msg = ''
+                msg += "Given paths in \'%s\' and \'%s\'" %(out_arg, in_arg)
+                msg += " are the same. Moving"
+                msg += " \'%s\' to \'%s.old\'" %(in_name, in_name)
+                print_warning(msg)
+                try:
+                    # If it is the case, copy to another file to
+                    # preserve the content
+                    shutil.copy2(in_name, in_name + ".old")
+                except:
+                    msg = ''
+                    msg += "Could not copy"
+                    msg += " \'%s\' to \'%s.old\'." %(in_name, in_name)
+                    msg += " Aborting."
+                    print_error(msg)
+                    raise
+
+                # Modify the name to point to the old file in case the original
+                # was meant to be overwritten
+                in_name = in_name + ".old"
+
 #TODO
 def compare(args):
-    print("Command: compare")
-    print(args)
+    print_info("Command: compare")
+    print_debug("Arguments provided: ")
+    print_debug(args)
 
     old_map = Map(filename=args.old)
     new_map = Map(filename=args.new)
 
+    #TODO: compare existing releases
+    #TODO: compare set of symbols
 
 #TODO
 def update(args):
@@ -841,7 +949,21 @@ def update(args):
       of the library should be bumped
     """
 
-    print(args)
+    print_info("Command: update")
+    print_debug("Arguments provided: ")
+    print_debug(args.__str__())
+
+    # If output would be overwritten, print a warning
+    if args.out:
+        print_warning("Overwriting existing file \'%s\'" %(args.out))
+
+    # If both output and input files were given, check if are the same
+    if args.out and args.input:
+        check_files('--out', args.out, '--in', args.input)
+
+    # If output is given, check with the file to be updated
+    if args.out and args.file:
+        check_files('--out', args.out, 'file', args.file)
 
     # Read the current map file
     cur_map = Map(filename=args.file)
@@ -898,17 +1020,21 @@ def update(args):
         msg = "Added:\n"
         for symbol in added:
             msg += "    %s\n" %(symbol)
-        print(msg)
+        print_msg(msg)
 
     if removed:
         removed.sort()
         msg = "Removed:\n"
         for symbol in removed:
             msg += "    %s\n" %(symbol)
-        print(msg)
+        print_msg(msg)
 
     # Guess the latest release
     latest = cur_map.guess_latest_release()
+
+    if not added and not removed:
+        print_msg("No symbols added or removed. Nothing done.")
+        return
 
     # TODO Add stuff to help name guesser?
     if added:
@@ -930,8 +1056,7 @@ def update(args):
         if args.care:
             raise Exception("ABI break detected: symbols would be removed")
 
-        #TODO: Set verbosity
-        print("Merging all symbols in a single new release")
+        print_msg("Merging all symbols in a single new release")
         new_map = Map()
         r = Release()
 
@@ -939,12 +1064,22 @@ def update(args):
         r.name = cur_map.guess_name(abi_break=True)
         r.name.upper()
 
+        # Add the symbols added to global scope
+        all_symbols.extend(added)
+
+        # Remove duplicates
+        all_symbols = list(set(all_symbols))
+
         # Remove the symbols to be removed
         for symbol in removed:
             all_symbols.remove(symbol)
 
-        # Add the symbols added to global scope
-        all_symbols.extend(added)
+        # Remove the '*' wildcard, if present
+        if '*' in all_symbols:
+            print_warning("Wildcard \'*\' found in global. Removed to avoid"
+            " exporting unexpected symbols.")
+            all_symbols.remove('*')
+
         r.symbols.append(('global', all_symbols))
 
         # Add the wildcard to the local symbols
@@ -963,30 +1098,54 @@ def update(args):
     cur_map.sort_releases_nice(r.name)
 
     # Write out to the output
-    args.out.write("# This map file was automatically updated with"
-    " map-checker\n\n")
-    args.out.write(cur_map.__str__())
+    if args.out:
+        with open(args.out, "w") as outfile:
+            outfile.write("# This map file was automatically updated\n\n")
+            outfile.write(cur_map.__str__())
+    else:
+        # Print to stdout
+        sys.stdout.write("# This map file was automatically updated\n\n")
+        sys.stdout.write(cur_map.__str__())
 
 def new(args):
-    print("Command: new")
-    print(args)
+    print_info("Command: new")
+    print_debug("Arguments provided: ")
+    print_debug(args.__str__())
 
-    name = ''
+    print_debug("Files: out=\'%s\', in=\'%s\'" %(args.out, args.input))
 
+    # If output would be overwritten, print a warning
+    if args.out:
+        print_warning("Overwriting existing file \'%s\'" %(args.out))
+
+    # If both output and input files were given, check if are the same
+    if args.out and args.input:
+        check_files('--out', args.out, '--in', args.input)
+
+    release_info = None
     if args.release:
-        name = args.release
+        # Parse the release name string to get info
+        release_info = get_info_from_release_string(args.release)
     elif args.name and args.version:
-        #TODO: parse version and check
-        name = args.name + args.version
+        # Parse the given version string to get the version information
+        version = get_version_from_string(args.version)
+        # Construct the release info list
+        release_info = [None, args.name, None, version]
     else:
-        #TODO: Create error
-        print("ERROR: Is necessary to provide either release name or name and"
-        " version")
+        print_error("It is necessary to provide either release name or name"
+        " and version")
+        raise Exception("Release name not provided")
+
+    if not release_info:
+        print_error("Could not retrieve release information.")
+
+    print_debug("Release information:")
+    print_debug(release_info.__str__())
 
     # Generate the list of the new symbols
     new_symbols = []
     if args.input:
-        with open(arsg.input, "r") as symbols_fp:
+        with open(args.input, "r") as symbols_fp:
             lines = symbols_sp.readlines()
             for line in lines:
                 new_symbols.extend(line.split())
@@ -1002,6 +1161,13 @@ def new(args):
     if new_symbols:
         new_map = Map()
         r = Release()
+
+        name = new_map.guess_name(
+        new_release = release_info[0],
+        new_prefix = release_info[1],
+        new_ver = release_info[3])
+
+        print_debug("Generated name: \'%s\'" %(name))
 
         # Set the name of the new release
         r.name = name.upper()
@@ -1022,63 +1188,96 @@ def new(args):
         new_map.sort_releases_nice(r.name)
 
         # Write out to the output
-        args.out.write("# This map file was created with"
-        " map-checker\n\n")
-        args.out.write(new_map.__str__())
+        if args.out:
+            with open(args.out, "w") as outfile:
+                outfile.write("# This map file was created with"
+                " symbol_version.py\n\n")
+                outfile.write(new_map.__str__())
+        else:
+            # Print to stdout
+            sys.stdout.write("# This map file was created with"
+            " symbol_version.py\n\n")
+            sys.stdout.write(new_map.__str__())
     else:
-        #TODO Make this a warning
-        print("WARNING: No valid symbols provided")
+        print_warning("No valid symbols provided. Nothing done.")
 
 # User interface
+if __name__ == "__main__":
+    # Used to check files
+    import os
+    # Used to preserve files
+    import shutil
 
-# Main arguments parser
-parser = argparse.ArgumentParser(description='Helper tools for linker version'
-' script maintenance')
-# Output file
-parser.add_argument('-o', '--out', help='Output file (defaults to stdout)',
-type=argparse.FileType('w'), default='-')
+    # Common file arguments
+    file_args = argparse.ArgumentParser(add_help = False)
+    file_args.add_argument('-o', '--out',
+    help='Output file (defaults to stdout)')
+    file_args.add_argument('-i', '--in',
+    help='Read from a file instead of stdio',
+    dest='input')
 
-# Subcommands parser
-subparsers = parser.add_subparsers(title='Subcommands', description='Valid'
-' subcommands:', help='These subcommands have their own set of options')
+    # Common verbosity arguments
+    verb_args = argparse.ArgumentParser(add_help = False)
+    group_verb = verb_args.add_mutually_exclusive_group()
+    group_verb.add_argument('--verbosity', help='Set the program verbosity',
+    choices=['quiet', 'error', 'warning', 'info', 'debug'], default='warning')
+    group_verb.add_argument('--quiet', help='Makes the program quiet',
+    dest='verbosity', action='store_const', const='quiet')
+    group_verb.add_argument('--debug', help='Makes the program print debug info',
+    dest='verbosity', action='store_const', const='debug')
 
-# Compare subcommand parser
-parser_cmp = subparsers.add_parser('compare', help='Compare two map files')
-parser_cmp.add_argument('-n', '--new', help='The new map', required=True)
-parser_cmp.add_argument('-o', '--old', help='The old map', required=True)
-parser_cmp.set_defaults(func=compare)
+    # Main arguments parser
+    parser = argparse.ArgumentParser(description='Helper tools for linker version'
+    ' script maintenance', epilog='Call a subcommand passing \'-h\' to see its'
+    ' specific options')
 
-# Update subcommand parser
-parser_up = subparsers.add_parser('update', help='Update the map file')
-parser_up.add_argument('file', help='The map file to be updated')
-parser_up.add_argument('-i', '--in', help='Read from a file instead of stdio',
-dest='input')
-parser_up.add_argument('-c', '--care', help='Does not continue if the ABI would'
-' break', action='store_true')
-group = parser_up.add_mutually_exclusive_group(required=True)
-group.add_argument('-a', '--add', help='Adds the symbols to the map file.',
-action='store_true')
-group.add_argument('-d', '--delete', help='Remove the symbols from the map'
-' file. This breaks the ABI.', action='store_true')
-group.add_argument('-s', '--symbols', help='Compare the given symbol list with'
-' the current map file and update accordingly. May break the ABI.',
-action='store_true')
-parser_up.set_defaults(func=update)
+    # Subcommands parser
+    subparsers = parser.add_subparsers(title='Subcommands', description='Valid'
+    ' subcommands:', help='These subcommands have their own set of options')
 
-# New subcommand parser
-parser_new = subparsers.add_parser('new', help='Create a new map file')
-parser_new.add_argument('file', help='The map file to be created')
-parser_new.add_argument('-i', '--in', help='Read from a file instead of stdio',
-dest='input')
-parser_new.add_argument('-n', '--name', help='The name of the library'
-' (e.g. libx)')
-parser_new.add_argument('-v', '--version', help='The release version'
-' (e.g. 1_0_0)')
-parser_new.add_argument('-r', '--release', help='The full name of the release'
-' to be used (e.g. LIBX_1_0_0)')
-parser_new.set_defaults(func=new)
+    # Compare subcommand parser
+    parser_cmp = subparsers.add_parser('compare', help='Compare two map files')
+    parser_cmp.add_argument('-n', '--new', help='The new map', required=True)
+    parser_cmp.add_argument('-o', '--old', help='The old map', required=True)
+    parser_cmp.set_defaults(func=compare)
 
-args = parser.parse_args()
-args.func(args)
-args.out.close()
+    # Update subcommand parser
+    parser_up = subparsers.add_parser('update', help='Update the map file',
+    parents=[file_args, verb_args], epilog='A list of symbols is expected as'
+    ' the input.\nIf a file is provided with \'-i\', the symbols are read'
+    ' from the given file. Otherwise the symbols are read from stdin.')
+    parser_up.add_argument('-c', '--care', help='Do not continue if the ABI would'
+    ' break', action='store_true')
+    group = parser_up.add_mutually_exclusive_group(required=True)
+    group.add_argument('-a', '--add', help='Adds the symbols to the map file.',
+    action='store_true')
+    group.add_argument('-d', '--delete', help='Remove the symbols from the map'
+    ' file. This breaks the ABI.', action='store_true')
+    group.add_argument('-s', '--symbols', help='Compare the given symbol list with'
+    ' the current map file and update accordingly. May break the ABI.',
+    action='store_true')
+    parser_up.add_argument('file', help='The map file being updated')
+    parser_up.set_defaults(func=update)
+
+    # New subcommand parser
+    parser_new = subparsers.add_parser('new', help='Create a new map file',
+    parents=[file_args, verb_args], epilog='A list of symbols is expected as'
+    ' the input.\nIf a file is provided with \'-i\', the symbols are read'
+    ' from the given file. Otherwise the symbols are read from stdin.')
+    parser_new.add_argument('-n', '--name', help='The name of the library'
+    ' (e.g. libx)')
+    parser_new.add_argument('-v', '--version', help='The release version'
+    ' (e.g. 1_0_0)')
+    parser_new.add_argument('-r', '--release', help='The full name of the release'
+    ' to be used (e.g. LIBX_1_0_0)')
+    parser_new.set_defaults(func=new)
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Set program verbosity
+    global_verbosity = VERBOSITY_MAP[args.verbosity]
+
+    # Run command
+    args.func(args)
 
