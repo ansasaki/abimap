@@ -798,8 +798,8 @@ class Map:
 
         self.releases.sort(key=lambda release: release.name)
         dependencies = self.dependencies()
-        top_dependency = (dependency for dependency in dependencies if
-        dependency[0] == top_release).next()
+        top_dependency = next((dependency for dependency in dependencies if
+        dependency[0] == top_release))
 
         new_list = []
         index = 0
