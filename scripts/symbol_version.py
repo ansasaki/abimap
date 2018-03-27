@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import sys
 import re
 
@@ -28,25 +29,28 @@ global_verbosity = WARNING
 # Global functions
 
 # Information printer helpers
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 def print_msg(message):
     if global_verbosity > QUIET:
         print(message)
 
 def print_info(message):
     if global_verbosity >= INFO:
-        print(SEVERITY_MSG[INFO] + message)
+        eprint(SEVERITY_MSG[INFO] + message)
 
 def print_warning(message):
     if global_verbosity >= WARNING:
-        print(SEVERITY_MSG[WARNING] + message)
+        eprint(SEVERITY_MSG[WARNING] + message)
 
 def print_error(message):
     if global_verbosity >= ERROR:
-        print(SEVERITY_MSG[ERROR] + message)
+        eprint(SEVERITY_MSG[ERROR] + message)
 
 def print_debug(message):
     if global_verbosity >= DEBUG:
-        print(SEVERITY_MSG[DEBUG] + message)
+        eprint(SEVERITY_MSG[DEBUG] + message)
 
 def get_version_from_string(version_string):
     m = re.findall(r'[a-zA-Z0-9]+', version_string)
