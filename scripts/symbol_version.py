@@ -423,13 +423,29 @@ class Map:
                 symbols.extend(scope_symbols)
         return set(symbols)
 
+    def all_global_symbols(self):
+        """
+        Returns all global symbols from all releases contained in the Map
+        object
+
+        :returns: A set containing all global symbols in all releases
+        """
+
+        symbols = []
+        for release in self.releases:
+            for scope, scope_symbols in release.symbols:
+                if scope.lower() == 'global':
+                    symbols.extend(scope_symbols)
+        return set(symbols)
+
     def duplicates(self):
         """
-        Find and return a list of duplicated symbols for each release.
+        Find and return a list of duplicated symbols for each release
 
         If no duplicates are found, return an empty list
 
-        :returns: A list of tuples in the form [(release, [(scope, [duplicates])])]
+        :returns: A list of tuples in the form
+        [(release, [(scope, [duplicates])])]
         """
         duplicates = []
         for release in self.releases:
@@ -936,7 +952,6 @@ def compare(args):
     #TODO: compare existing releases
     #TODO: compare set of symbols
 
-#TODO
 def update(args):
     """
     Given the new list of symbols, update the map
@@ -967,7 +982,9 @@ def update(args):
 
     # Read the current map file
     cur_map = Map(filename=args.file)
-    all_symbols = list(cur_map.all_symbols())
+
+    # Get all global symbols
+    all_symbols = list(cur_map.all_global_symbols())
 
     # Generate the list of the new symbols
     new_symbols = []
@@ -1002,10 +1019,27 @@ def update(args):
                 removed.append(symbol)
     # If the list of symbols are being added
     elif args.add:
+        # Check the symbols and print a warning if already present
+        for symbol in new_symbols:
+            if symbol in all_symbols:
+                msg = ''
+                msg += "The symbol \'%s\' is already present in a" %(symbol)
+                msg += " previous version."
+                msg += " Keep the previous implementation to not break ABI."
+                print_warning(msg)
+
         added.extend(new_symbols)
     # If the list of symbols are being removed
     elif args.delete:
-        removed.extend(new_symbols)
+        # Remove the symbols to be removed
+        for symbol in new_symbols:
+            if symbol in all_symbols:
+                removed.append(symbol)
+            else:
+                msg = ''
+                msg += "Requested to remove \'%s\'" %(symbol)
+                msg += ", but not found."
+                print_warning(msg)
     else:
         # Execution should never reach this point
         raise Exception("No strategy was provided (add/delete/symbols)")
@@ -1036,7 +1070,6 @@ def update(args):
         print_msg("No symbols added or removed. Nothing done.")
         return
 
-    # TODO Add stuff to help name guesser?
     if added:
         r = Release()
         # Guess the name for the new release
@@ -1056,6 +1089,7 @@ def update(args):
         if args.care:
             raise Exception("ABI break detected: symbols would be removed")
 
+        print_warning("ABI break detected: symbols were removed.")
         print_msg("Merging all symbols in a single new release")
         new_map = Map()
         r = Release()
