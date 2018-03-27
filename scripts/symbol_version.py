@@ -865,7 +865,6 @@ class Release:
                 return True
         return False
 
-    #TODO should this search for duplicates between scopes?
     def duplicates(self):
         duplicates = []
         for scope, symbols in self.symbols:
@@ -925,7 +924,13 @@ def check_files(out_arg, out_name, in_arg, in_name):
             if os.path.samefile(out_name, in_name):
                 msg = ''
                 msg += "Given paths in \'%s\' and \'%s\'" %(out_arg, in_arg)
-                msg += " are the same. Moving"
+                msg += " are the same."
+
+                # Avoid changing the files if this is a dry run
+                if args.dry:
+                    return
+
+                msg = "Moving"
                 msg += " \'%s\' to \'%s.old\'" %(in_name, in_name)
                 print_warning(msg)
                 try:
@@ -948,7 +953,7 @@ def check_files(out_arg, out_name, in_arg, in_name):
 def compare(args):
     print_info("Command: compare")
     print_debug("Arguments provided: ")
-    print_debug(args)
+    print_debug(args.__str__())
 
     old_map = Map(filename=args.old)
     new_map = Map(filename=args.new)
@@ -974,7 +979,8 @@ def update(args):
 
     # If output would be overwritten, print a warning
     if args.out:
-        print_warning("Overwriting existing file \'%s\'" %(args.out))
+        if os.path.isfile(args.out):
+            print_warning("Overwriting existing file \'%s\'" %(args.out))
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -993,8 +999,8 @@ def update(args):
     # Generate the list of the new symbols
     new_symbols = []
     if args.input:
-        with open(arsg.input, "r") as symbols_fp:
-            lines = symbols_sp.readlines()
+        with open(args.input, "r") as symbols_fp:
+            lines = symbols_fp.readlines()
             for line in lines:
                 new_symbols.extend(line.split())
     else:
@@ -1034,7 +1040,7 @@ def update(args):
 
         added.extend(new_symbols)
     # If the list of symbols are being removed
-    elif args.delete:
+    elif args.remove:
         # Remove the symbols to be removed
         for symbol in new_symbols:
             if symbol in all_symbols:
@@ -1135,6 +1141,10 @@ def update(args):
     # Sort the releases putting the new release and dependencies first
     cur_map.sort_releases_nice(r.name)
 
+    if args.dry:
+        print_msg("This is a dry run, the files were not modified.")
+        return
+
     # Write out to the output
     if args.out:
         with open(args.out, "w") as outfile:
@@ -1154,7 +1164,8 @@ def new(args):
 
     # If output would be overwritten, print a warning
     if args.out:
-        print_warning("Overwriting existing file \'%s\'" %(args.out))
+        if os.path.isfile(args.out):
+            print_warning("Overwriting existing file \'%s\'" %(args.out))
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -1184,7 +1195,7 @@ def new(args):
     new_symbols = []
     if args.input:
         with open(args.input, "r") as symbols_fp:
-            lines = symbols_sp.readlines()
+            lines = symbols_fp.readlines()
             for line in lines:
                 new_symbols.extend(line.split())
     else:
@@ -1225,6 +1236,10 @@ def new(args):
         # Sort the releases putting the new release and dependencies first
         new_map.sort_releases_nice(r.name)
 
+        if args.dry:
+            print_msg("This is a dry run, the files were not modified.")
+            return
+
         # Write out to the output
         if args.out:
             with open(args.out, "w") as outfile:
@@ -1251,8 +1266,9 @@ if __name__ == "__main__":
     file_args.add_argument('-o', '--out',
     help='Output file (defaults to stdout)')
     file_args.add_argument('-i', '--in',
-    help='Read from a file instead of stdio',
-    dest='input')
+    help='Read from a file instead of stdio', dest='input')
+    file_args.add_argument('-d', '--dry',
+    help='Do everything, but do not modify the files', action='store_true')
 
     # Common verbosity arguments
     verb_args = argparse.ArgumentParser(add_help = False)
@@ -1284,12 +1300,12 @@ if __name__ == "__main__":
     parents=[file_args, verb_args], epilog='A list of symbols is expected as'
     ' the input.\nIf a file is provided with \'-i\', the symbols are read'
     ' from the given file. Otherwise the symbols are read from stdin.')
-    parser_up.add_argument('-c', '--care', help='Do not continue if the ABI would'
-    ' break', action='store_true')
+    parser_up.add_argument('-c', '--care', help='Do not continue if the ABI'
+    ' would be broken', action='store_true')
     group = parser_up.add_mutually_exclusive_group(required=True)
     group.add_argument('-a', '--add', help='Adds the symbols to the map file.',
     action='store_true')
-    group.add_argument('-d', '--delete', help='Remove the symbols from the map'
+    group.add_argument('-r', '--remove', help='Remove the symbols from the map'
     ' file. This breaks the ABI.', action='store_true')
     group.add_argument('-s', '--symbols', help='Compare the given symbol list with'
     ' the current map file and update accordingly. May break the ABI.',
