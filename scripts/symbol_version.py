@@ -659,11 +659,12 @@ class Map:
         :param new_release: String, the name of the new release. If this is
         provided, the guessing is avoided and this will be used as the release
         name
+        :param new_prefix:  The prefix to be used (library name)
+        :param new_suffix:  The suffix to be used (version, like \'_1_0_0\')
         :param new_ver:     A list of int, the components of the version (e.g.
         [CURRENT, AGE, RELEASE]).
-        :param libname:     String, the name of the library; will be used as the prefix
-        for the name of the new release.
         :param prev_release:    The name of the previous release.
+        :param prev_prefix:  The previous release prefix (library name)
         :param prev_ver:    A list of int, the components of the previous
         version (e.g. [CURRENT, AGE, RELEASE])
         """
@@ -794,6 +795,8 @@ class Map:
         """
         Sort the releases contained in a map file putting the dependencies of
         top_release first
+
+        :param top_release: The release whose dependencies should be prioritized
         """
 
         self.releases.sort(key=lambda release: release.name)
@@ -917,6 +920,14 @@ class Release:
         self.symbols = []
 
 def check_files(out_arg, out_name, in_arg, in_name):
+    """
+    Check if output and input are the same file. Create a backup if so.
+
+    :param out_arg:  The name of the option used to receive output file name
+    :param out_name: The received string as output file path
+    :param in_arg:   The name of the option used to receive input file name
+    :param in_name:  The received string as input file path
+    """
     # Check if the first file exists
     if os.path.isfile(out_name):
         # Check if given input file is the same as output
@@ -925,6 +936,7 @@ def check_files(out_arg, out_name, in_arg, in_name):
                 msg = ''
                 msg += "Given paths in \'%s\' and \'%s\'" %(out_arg, in_arg)
                 msg += " are the same."
+                print_warning(msg)
 
                 # Avoid changing the files if this is a dry run
                 if args.dry:
@@ -959,6 +971,8 @@ def update(args):
     - If a previous existing symbol is removed, then all releases are
       unified in a new release. This is an incompatible change, the SONAME
       of the library should be bumped
+
+    :param args: Arguments given in command line parsed by argparse
     """
 
     print_info("Command: update")
@@ -1144,6 +1158,11 @@ def update(args):
         sys.stdout.write(cur_map.__str__())
 
 def new(args):
+    """
+    \'new\' subcommand implementation
+
+    :param args: Arguments given in command line parsed by argparse
+    """
     print_info("Command: new")
     print_debug("Arguments provided: ")
     print_debug(args.__str__())
