@@ -949,18 +949,6 @@ def check_files(out_arg, out_name, in_arg, in_name):
                 # was meant to be overwritten
                 in_name = in_name + ".old"
 
-#TODO
-def compare(args):
-    print_info("Command: compare")
-    print_debug("Arguments provided: ")
-    print_debug(args.__str__())
-
-    old_map = Map(filename=args.old)
-    new_map = Map(filename=args.new)
-
-    #TODO: compare existing releases
-    #TODO: compare set of symbols
-
 def update(args):
     """
     Given the new list of symbols, update the map
@@ -1288,12 +1276,6 @@ if __name__ == "__main__":
     # Subcommands parser
     subparsers = parser.add_subparsers(title='Subcommands', description='Valid'
     ' subcommands:', help='These subcommands have their own set of options')
-
-    # Compare subcommand parser
-    parser_cmp = subparsers.add_parser('compare', help='Compare two map files')
-    parser_cmp.add_argument('-n', '--new', help='The new map', required=True)
-    parser_cmp.add_argument('-o', '--old', help='The old map', required=True)
-    parser_cmp.set_defaults(func=compare)
 
     # Update subcommand parser
     parser_up = subparsers.add_parser('update', help='Update the map file',
