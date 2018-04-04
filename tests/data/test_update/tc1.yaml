@@ -1,0 +1,14 @@
+# Testcases to test new command
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "--out"
+      - "tc1.map"
+      - "tc1.map"
+    stdin: "tc1.in"
+  output:
+    file: "tc1.out"
+    stdout: "tc1.stdout"
+    stderr: "tc1.err"

@@ -1,9 +1,0 @@
-# This map is missing a visibility scope.
-
-libx
-{
-    # Missing a visibility scope here
-        symbol;
-    local:
-        *;
-};

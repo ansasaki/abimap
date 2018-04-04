@@ -1,0 +1,14 @@
+# Testcases to test new command
+-
+  input:
+    args:
+      - "new"
+      - "--out"
+      - "tc1.map"
+      - "--release"
+      - "libtc1_1_0_0"
+    stdin: "tc1.in"
+  output:
+    file: "tc1.out"
+    stdout:
+    stderr:

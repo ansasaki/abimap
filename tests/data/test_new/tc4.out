@@ -1,0 +1,11 @@
+# This map file was created with symbol_version.py
+
+LIBTC4_1_0_0
+{
+    global:
+        another_symbol;
+        symbol;
+    local:
+        *;
+} ;
+

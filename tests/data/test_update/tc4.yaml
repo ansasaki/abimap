@@ -1,0 +1,14 @@
+# Testcases to test new command
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "tc4.map"
+      - "tc4.map"
+    stdin: "tc4.in"
+  output:
+    file: "tc4.out"
+    stdout: "tc4.stdout"
+    stderr: "tc4.err"
