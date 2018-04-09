@@ -6,7 +6,7 @@
     * - docs
       - |docs|
     * - tests
-      - | |travis| |appveyor|
+      - | |travis|
         | |coveralls| |codecov|
 
 .. |docs| image:: https://readthedocs.org/projects/symbol_version/badge/?style=flat
@@ -16,10 +16,6 @@
 .. |travis| image:: https://travis-ci.org/ansasaki/symbol_version.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ansasaki/symbol_version
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ansasaki/symbol_version?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/ansasaki/symbol_version
 
 .. |coveralls| image:: https://coveralls.io/repos/ansasaki/symbol_version/badge.svg?branch=master&service=github
     :alt: Coverage Status
