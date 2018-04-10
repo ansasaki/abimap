@@ -68,7 +68,7 @@ class cd:
         os.chdir(self.saved_path)
 
 
-def run_tc(tc, datadir, capsys):
+def run_tc(tc, datadir, capsys, caplog):
     """
     Run a command test case (for update and new commands)
 
@@ -117,18 +117,7 @@ def run_tc(tc, datadir, capsys):
                 # Fail
                 assert 0
 
-        # If there is an expected output to stderr (e.g. warnings)
-        if tc_out["stderr"]:
-            if err:
-                with open(tc_out["stderr"], "r") as tcerr:
-                    expected = tcerr.read()
-                    assert err == expected
-            else:
-                print("Expected output in stderr")
-                # Fail
-                assert 0
-        else:
-            if err:
-                print("Unexpected output in stderr")
-                # Fail
-                assert 0
+        # Check if the expected messages are in the log
+        if tc_out["warnings"]:
+            for expected in tc_out["warnings"]:
+                assert "WARNING  " + expected in caplog.text

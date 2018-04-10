@@ -10,5 +10,6 @@
     stdin: "tc1.in"
   output:
     file: "tc1.out"
-    stdout:
-    stderr:
+    stdout: ""
+    warnings:
+    exceptions:

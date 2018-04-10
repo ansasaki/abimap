@@ -31,7 +31,7 @@ def test_different_overwrite(datadir):
                                "--in", str(in_name), True)
 
 
-def test_same_file(datadir, capsys):
+def test_same_file(datadir, caplog):
 
     in_name = os.path.join(str(datadir), "in.map")
 
@@ -41,31 +41,33 @@ def test_same_file(datadir, capsys):
     symbol_version.check_files("--out", input_name,
                                "--in", input_name, True)
 
-    # Capture stdout and stderr
-    out, err = capsys.readouterr()
+    # The expected message
+    expected = "".join(["Given paths in '--out' and '--in'",
+                        " are the same."])
 
-    # Compare the expected result with the provided one
-    expected = "[WARNING] Given paths in \'--out\' and \'--in\' are the same.\n"
-    assert err == expected
-    assert out == ""
+    # Check if the expected warning is in the log records
+    for record in caplog.records:
+        assert record.levelname != "CRITICAL"
+        assert record.levelname != "ERROR"
+    assert "WARNING  " + expected in caplog.text
+
+    # Clear the captured log to not affect the following checks
+    caplog.clear()
 
     # Running without "--dry"
     symbol_version.check_files("--out", input_name,
                                "--in", input_name, False)
 
-    # Capture output messages
-    out, err = capsys.readouterr()
-
     # Check expected warning
-    expected = "".join(["[WARNING] Given paths in \'--out\' and \'--in\'",
-                        " are the same.\n",
-                        "[WARNING] Moving ",
+    expected = "".join(["Moving ",
                         "\'", input_name, "\' to ",
                         "\'", input_name, ".old\'.\n"])
-    assert err == expected
 
-    # Check expected message
-    assert out == ""
+    # Check if the expected warning is in the log records
+    for record in caplog.records:
+        assert record.levelname != "CRITICAL"
+        assert record.levelname != "ERROR"
+    assert "WARNING  " + expected in caplog.text
 
     # Check if the file was created
     created = os.path.join(str(datadir), "in.map.old")

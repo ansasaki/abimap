@@ -12,5 +12,5 @@
   output:
     file:
     stdout: "tc4.out"
-    stderr:
-
+    warnings:
+    exceptions:

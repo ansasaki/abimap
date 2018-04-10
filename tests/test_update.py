@@ -6,6 +6,6 @@
 from conftest import run_tc
 
 
-def test_update(testcases, datadir, capsys):
+def test_update(testcases, datadir, capsys, caplog):
     for tc in testcases:
-        run_tc(tc, datadir, capsys)
+        run_tc(tc, datadir, capsys, caplog)

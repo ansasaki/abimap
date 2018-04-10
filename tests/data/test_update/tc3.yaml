@@ -11,4 +11,8 @@
   output:
     file: "tc3.out"
     stdout: "tc3.stdout"
-    stderr: "tc3.err"
+    warnings:
+      - "Overwriting existing file 'tc3.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'tc3.map' to 'tc3.map.old'."
+    exceptions:

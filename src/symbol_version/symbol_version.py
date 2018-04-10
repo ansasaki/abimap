@@ -7,7 +7,8 @@ import os
 import re
 import shutil
 import sys
-import warnings
+
+# import warnings
 
 VERBOSITY_MAP = {"debug": logging.DEBUG,
                  "info": logging.INFO,
@@ -15,9 +16,48 @@ VERBOSITY_MAP = {"debug": logging.DEBUG,
                  "error": logging.ERROR,
                  "quiet": logging.CRITICAL}
 
+
+class Single_Logger(object):
+    """
+    A singleton logger for the module
+    """
+    __instance = None
+
+    @classmethod
+    def getLogger(cls, name):
+        """
+        Get the unique instance of the logger
+
+        :param name: The name of the module (usually just __name__)
+        :returns: An instance of logging.Logger
+        """
+        if Single_Logger.__instance is None:
+            # Get logger
+            logger = logging.getLogger(name)
+
+            # Setup a handler to print warnings and above to stderr
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.WARNING)
+            console_format = "[%(levelname)s] %(message)s"
+            console_formatter = logging.Formatter(console_format)
+            console_handler.setFormatter(console_formatter)
+
+            logger.addHandler(console_handler)
+
+            Single_Logger.__instance = logger
+        return Single_Logger.__instance
+
+
 def get_version_from_string(version_string):
+    """
+    Get the version numbers from a string
+
+    :param version_string: A string composed by numbers separated by non
+    alphanumeric characters (e.g. 0_1_2 or 0.1.2)
+    :returns: A list of the numbers in the string
+    """
     # Get logger
-    logger = logging.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__)
 
     m = re.findall(r'[a-zA-Z0-9]+', version_string)
 
@@ -26,12 +66,12 @@ def get_version_from_string(version_string):
             msg = "".join(["Provide at least a major and a minor",
                            " version digit (eg. '1.2.3' or '1_2')"])
             logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
         if len(m) > 3:
             msg = "".join(["Version has too many parts; provide 3 or less ",
                            "( e.g. '0.1.2')"])
             logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
     else:
         msg = "".join(["Could not get version parts. Provide digits separated",
                        "by non-alphanumeric characters.",
@@ -39,9 +79,7 @@ def get_version_from_string(version_string):
         logger.error(msg)
         raise Exception(msg)
 
-    version = []
-    for i in m:
-        version.append(int(i))
+    version = [int(i) for i in m]
 
     return version
 
@@ -57,9 +95,6 @@ def get_info_from_release_string(release):
     :param release: A string in format 'LIBX_1_0_0' or similar
     :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
     """
-
-    # Get logger
-    logger = logging.getLogger(__name__)
 
     version = [None, None, None]
     ver_suffix = ''
@@ -108,9 +143,6 @@ def bump_version(version, abi_break):
     :returns:           A list in format [CUR, AGE, REV]
     """
 
-    # Get logger
-    logger = logging.getLogger(__name__)
-
     new_version = []
     if abi_break:
         if version[0] is not None:
@@ -136,9 +168,6 @@ def clean_symbols(symbols):
     :param symbols: A list of lines containing symbols
     :returns:       A list of the obtained symbols
     """
-
-    # Get logger
-    logger = logging.getLogger(__name__)
 
     # Split the lines into potential symbols and remove invalid characters
     clean = []
@@ -188,7 +217,7 @@ class ParserError(Exception):
 
 # Map class
 
-class Map:
+class Map(object):
     """
     A linker map
     """
@@ -240,9 +269,10 @@ class Map:
                             if has_duplicate:
                                 msg = "".join(["Duplicated Release identifier"
                                                "\'", name, "\'"])
-                                raise ParserError(lines[index], index,
-                                                  column, msg,
-                                                  severity=WARNING)
+                                # This is non-critical, only warning
+                                self.logger.warn(ParserError(lines[index],
+                                                             index,
+                                                             column, msg))
                             continue
                     # Searching for the '{'
                     elif state == 1:
@@ -307,10 +337,10 @@ class Map:
                                                "before \'", identifier, "\'.",
                                                " Symbols considered in",
                                                "\'global:\'"])
-                                raise ParserError(lines[last[0]],
-                                                  last[0], last[1],
-                                                  msg,
-                                                  severity=WARNING)
+                                # Non-critical, only warning
+                                self.logger.warn(ParserError(lines[last[0]],
+                                                             last[0], last[1],
+                                                             msg))
                             else:
                                 # Symbol found
                                 v[1].append(identifier)
@@ -359,13 +389,9 @@ class Map:
                         raise ParserError(lines[last[0]], last[0], last[1], "Unknown"
                                           "parser state")
                 except ParserError as e:
-                    # If the exception was not an error, continue
-                    if e.severity != ERROR:
-                        self.logger.warn(e)
-                        warnings.warn(e)
-                        pass
-                    else:
-                        raise e
+                    # Any exception raised is considered an error
+                    self.logger.error(e)
+                    raise e
         # Store the parsed releases
         self.releases = releases
 
@@ -455,15 +481,15 @@ class Map:
         :returns:   A list containing the dependencies lists
         """
 
-        def get_dependency(releases, current):
-            found = [release for release in releases if release.name == current]
+        def get_dependency(releases, head):
+            found = [release for release in releases if release.name == head]
             if not found:
-                msg = "".join(["Release \'", current, "\' not found"])
-                self.logger.warn(msg)
-                warnings.warn(msg)
+                msg = "".join(["Release \'", head, "\' not found"])
+                self.logger.error(msg)
+                raise Exception(msg)
             if len(found) > 1:
                 msg = "".join(["defined more than 1 release ",
-                               "\'", current, "\'"])
+                               "\'", head, "\'"])
                 self.logger.error(msg)
                 raise Exception(msg)
             return found[0].previous
@@ -471,28 +497,34 @@ class Map:
         solved = []
         deps = []
         for release in self.releases:
+            # If the dependencies of the current release were resolved, skip
             if release.name in solved:
                 continue
             else:
                 current = [release.name]
                 dep = release.previous
+                # Construct the current release dependency list
                 while dep:
+                    # If the found dependency was already in the list
                     if dep in current:
+                        print(self)
                         msg = "".join(["Circular dependency detected!\n",
                                        "    "] +
                                       [i + "->" for i in current] +
                                       [dep])
                         self.logger.error(msg)
                         raise Exception(msg)
+                    # Append the dependency to the current list
                     current.append(dep)
-                    # Squash dependencies
+
+                    # Remove the releases that are not heads from the list
                     if dep in solved:
                         for i in deps:
                             if i[0] == dep:
                                 deps.remove(i)
                     else:
                         solved.append(dep)
-                        dep = get_dependency(self.releases, dep)
+                    dep = get_dependency(self.releases, dep)
                 solved.append(release.name)
                 deps.append(current)
         return deps
@@ -510,17 +542,17 @@ class Map:
         if d:
             for release, duplicates in d:
                 msg = "".join(["Duplicates found in release \'", release,
-                                   "\':"])
+                               "\':"])
                 self.logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
                 for scope, symbols in duplicates:
                     msg = ' ' * 4 + scope + ':'
                     self.logger.warn(msg)
-                    warnings.warn(msg)
+                    # warnings.warn(msg)
                     for symbol in symbols:
                         msg = ' ' * 8 + symbol
                         self.logger.warn(msg)
-                        warnings.warn(msg)
+                        # warnings.warn(msg)
 
         # Check '*' wildcard usage
         for release in self.releases:
@@ -529,25 +561,25 @@ class Map:
                     if symbols:
                         if "*" in symbols:
                             msg = "".join([release.name,
-                                               " contains the local \'*\'",
-                                               " wildcard"])
+                                           " contains the local \'*\'",
+                                           " wildcard"])
                             self.logger.info(msg)
                             if release.previous:
                                 # Predecessor version and local: *; are present
                                 msg = "".join([release.name,
-                                                   " should not contain the",
-                                                   " local wildcard because",
-                                                   " it is not the base",
-                                                   " version (it refers to",
-                                                   " version ",
-                                                   release.previous,
-                                                   " as its predecessor)"])
+                                               " should not contain the",
+                                               " local wildcard because",
+                                               " it is not the base",
+                                               " version (it refers to",
+                                               " version ",
+                                               release.previous,
+                                               " as its predecessor)"])
                                 self.logger.warn(msg)
-                                warnings.warn(msg)
+                                # warnings.warn(msg)
                             else:
                                 # Release seems to be base: empty predecessor
                                 msg = "".join([release.name, "seems to",
-                                                   " be the base version"])
+                                               " be the base version"])
                                 self.logger.info(msg)
                                 seems_base.append(release.name)
 
@@ -559,68 +591,64 @@ class Map:
                         if "*" in symbols:
                             # Release contains '*' wildcard in global scope
                             msg = "".join([release.name, " contains the",
-                                               " \'*\' wildcard in global",
-                                               " scope. It is probably",
-                                               " exporting symbols it should",
-                                               " not."])
+                                           " \'*\' wildcard in global",
+                                           " scope. It is probably",
+                                           " exporting symbols it should",
+                                           " not."])
                             self.logger.warn(msg)
-                            warnings.warn(msg)
+                            # warnings.warn(msg)
                             have_wildcard.append((release.name, scope))
                 else:
                     # Release contains unknown visibility scopes (not global or
                     # local)
                     msg = "".join([release.name, "contains unknown scope named ",
-                             scope, " (different from ",
-                             " \'global\' and \'local\')"])
+                                   scope, " (different from ",
+                                   " \'global\' and \'local\')"])
                     self.logger.warn(msg)
-                    warnings.warn(msg)
+                    # warnings.warn(msg)
 
         if have_wildcard:
             if len(have_wildcard) > 1:
                 # The '*' wildcard was found in more than one place
                 msg = "".join(["The \'*\' wildcard was found in more than",
-                                   " one place:"])
+                               " one place:"])
                 self.logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
                 for name, scope in have_wildcard:
                     msg = "".join([" " * 4, name, ": in \'", scope, "\'"])
                     self.logger.warn(msg)
-                    warnings.warn(msg)
+                    # warnings.warn(msg)
         else:
             msg = "The \'*\' wildcard was not found"
             self.logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
 
         if seems_base:
             if len(seems_base) > 1:
                 # There is more than one release without predecessor and
                 # containing '*' wildcard in local scope
                 msg = "".join(["More than one release seems the base",
-                                   " version (contains the local wildcard",
-                                   " and does not have a predecessor"
-                                   " version):"])
+                               " version (contains the local wildcard",
+                               " and does not have a predecessor"
+                               " version):"])
                 self.logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
                 for name in seems_base:
                     msg = "".join([" " * 4, name])
                     self.logger.warn(msg)
-                    warnings.warn(msg)
+                    # warnings.warn(msg)
         else:
             msg = "No base version release found"
             self.logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
 
-        try:
-            dependencies = self.dependencies()
-            self.logger.info("Found dependencies: ")
-            for release in dependencies:
-                content = [" " * 4]
-                content.extend([dep + "->" for dep in release])
-                cur = "".join(content)
-                self.logger.info(cur)
-        except DependencyError as e:
-            self.logger.error(e)
-            raise Exception(str(e))
+        dependencies = self.dependencies()
+        self.logger.info("Found dependencies: ")
+        for release in dependencies:
+            content = [" " * 4]
+            content.extend((dep + "->" for dep in release))
+            cur = "".join(content)
+            self.logger.info(cur)
 
     def guess_latest_release(self):
         """
@@ -822,7 +850,7 @@ class Map:
         self.index = 0
         self.releases = []
         # Logging
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = Single_Logger.getLogger(__name__)
         # From the raw file
         self.filename = ''
         self.lines = []
@@ -907,7 +935,7 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
     """
 
     # Get logger
-    logger = logging.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__)
 
     # Check if the first file exists
     if os.path.isfile(out_name):
@@ -918,7 +946,7 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
                                str(out_arg), "\' and \'",
                                str(in_arg), "\' are the same."])
                 logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
 
                 # Avoid changing the files if this is a dry run
                 if dry:
@@ -928,7 +956,7 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
                                str(in_name), "\' to \'",
                                str(in_name), ".old\'."])
                 logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
                 try:
                     # If it is the case, copy to another file to
                     # preserve the content
@@ -956,7 +984,7 @@ def update(args):
     """
 
     # Get logger
-    logger = logging.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__)
 
     logger.info("Command: update")
     logger.debug("Arguments provided: ")
@@ -971,7 +999,7 @@ def update(args):
         if os.path.isfile(args.out):
             msg = "".join(["Overwriting existing file \'", args.out, "\'"])
             logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -1027,7 +1055,7 @@ def update(args):
                                " present in a previous version. Keep the",
                                " previous implementation to not break ABI."])
                 logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
 
         added.extend(new_symbols)
     # If the list of symbols are being removed
@@ -1040,7 +1068,7 @@ def update(args):
                 msg = "".join(["Requested to remove \'", symbol, "\', but",
                                " not found."])
                 logger.warn(msg)
-                warnings.warn(msg)
+                # warnings.warn(msg)
     else:
         # Execution should never reach this point
         raise Exception("No strategy was provided (add/delete/symbols)")
@@ -1078,13 +1106,14 @@ def update(args):
         r.name.upper()
 
         # Add the symbols added to global scope
-        r.symbols.append(('global', added))
+        r.symbols.append(("global", added))
 
-        # Add the name for the previous release
-        r.previous = latest[0]
+        if not removed:
+            # Add the name for the previous release
+            r.previous = latest[0]
 
-        # Put the release on the map
-        cur_map.releases.append(r)
+            # Put the release on the map
+            cur_map.releases.append(r)
 
     if removed:
         if args.care:
@@ -1094,7 +1123,7 @@ def update(args):
 
         msg = "ABI break detected: symbols were removed."
         logger.warn(msg)
-        warnings.warn(msg)
+        # warnings.warn(msg)
         print("Merging all symbols in a single new release")
         new_map = Map()
         r = Release()
@@ -1116,9 +1145,9 @@ def update(args):
         # Remove the '*' wildcard, if present
         if '*' in all_symbols:
             msg = "".join(["Wildcard \'*\' found in global. Removed to avoid",
-                  " exporting unexpected symbols."])
+                           " exporting unexpected symbols."])
             logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
             all_symbols.remove('*')
 
         r.symbols.append(('global', all_symbols))
@@ -1161,7 +1190,7 @@ def new(args):
     """
 
     # Get logger
-    logger = logging.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__)
 
     logger.info("Command: new")
     logger.debug("Arguments provided: ")
@@ -1176,7 +1205,7 @@ def new(args):
         if os.path.isfile(args.out):
             msg = "".join(["Overwriting existing file \'", args.out, "\'"])
             logger.warn(msg)
-            warnings.warn(msg)
+            # warnings.warn(msg)
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -1268,7 +1297,7 @@ def new(args):
     else:
         msg = "No valid symbols provided. Nothing done."
         logger.warn(msg)
-        warnings.warn(msg)
+        # warnings.warn(msg)
 
 
 def get_arg_parser():

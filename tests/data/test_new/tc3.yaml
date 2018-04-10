@@ -10,4 +10,5 @@
   output:
     file:
     stdout: "tc3.out"
-    stderr:
+    warnings:
+    exceptions:

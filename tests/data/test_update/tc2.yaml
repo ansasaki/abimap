@@ -11,4 +11,9 @@
   output:
     file: "tc2.out"
     stdout: "tc2.stdout"
-    stderr: "tc2.err"
+    warnings:
+      - "Overwriting existing file 'tc2.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'tc2.map' to 'tc2.map.old'."
+      - "ABI break detected: symbols were removed."
+    exceptions:

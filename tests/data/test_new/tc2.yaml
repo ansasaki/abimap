@@ -12,6 +12,8 @@
   output:
     file: "tc2.out"
     stdout: ""
-    stderr: "tc2.err"
-
-
+    warnings:
+      - "Overwriting existing file 'tc2.in'"
+      - "Given paths in '--out' and '--in' are the same."
+      - "Moving 'tc2.in' to 'tc2.in.old'."
+    exceptions:
