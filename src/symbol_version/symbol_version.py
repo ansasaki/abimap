@@ -188,10 +188,20 @@ def clean_symbols(symbols):
 class ParserError(Exception):
     """
     Exception type raised by the map parser
+
+    Used mostly to keep track where an error was found in the given file
+
+    Attributes:
+        filename:    The name (path) of the file being parsed
+        context:     The line where the error was detected
+        line:        The index of the line where the error was detected
+        column:      The index of the column where the error was detected
+        message:     The error message
     """
 
     def __str__(self):
-        content = "".join(["in line ", self.line + 1,
+        content = "".join(["In file ", self.filename,
+                           ", line ", self.line + 1,
                            ", column ", self.column,
                            ": ", self.message,
                            "\n",
@@ -200,15 +210,17 @@ class ParserError(Exception):
                            "^"])
         return content
 
-    def __init__(self, context, line, column, message):
+    def __init__(self, filename, context, line, column, message):
         """
         The constructor
 
+        :param filename:    The name (path) of the file being parsed
         :param context:     The line where the error was detected
         :param line:        The index of the line where the error was detected
         :param column:      The index of the column where the error was detected
         :param message:     The error message
         """
+        self.filename = filename
         self.context = context
         self.line = line
         self.column = column
@@ -219,17 +231,83 @@ class ParserError(Exception):
 
 class Map(object):
     """
-    A linker map
+    A linker map (version script) representation
+
+    This class is an internal representation of a version script.
+    It is intended to be initialized by calling the method ``read()`` and
+    passing the path to a version script file.
+    The parser will parse the file and check the file syntax, creating a list of
+    releases (instances of the ``Release`` class), which is stored in ``releases``.
+
+    Attributes:
+        init:       Indicates if the object was initialized by calling
+                    ``read()``
+        logger:     The logger object; can be specified in the constructor
+        filename:   Holds the name (path) of the file read
+        lines:      A list containing the lines of the file
     """
 
+    # To make printable
+    def __str__(self):
+        """
+        Print the map in a usable form for the linker
+
+        :returns: A string containing the whole map file as it would be written
+                  in a file
+        """
+
+        content = "".join([str(release) + "\n" for release in
+                           self.releases])
+        return content
+
+    # Constructor
+    def __init__(self, filename=None, logger=None):
+        """
+        The constructor.
+
+        :param filename: The name of the file to be read. If provided the
+                         ``read()`` method is called using this name.
+        :param logger:   A logger object. If not provided, the module based
+                         logger will be used
+        """
+
+        # The state
+        self.init = False
+        self.releases = []
+        # Logging
+        self.logger = Single_Logger.getLogger(__name__)
+        # From the raw file
+        self.filename = ''
+        self.lines = []
+        if filename:
+            try:
+                self.read(filename)
+            except ParserError as e:
+                raise(e)
+
     def parse(self, lines):
-        # The parser FSM state. Can be:
-        # 0: name:             searching for release name or 'EOF'
-        # 1: opening:          searching for opening '{'
-        # 2: element:           searching for visibility/symbol name or '}' closer
-        # 3: element_closer:    searching for ':' or ';'
-        # 4: previous:         searching for previous release name (can be empty)
-        # 5: previous_closer:  searching for ';'
+        """
+        A simple version script parser.
+
+        This is the main initializator of the ``releases`` list.
+        This simple parser receives the lines of a given version script, check its
+        syntax, and construct the list of releases.
+        Some semantic aspects are checked, like the existence of the ``*`` wildcard
+        in global scope and the existence of duplicated release names.
+
+        It works by running a finite state machine:
+
+         The parser states. Can be:
+            0. name: The parser is searching for a release name or ``EOF``
+            1. opening: The parser is searching for the release opening ``{``
+            2. element: The parser is searching for an identifier name or ``}``
+            3. element_closer: The parser is searching for ``:`` or ``;``
+            4. previous: The parser is searching for previous release name
+            5. previous_closer: The parser is searching for ``;``
+
+        :param lines: The lines of a version script file
+        """
+
         state = 0
 
         # The list of releases parsed
@@ -399,6 +477,8 @@ class Map(object):
         """
         Read a linker map file (version script) and store the obtained releases
 
+        Obtain the lines of the file and calls ``parse()`` to parse the file
+
         :param filename:        The path to the file to be read
         :raises ParserError:    Raised when a syntax error is found in the file
         """
@@ -455,19 +535,6 @@ class Map(object):
             if rel_dup:
                 duplicates.append((release.name, rel_dup))
         return duplicates
-
-    def contains(self, symbol):
-        """
-        Check if a symbol is contained in the map in any Release
-
-        :param symbol:  The symbol to be searched
-        :returns:       True if the symbol was found, False otherwise
-        """
-
-        for release in self.releases:
-            if release.contains(symbol):
-                return True
-        return False
 
     def dependencies(self):
         """
@@ -531,7 +598,9 @@ class Map(object):
 
     def check(self):
         """
-        Check the map structure
+        Check the map structure.
+
+        Reports errors found in the structure of the map in form of warnings.
         """
 
         have_wildcard = []
@@ -654,6 +723,9 @@ class Map(object):
         """
         Try to guess the latest release
 
+        It uses the information found in the releases present in the version
+        script read. It tries to find the latest release using heuristics.
+
         :returns:   A list [release, prefix, suffix, version[CUR, AGE, REV]]
         """
 
@@ -680,18 +752,36 @@ class Map(object):
         """
         Use the given information to guess the name for the new release
 
+        The two parts necessary to make the release name:
+            - The new prefix: Usually the library name (e.g. LIBX)
+            - The new suffix: The version information (e.g. _1_2_3)
+
+        If the new prefix is not provided:
+            1. Try previous prefix, if given
+            2. Try previous release name, if given
+                - This will also set the version, if not set yet
+            3. Try to find a common prefix between release names
+            4. Try to find latest release
+
+        If the new suffix is not provided:
+            1. Try previous version, if given
+            2. Try previous release name, if given
+                - This will also set the prefix, if not set yet
+            4. Try to find latest release version
+
         :param abi_break:   Boolean, indicates if the ABI was broken
         :param new_release: String, the name of the new release. If this is
-            provided, the guessing is avoided and this will be used as the release
-            name
+                            provided, the guessing is avoided and this will
+                            be used as the release name
         :param new_prefix:  The prefix to be used (library name)
         :param new_suffix:  The suffix to be used (version, like \'_1_0_0\')
         :param new_ver:     A list of int, the components of the version (e.g.
-            [CURRENT, AGE, RELEASE]).
+                            [CURRENT, AGE, RELEASE]).
         :param prev_release:    The name of the previous release.
-        :param prev_prefix:  The previous release prefix (library name)
-        :param prev_ver:    A list of int, the components of the previous
-            version (e.g. [CURRENT, AGE, RELEASE])
+        :param prev_prefix:     The previous release prefix (library name)
+        :param prev_ver:        A list of int, the components of the previous
+                                version (e.g. [CURRENT, AGE, RELEASE])
+        :returns: The guessed release name (new prefix + new suffix)
         """
 
         # If the two required parts were given, just combine and return
@@ -708,23 +798,6 @@ class Map(object):
         if new_release:
             self.logger.debug("[guess]: New release found, using it")
             return new_release.upper()
-
-        # The two parts necessary to make the release name
-        # new_prefix
-        # new_suffix
-
-        # If the new prefix was not given:
-        # - Try previous prefix, if given
-        # - Try previous release name, if given
-        #   - This will also set the version, if not set yet
-        # - Try to find a common prefix between release names
-        # - Try to find latest release
-
-        # If the new suffix was not given:
-        # - Try previous version, if given
-        # - Try previous release name, if given
-        #   - This will also set the prefix, if not set yet
-        # - Try to find latest release version
 
         # If a previous release was given, extract info and check it
         if prev_release:
@@ -800,9 +873,11 @@ class Map(object):
 
         if not new_prefix or not new_suffix:
             # ERROR: could not guess the name
-            raise Exception("Insufficient information to guess the new release"
-                            " name. Releases found do not have version"
-                            " information.")
+            msg = "".join(["Insufficient information to guess the new release",
+                           " name. Releases found do not have version",
+                           " information."])
+            self.logger.error(msg)
+            raise Exception(msg)
 
         # Return the combination of the prefix and version
         return new_prefix.upper() + new_suffix
@@ -810,7 +885,8 @@ class Map(object):
     def sort_releases_nice(self, top_release):
         """
         Sort the releases contained in a map file putting the dependencies of
-        top_release first
+        ``top_release`` first. This changes the order of the list in
+        ``releases``.
 
         :param top_release: The release whose dependencies should be prioritized
         """
@@ -833,68 +909,33 @@ class Map(object):
 
         self.releases = new_list
 
-    # To make printable
-    def __str__(self):
-        """
-        Print the map in a usable form for the linker
-        """
-        content = "".join([str(release) + "\n" for release in
-                           self.releases])
-        return content
-
-    # Constructor
-    def __init__(self, filename=None, logger=None):
-        # The state
-        self.init = False
-        # For iterator
-        self.index = 0
-        self.releases = []
-        # Logging
-        self.logger = Single_Logger.getLogger(__name__)
-        # From the raw file
-        self.filename = ''
-        self.lines = []
-        if filename:
-            try:
-                self.read(filename)
-            except ParserError as e:
-                raise(e)
-
 
 class Release:
     """
-    A release version and its symbols
+    A internal representation of a release version and its symbols
+
+    A release is usually identified by the library name (suffix) and the release
+    version (suffix). A release contains symbols, grouped by their visibility
+    scope (global or local).
+
+    In this class the symbols of a release are stored in a list of dictionaries
+    mapping a visibility scope name (e.g. \"global\") to a list of the contained
+    symbols:
+    ::
+
+        ([{"global": [symbols]}, {"local": [local_symbols]}])
+
+    Attributes:
+        name: The release name
+        previous: The previous release to which this release is dependent
+        symbols: The symbols contained in the release, grouped by the visibility
+                 scope.
     """
 
-    def contains(self, symbol):
-        for scope, symbols in self.symbols:
-            if symbol in symbols:
-                return True
-        return False
-
-    def duplicates(self):
-        duplicates = []
-        for scope, symbols in self.symbols:
-            seen = []
-            release_dups = []
-            if symbols:
-                for symbol in symbols:
-                    if symbol not in seen:
-                        seen.append(symbol)
-                    else:
-                        release_dups.append(symbol)
-                if release_dups:
-                    duplicates.append((scope, set(release_dups)))
-        return duplicates
-
-    def __next__(self):
-        all_symbols = []
-        for visibility, symbols in self.symbols:
-            all_symbols.extend(symbols)
-        if self.index >= len(all_symbols):
-            raise StopIteration
-        self.index += 1
-        return all_symbols[self.index - 1]
+    def __init__(self):
+        self.name = ''
+        self.previous = ''
+        self.symbols = []
 
     def __str__(self):
         content = ''
@@ -914,14 +955,20 @@ class Release:
         content += ";\n"
         return content
 
-    def __iter__(self):
-        return self
-
-    def __init__(self):
-        self.name = ''
-        self.previous = ''
-        self.index = 0
-        self.symbols = []
+    def duplicates(self):
+        duplicates = []
+        for scope, symbols in self.symbols:
+            seen = []
+            release_dups = []
+            if symbols:
+                for symbol in symbols:
+                    if symbol not in seen:
+                        seen.append(symbol)
+                    else:
+                        release_dups.append(symbol)
+                if release_dups:
+                    duplicates.append((scope, set(release_dups)))
+        return duplicates
 
 
 def check_files(out_arg, out_name, in_arg, in_name, dry):
@@ -974,11 +1021,11 @@ def update(args):
     Given the new list of symbols, update the map
 
     The new map will be generated by the following rules:
-    - If new symbols are added, a new release is created containing the new
-    symbols. This is a compatible update.
-    - If a previous existing symbol is removed, then all releases are
-    unified in a new release. This is an incompatible change, the SONAME
-    of the library should be bumped
+        - If new symbols are added, a new release is created containing the new
+          symbols. This is a compatible update.
+        - If a previous existing symbol is removed, then all releases are
+          unified in a new release. This is an incompatible change, the SONAME
+          of the library should be bumped
 
     :param args: Arguments given in command line parsed by argparse
     """
@@ -1186,6 +1233,8 @@ def new(args):
     """
     \'new\' subcommand implementation
 
+    Create a new version script file containing the provided symbols.
+
     :param args: Arguments given in command line parsed by argparse
     """
 
@@ -1301,6 +1350,14 @@ def new(args):
 
 
 def get_arg_parser():
+    """
+    Get a parser for the command line arguments
+
+    The parser is capable of checking requirements for the arguments and
+    possible incompatible arguments.
+
+    :returns: A parser for command line arguments. (argparse.ArgumentParser)
+    """
     # Common file arguments
     file_args = argparse.ArgumentParser(add_help=False)
     file_args.add_argument('-o', '--out',
@@ -1385,6 +1442,9 @@ def get_arg_parser():
 if __name__ == "__main__":
 
     class C:
+        """
+        Empty class used as a namespace
+        """
         pass
 
     ns = C()
