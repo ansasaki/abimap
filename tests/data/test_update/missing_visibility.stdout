@@ -2,7 +2,6 @@ Added:
     symbol
 
 Removed:
-    another_symbol
-    one_more_symbol
     other_symbol
 
+Merging all symbols in a single new release

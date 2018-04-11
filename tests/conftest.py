@@ -34,7 +34,7 @@ def datadir(tmpdir, request):
 
 
 @pytest.fixture
-def testcases(datadir):
+def testcases(datadir, capsys):
     """
     Returns the test cases for a given test
     """
@@ -52,7 +52,9 @@ def testcases(datadir):
                     try:
                         all_tests.extend(yaml.load(stream))
                     except yaml.YAMLError as e:
-                        print(e)
+                        with capsys.disabled():
+                            print(e)
+                        raise e
 
     return all_tests
 
@@ -105,16 +107,26 @@ def run_tc(tc, datadir, capsys, caplog):
         else:
             args.func(args)
 
+        # Capture stdout and stderr
+        out, err = capsys.readouterr()
+
         # If there is an expected output file
         if tc_out["file"]:
             if args.out:
                 assert filecmp.cmp(args.out, tc_out["file"], shallow=False)
             else:
+                with capsys.disabled():
+                    print(tc)
                 # Fail
                 assert 0
-
-        # Capture stdout and stderr
-        out, err = capsys.readouterr()
+        else:
+            if args.out:
+                if os.path.isfile(args.out):
+                    with capsys.disabled():
+                        print(tc)
+                        print("Unexpected output file created:\n" + args.out)
+                    # Fail
+                    assert 0
 
         # If there is an expected output to stdout
         if tc_out["stdout"]:
@@ -123,6 +135,9 @@ def run_tc(tc, datadir, capsys, caplog):
                 assert out == expected
         else:
             if out:
+                with capsys.disabled():
+                    print(tc)
+                    print("Unexpected output in stdout:\n" + out)
                 # Fail
                 assert 0
 

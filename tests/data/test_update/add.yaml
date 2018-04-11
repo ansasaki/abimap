@@ -1,0 +1,18 @@
+# Testing add strategy
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "--out"
+      - "add.map"
+      - "add.map"
+    stdin: "symbol.in"
+  output:
+    file: "add.outfile"
+    stdout: "add.stdout"
+    warnings:
+      - "Overwriting existing file 'add.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'add.map' to 'add.map.old'."
+    exceptions:

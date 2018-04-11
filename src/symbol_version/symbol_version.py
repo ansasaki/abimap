@@ -399,7 +399,7 @@ class Map(object):
                             m = re.match(r':', line[column:])
                             if m is None:
                                 msg = "".join(["Missing \';\' or \':\' after",
-                                               "\'", identifier, "\'"])
+                                               " \'", identifier, "\'"])
                                 # In this case the current position is used
                                 raise ParserError(self.filename,
                                                   lines[index], index, column,
@@ -418,9 +418,9 @@ class Map(object):
                                 v = ('global', [])
                                 r.symbols.append(v)
                                 msg = "".join(["Missing visibility scope",
-                                               "before \'", identifier, "\'.",
+                                               " before \'", identifier, "\'.",
                                                " Symbols considered in",
-                                               "\'global:\'"])
+                                               " \'global:\'"])
                                 # Non-critical, only warning
                                 self.logger.warn(ParserError(self.filename,
                                                              lines[last[0]],

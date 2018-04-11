@@ -4,7 +4,6 @@ LIBTC1_1_0_0
 {
     global:
         another_symbol;
-        symbol;
     local:
         *;
 } ;

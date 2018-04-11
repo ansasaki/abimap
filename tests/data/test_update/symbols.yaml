@@ -1,0 +1,18 @@
+# Testing symbols strategy
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "symbols.map"
+      - "symbols.map"
+    stdin: "symbols.in"
+  output:
+    file: "symbols.out"
+    stdout: "symbols.stdout"
+    warnings:
+      - "Overwriting existing file 'symbols.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'symbols.map' to 'symbols.map.old'."
+    exceptions:
