@@ -492,19 +492,6 @@ class Map(object):
             except ParserError as e:
                 raise e
 
-    def all_symbols(self):
-        """
-        Returns all symbols from all releases contained in the Map object
-
-        :returns: A set containing all the symbols in all releases
-        """
-
-        symbols = []
-        for release in self.releases:
-            for scope, scope_symbols in release.symbols:
-                symbols.extend(scope_symbols)
-        return set(symbols)
-
     def all_global_symbols(self):
         """
         Returns all global symbols from all releases contained in the Map
@@ -910,7 +897,7 @@ class Map(object):
         self.releases = new_list
 
 
-class Release:
+class Release(object):
     """
     A internal representation of a release version and its symbols
 
@@ -1441,7 +1428,7 @@ def get_arg_parser():
 # User interface
 if __name__ == "__main__":
 
-    class C:
+    class C(object):
         """
         Empty class used as a namespace
         """
