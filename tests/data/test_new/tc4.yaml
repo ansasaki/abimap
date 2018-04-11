@@ -1,0 +1,16 @@
+-
+  input:
+    args:
+      - "new"
+      - "--in"
+      - "tc4.in"
+      - "--name"
+      - "libtc4"
+      - "--version"
+      - "1_0_0"
+    stdin:
+  output:
+    file:
+    stdout: "tc4.out"
+    warnings:
+    exceptions:

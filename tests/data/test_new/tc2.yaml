@@ -1,0 +1,19 @@
+-
+  input:
+    args:
+      - "new"
+      - "--in"
+      - "tc2.in"
+      - "--out"
+      - "tc2.in"
+      - "--release"
+      - "libtc2_1_0_0"
+    stdin:
+  output:
+    file: "tc2.out"
+    stdout: ""
+    warnings:
+      - "Overwriting existing file 'tc2.in'"
+      - "Given paths in '--out' and '--in' are the same."
+      - "Moving 'tc2.in' to 'tc2.in.old'."
+    exceptions:

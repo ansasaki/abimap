@@ -1,0 +1,35 @@
+# Testcases to test get_version_from_string()
+
+-
+  input: '1_0_0'
+  output:
+    - 1
+    - 0
+    - 0
+-
+  input: '___1__0___0___'
+  output:
+    - 1
+    - 0
+    - 0
+-
+  input: '1.0.0'
+  output:
+    - 1
+    - 0
+    - 0
+-
+  input: '1_0_0_1_0_0'
+  output:
+    - 1
+    - 0
+    - 0
+    - 1
+    - 0
+    - 0
+-
+  input: '12_34_56'
+  output:
+    - 12
+    - 34
+    - 56

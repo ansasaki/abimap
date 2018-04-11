@@ -1,0 +1,19 @@
+# Testcases to test new command
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "tc4.map"
+      - "tc4.map"
+    stdin: "tc4.in"
+  output:
+    file: "tc4.out"
+    stdout: "tc4.stdout"
+    warnings:
+      - "Overwriting existing file 'tc4.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'tc4.map' to 'tc4.map.old'."
+      - "ABI break detected: symbols were removed."
+    exceptions:

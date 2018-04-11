@@ -1,0 +1,9 @@
+# Test input
+
+LIBX_1_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+};

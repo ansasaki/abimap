@@ -1,0 +1,56 @@
+# Testcases to test clean_symbols()
+
+-
+  input:
+    - "a;b;c;d;e;f"
+  output:
+    - "a"
+    - "b"
+    - "c"
+    - "d"
+    - "e"
+    - "f"
+-
+  input:
+    - "a;"
+    - "b;"
+    - "c;"
+    - "d;"
+  output:
+    - "a"
+    - "b"
+    - "c"
+    - "d"
+-
+  input:
+    - "a "
+    - "b c"
+    - "d e"
+  output:
+    - "a"
+    - "b"
+    - "c"
+    - "d"
+    - "e"
+-
+  input:
+    - "a; \n # ; $ % ^  "
+    - "b;     c     d"
+    - "e"
+  output:
+    - "a"
+    - "b"
+    - "c"
+    - "d"
+    - "e"
+-
+  input:
+    - "a_b_c_d;"
+    - "e_f_g_H;"
+    - "i_j__k____l;"
+    - "m;"
+  output:
+    - "a_b_c_d"
+    - "e_f_g_H"
+    - "i_j__k____l"
+    - "m"
