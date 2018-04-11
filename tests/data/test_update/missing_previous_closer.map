@@ -2,6 +2,7 @@
 
 LIBTC5_7_0_0
 {
+    global:
         other_symbol;
     local:
         *;

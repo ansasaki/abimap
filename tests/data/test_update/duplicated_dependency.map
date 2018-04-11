@@ -1,0 +1,23 @@
+# Broken map with duplicated dependency
+
+LIBTC5_9_1_0
+{
+    global:
+        other_symbol;
+} LIBTC5_9_0_0;
+
+LIBTC5_9_0_0
+{
+    global:
+        another_symbol;
+    local:
+        *;
+} ;
+
+LIBTC5_9_0_0
+{
+    global:
+        one_more_symbol;
+    local:
+        *;
+} ;

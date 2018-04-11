@@ -493,6 +493,8 @@ class Map(object):
             self.filename = filename
             self.lines = f.readlines()
             self.parse(self.lines)
+            # Check the map read
+            self.check()
             self.init = True
 
     def all_global_symbols(self):
@@ -564,7 +566,6 @@ class Map(object):
                 while dep:
                     # If the found dependency was already in the list
                     if dep in current:
-                        print(self)
                         msg = "".join(["Circular dependency detected!\n",
                                        "    "] +
                                       [i + "->" for i in current] +

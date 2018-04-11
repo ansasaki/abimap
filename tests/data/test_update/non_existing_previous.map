@@ -1,0 +1,15 @@
+# Broken map with non-existing dependency
+
+LIBTC5_8_1_0
+{
+    global:
+        other_symbol;
+} LIBTC5_8_0_0;
+
+LIBBASE_1_0_0
+{
+    global:
+        another_symbol;
+    local:
+        *;
+} ;
