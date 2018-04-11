@@ -280,10 +280,7 @@ class Map(object):
         self.filename = ''
         self.lines = []
         if filename:
-            try:
-                self.read(filename)
-            except ParserError as e:
-                raise(e)
+            self.read(filename)
 
     def parse(self, lines):
         """
@@ -486,11 +483,8 @@ class Map(object):
         with open(filename, "r") as f:
             self.filename = filename
             self.lines = f.readlines()
-            try:
-                self.parse(self.lines)
-                self.init = True
-            except ParserError as e:
-                raise e
+            self.parse(self.lines)
+            self.init = True
 
     def all_global_symbols(self):
         """
