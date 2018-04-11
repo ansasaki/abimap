@@ -68,14 +68,14 @@ def get_version_from_string(version_string):
             logger.warn(msg)
             # warnings.warn(msg)
         if len(m) > 3:
-            msg = "".join(["Version has too many parts; provide 3 or less ",
-                           "( e.g. '0.1.2')"])
+            msg = "".join(["Version has too many parts; provide 3 or less",
+                           " ( e.g. '0.1.2')"])
             logger.warn(msg)
             # warnings.warn(msg)
     else:
         msg = "".join(["Could not get version parts. Provide digits separated",
-                       "by non-alphanumeric characters.",
-                       "(e.g. 0_1_2 or 0.1.2)"])
+                       " by non-alphanumeric characters.",
+                       " (e.g. 0_1_2 or 0.1.2)"])
         logger.error(msg)
         raise Exception(msg)
 

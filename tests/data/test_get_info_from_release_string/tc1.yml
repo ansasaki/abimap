@@ -10,6 +10,8 @@
       - 1
       - 0
       - 0
+  warnings:
+  exceptions:
 -
   input: "libx_____1____0____0___"
   output:
@@ -20,6 +22,8 @@
       - 1
       - 0
       - 0
+  warnings:
+  exceptions:
 -
   input: "libx_1.0.0"
   output:
@@ -30,6 +34,8 @@
       - 1
       - 0
       - 0
+  warnings:
+  exceptions:
 -
   input: "libx_1_0_0_1_0_0"
   output:
@@ -43,6 +49,8 @@
       - 1
       - 0
       - 0
+  warnings:
+  exceptions:
 -
   input: "libx_______"
   output:
@@ -53,6 +61,8 @@
         -
         -
         -
+  warnings:
+  exceptions:
 -
   input: "libx_1_"
   output:
@@ -61,6 +71,8 @@
     - "_1"
     -
       - 1
+  warnings:
+  exceptions:
 -
   input: "lib1_1_0"
   output:
@@ -70,3 +82,17 @@
     -
       - 1
       - 0
+  warnings:
+  exceptions:
+-
+  input: "libx"
+  output:
+    - "libx"
+    - "libx"
+    - ""
+    -
+        -
+        -
+        -
+  warnings:
+  exceptions:
