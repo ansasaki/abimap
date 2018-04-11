@@ -1,0 +1,128 @@
+# Testing broken map files
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "nameless.out"
+      - "nameless.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid Release identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "duplicated.out"
+      - "duplicated.map"
+    stdin: "symbol.in"
+  output:
+    file: "tc5.1.out"
+    stdout: "tc5.1.stdout"
+    warnings:
+      - "Duplicated Release identifier"
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "opening.out"
+      - "opening.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing \'{\'"
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "invalid_element.out"
+      - "invalid_element.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "missing_semicolon.out"
+      - "missing_semicolon.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing \';\' or \':\' after"
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "missing_visibility.out"
+      - "missing_visibility.map"
+    stdin: "symbol.in"
+  output:
+    file: "tc5.5.out"
+    stdout: "tc5.5.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+      - "Missing visibility scope before"
+      - "Symbols considered in \'global:\'"
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "invalid_previous.out"
+      - "invalid_previous.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "missing_previous_closer.out"
+      - "missing_previous_closer.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing \';\'"
+
+
+
+

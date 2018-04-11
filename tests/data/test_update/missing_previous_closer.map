@@ -1,0 +1,9 @@
+# Broken map missing the previous closer ';'
+
+LIBTC5_7_0_0
+{
+        other_symbol;
+    local:
+        *;
+}
+

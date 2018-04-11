@@ -1,0 +1,9 @@
+# Broken map with invalid characters in previous
+
+LIBTC5_6_0_0
+{
+        other_symbol;
+    local:
+        *;
+} $#&@;
+

@@ -2,19 +2,20 @@ import filecmp
 import os
 from distutils import dir_util
 
+import pytest
 import yaml
-from pytest import fixture
 
 from symbol_version import symbol_version
 
 
-@fixture
+@pytest.fixture
 def datadir(tmpdir, request):
-    '''
+    """
     Fixture responsible for searching a folder with the same name of test
     module in the \'data\' directory and, if available, moving all contents
     to a temporary directory so tests can use them freely.
-    '''
+    """
+
     filename = request.module.__file__
     test_dir, _ = os.path.splitext(filename)
 
@@ -32,11 +33,12 @@ def datadir(tmpdir, request):
     return tmpdir
 
 
-@fixture
+@pytest.fixture
 def testcases(datadir):
     """
     Returns the test cases for a given test
     """
+
     input_list = datadir.listdir()
 
     all_tests = []
@@ -57,6 +59,7 @@ def testcases(datadir):
 
 class cd:
     """Class used to manage the working directory"""
+
     def __init__(self, new_path):
         self.new_path = str(new_path)
 
@@ -94,7 +97,13 @@ def run_tc(tc, datadir, capsys, caplog):
                 args.input = tc_in["stdin"]
 
         # Call the function
-        args.func(args)
+        if tc_out["exceptions"]:
+            with pytest.raises(Exception) as e:
+                args.func(args)
+                for expected in tc_out["exceptions"]:
+                    assert expected in str(e.value)
+        else:
+            args.func(args)
 
         # If there is an expected output file
         if tc_out["file"]:
@@ -120,4 +129,7 @@ def run_tc(tc, datadir, capsys, caplog):
         # Check if the expected messages are in the log
         if tc_out["warnings"]:
             for expected in tc_out["warnings"]:
-                assert "WARNING  " + expected in caplog.text
+                assert expected in caplog.text
+
+        # Clear the captured log and output so far
+        caplog.clear()

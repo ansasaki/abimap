@@ -3,10 +3,12 @@
 
 """Tests for test_get_info_from_release_string()"""
 
+import pytest
+
 from symbol_version import symbol_version
 
 
-def test_get_info_from_release_string(testcases):
+def test_get_info_from_release_string(testcases, caplog):
     if testcases:
         for tc in testcases:
             if tc["exceptions"]:
@@ -24,7 +26,6 @@ def test_get_info_from_release_string(testcases):
                 if tc["warnings"]:
                     for expected in tc["warnings"]:
                         assert "WARNING  " + expected in caplog.text
-                    tc["output"])
     else:
         # If no test cases were found, fail
         assert 0

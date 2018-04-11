@@ -1,0 +1,10 @@
+# Broken map missing a colon or semicolon
+
+LIBTC5_4_0_0
+{
+    global
+        other_symbol;
+    local:
+        *;
+} ;
+

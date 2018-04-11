@@ -24,7 +24,7 @@ class Single_Logger(object):
     __instance = None
 
     @classmethod
-    def getLogger(cls, name):
+    def getLogger(cls, name, filename=None):
         """
         Get the unique instance of the logger
 
@@ -34,6 +34,10 @@ class Single_Logger(object):
         if Single_Logger.__instance is None:
             # Get logger
             logger = logging.getLogger(name)
+
+            if filename:
+                file_handler = logging.FileHandler(filename)
+                logger.addHandler(file_handler)
 
             # Setup a handler to print warnings and above to stderr
             console_handler = logging.StreamHandler()
@@ -201,12 +205,12 @@ class ParserError(Exception):
 
     def __str__(self):
         content = "".join(["In file ", self.filename,
-                           ", line ", self.line + 1,
-                           ", column ", self.column,
+                           ", line ", str(self.line + 1),
+                           ", column ", str(self.column),
                            ": ", self.message,
                            "\n",
                            self.context,
-                           " " * (self.column - 1),
+                           (" " * (self.column - 1)),
                            "^"])
         return content
 
@@ -326,9 +330,10 @@ class Map(object):
                         self.logger.debug(">>Name")
                         m = re.match(r'\w+', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0],
-                                              last[1], "Invalid Release"
-                                              "identifier")
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0],
+                                              last[1],
+                                              "Invalid Release identifier")
                         else:
                             # New release found
                             name = m.group(0)
@@ -343,9 +348,10 @@ class Map(object):
                             state += 1
                             if has_duplicate:
                                 msg = "".join(["Duplicated Release identifier"
-                                               "\'", name, "\'"])
+                                               " \'", name, "\'"])
                                 # This is non-critical, only warning
-                                self.logger.warn(ParserError(lines[index],
+                                self.logger.warn(ParserError(self.filename,
+                                                             lines[index],
                                                              index,
                                                              column, msg))
                             continue
@@ -354,7 +360,8 @@ class Map(object):
                         self.logger.debug(">>Opening")
                         m = re.match(r'\{', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Missing \'{\'")
                         else:
                             column += m.end()
@@ -366,14 +373,15 @@ class Map(object):
                         self.logger.debug(">>Element")
                         m = re.match(r'\}', line[column:])
                         if m:
-                            self.logger.debug(">>Release closer, jump to Previous")
+                            self.logger.debug(">>Closer, jump to Previous")
                             column += m.end()
                             last = (index, column)
                             state = 4
                             continue
                         m = re.match(r'\w+|\*', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Invalid identifier")
                         else:
                             # In this case the position before the
@@ -393,7 +401,8 @@ class Map(object):
                                 msg = "".join(["Missing \';\' or \':\' after",
                                                "\'", identifier, "\'"])
                                 # In this case the current position is used
-                                raise ParserError(lines[index], index, column,
+                                raise ParserError(self.filename,
+                                                  lines[index], index, column,
                                                   msg)
                             else:
                                 # New visibility found
@@ -413,7 +422,8 @@ class Map(object):
                                                " Symbols considered in",
                                                "\'global:\'"])
                                 # Non-critical, only warning
-                                self.logger.warn(ParserError(lines[last[0]],
+                                self.logger.warn(ParserError(self.filename,
+                                                             lines[last[0]],
                                                              last[0], last[1],
                                                              msg))
                             else:
@@ -436,8 +446,9 @@ class Map(object):
                             continue
                         m = re.match(r'\w+', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1], "Invalid"
-                                              " identifier")
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
+                                              "Invalid identifier")
                         else:
                             # Found previous release identifier
                             column += m.end()
@@ -449,7 +460,8 @@ class Map(object):
                         self.logger.debug(">>Previous closer")
                         m = re.match(r'^;', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Missing \';\'")
                         else:
                             # Found previous closer
@@ -459,10 +471,7 @@ class Map(object):
                             # Move back the state to find other releases
                             state = 0
                             continue
-                    else:
-                        # Should never reach this
-                        raise ParserError(lines[last[0]], last[0], last[1], "Unknown"
-                                          "parser state")
+
                 except ParserError as e:
                     # Any exception raised is considered an error
                     self.logger.error(e)
@@ -1012,7 +1021,7 @@ def update(args):
     """
 
     # Get logger
-    logger = Single_Logger.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__, filename=args.logfile)
 
     logger.info("Command: update")
     logger.debug("Arguments provided: ")
@@ -1038,7 +1047,7 @@ def update(args):
         check_files('--out', args.out, 'file', args.file, args.dry)
 
     # Read the current map file
-    cur_map = Map(filename=args.file)
+    cur_map = Map(filename=args.file, logger=logger)
 
     # Get all global symbols
     all_symbols = list(cur_map.all_global_symbols())
@@ -1220,7 +1229,7 @@ def new(args):
     """
 
     # Get logger
-    logger = Single_Logger.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__, filename=args.logfile)
 
     logger.info("Command: new")
     logger.debug("Arguments provided: ")
@@ -1344,11 +1353,13 @@ def get_arg_parser():
     file_args.add_argument('-o', '--out',
                            help='Output file (defaults to stdout)')
     file_args.add_argument('-i', '--in',
-                           help='Read from a file instead of stdio',
+                           help='Read from this file instead of stdio',
                            dest='input')
     file_args.add_argument('-d', '--dry',
                            help='Do everything, but do not modify the files',
                            action='store_true')
+    file_args.add_argument('-l', '--logfile',
+                           help='Log to this file')
 
     # Common verbosity arguments
     verb_args = argparse.ArgumentParser(add_help=False)
