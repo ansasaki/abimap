@@ -125,8 +125,6 @@ def get_info_from_release_string(release):
         # Search and get the version information
         version = get_version_from_string(tail)
         if version:
-            # for i in version:
-            #    ver_suffix += "_%d" %(i)
             ver_suffix = "".join(["_" + str(i) for i in version])
 
     # Return the information got
