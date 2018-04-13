@@ -1,0 +1,20 @@
+Added:
+    symbol
+
+# This map file was automatically updated
+
+DUPLICATED_1_1_0
+{
+    global:
+        symbol;
+} DUPLICATED_1_0_0;
+
+DUPLICATED_1_0_0
+{
+    global:
+        duplicated;
+        duplicated;
+    local:
+        *;
+} ;
+

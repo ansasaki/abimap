@@ -1,0 +1,14 @@
+Removed:
+    symbol
+
+Merging all symbols in a single new release
+# This map file was automatically updated
+
+WITH_WILDCARD_2_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+

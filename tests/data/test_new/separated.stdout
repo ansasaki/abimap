@@ -1,0 +1,10 @@
+# This map file was created with symbol_version.py
+
+SEPARATED_1_1_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+

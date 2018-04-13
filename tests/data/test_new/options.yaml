@@ -1,0 +1,96 @@
+# Testcases to test new command
+-
+  input:
+    args:
+      - "new"
+      - "--out"
+      - "with_output.map"
+      - "--release"
+      - "WITH_OUTPUT_1_0_0"
+    stdin: "symbol.in"
+  output:
+    file: "with_out.outfile"
+    stdout: ""
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--in"
+      - "overwrite.in"
+      - "--out"
+      - "overwrite.in"
+      - "--release"
+      - "overwrite_1_0_0"
+    stdin:
+  output:
+    file: "overwrite.outfile"
+    stdout: ""
+    warnings:
+      - "Overwriting existing file 'overwrite.in'"
+      - "Given paths in '--out' and '--in' are the same."
+      - "Moving 'overwrite.in' to 'overwrite.in.old'."
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--in"
+      - "dry.in"
+      - "--out"
+      - "dry.in"
+      - "--release"
+      - "dry_1_0_0"
+      - "--dry"
+    stdin:
+  output:
+    file: "dry.outfile"
+    stdout: "dry.stdout"
+    warnings:
+      - "Overwriting existing file 'dry.in'"
+      - "Given paths in '--out' and '--in' are the same."
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--in"
+      - "empty.in"
+      - "--release"
+      - "empty_1_0_0"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+      - "No valid symbols provided. Nothing done."
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--release"
+      - "'$#@!'"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+      - "Release provided is not well formed (a well formed release contain \
+        the library identifier and the version information). \
+        Suggested: something like LIBNAME_1_2_3"
+    exceptions:
+      - "Could not retrieve release information."
+-
+  input:
+    args:
+      - "new"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "It is necessary to provide either release name or name and version"
+

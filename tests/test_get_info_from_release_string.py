@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """Tests for test_get_info_from_release_string()"""
@@ -26,6 +26,9 @@ def test_get_info_from_release_string(testcases, caplog):
                 if tc["warnings"]:
                     for expected in tc["warnings"]:
                         assert "WARNING  " + expected in caplog.text
+
+            # Clear the captured log and output so far
+            caplog.clear()
     else:
         # If no test cases were found, fail
         assert 0

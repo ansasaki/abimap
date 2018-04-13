@@ -1,10 +1,10 @@
 # This map file was created with symbol_version.py
 
-LIBTC1_1_0_0
+LIBTC2_1_0_0
 {
     global:
-        another_symbol;
-        symbol;
+      one_symbol;
+      two_symbol;
     local:
         *;
 } ;

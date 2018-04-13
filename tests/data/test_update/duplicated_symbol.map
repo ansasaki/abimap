@@ -1,0 +1,12 @@
+# This map file was automatically updated
+
+DUPLICATED_1_0_0
+{
+    global:
+        duplicated;
+        duplicated;
+    local:
+        *;
+} ;
+
+

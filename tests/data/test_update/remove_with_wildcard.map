@@ -1,0 +1,12 @@
+# This map file was automatically updated
+
+WITH_WILDCARD_1_0_0
+{
+    global:
+        one_symbol;
+        symbol;
+        *;
+    local:
+        *;
+} ;
+

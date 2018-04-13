@@ -1,0 +1,23 @@
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "-i"
+      - "overwrite_protected.in"
+      - "-o"
+      - "overwrite_protected.in"
+      - "base.map"
+    stdin:
+  output:
+    file: "overwrite_protected.outfile"
+    stdout:
+    warnings:
+      - "Overwriting existing file 'overwrite_protected.in'"
+      - "Given paths in '--out' and '--in' are the same."
+      - "Moving 'overwrite_protected.in' to 'overwrite_protected.in.old'."
+      - "Could no copy 'overwrite_protected.in' to \
+        'overwrite_protected.in.old'. Aborting."
+    exceptions:
+      - "Permission denied: 'overwrite_protected.out'"
+

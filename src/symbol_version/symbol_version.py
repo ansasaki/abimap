@@ -63,7 +63,7 @@ def get_version_from_string(version_string):
     # Get logger
     logger = Single_Logger.getLogger(__name__)
 
-    m = re.findall(r'[a-zA-Z0-9]+', version_string)
+    m = re.findall(r'[0-9]+', version_string)
 
     if m:
         if len(m) < 2:
@@ -100,10 +100,22 @@ def get_info_from_release_string(release):
     :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
     """
 
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
     version = [None, None, None]
-    ver_suffix = ''
-    prefix = ''
-    tail = ''
+    ver_suffix = None
+    prefix = None
+    tail = None
+
+    if not release:
+        logger.warn("No release provided")
+        return None
+
+    # Remove eventual white spaces
+    m = re.match(r'\s+', release)
+    if m:
+        release = release[m.end():]
 
     # Search for the first ocurrence of a version like sequence
     m = re.search(r'_+[0-9]+', release)
@@ -112,20 +124,30 @@ def get_info_from_release_string(release):
         prefix = release[:m.start()]
         tail = release[m.start():]
     else:
-        # The release does not have version info, but can have trailing '_'
-        m = re.search(r'_+$', release)
+        # Check if the prefix contain at least a letter
+        m = re.findall(r'[a-zA-Z]+', release)
         if m:
-            # If so, remove the trailing '_'
-            prefix = release[:m.start()]
-        else:
-            # Otherwise the prefix is the whole release name
             prefix = release
+        else:
+            # If not, reject the prefix
+            msg = "".join(["Release provided is not well formed",
+                           " (a well formed release contain the library",
+                           " identifier and the version information).",
+                           " Suggested: something like LIBNAME_1_2_3"])
+            logger.warn(msg)
+            return None
 
     if tail:
         # Search and get the version information
         version = get_version_from_string(tail)
-        if version:
-            ver_suffix = "".join(["_" + str(i) for i in version])
+        ver_suffix = "".join(["_" + str(i) for i in version if i is not None])
+
+    if prefix:
+        # The prefix can have trailing '_'
+        m = re.search(r'_+$', prefix)
+        if m:
+            # If so, remove the trailing '_'
+            prefix = prefix[:m.start()]
 
     # Return the information got
     return [release, prefix, ver_suffix, version]
@@ -780,13 +802,17 @@ class Map(object):
                 return new_prefix.upper() + new_suffix
             elif new_ver:
                 self.logger.debug("[guess]: Prefix and version found, using them")
-                new_suffix = "".join(["_" + str(i) for i in new_ver])
+                new_suffix = "".join(["_" + str(i) for i in new_ver if i is not
+                                      None])
                 return new_prefix.upper() + new_suffix
 
         # If the new release name was given (and could not be parsed), use it
+        # but give a warning
         if new_release:
             self.logger.debug("[guess]: New release found, using it")
             return new_release.upper()
+
+        # TODO entrypoint for --guess (if guess)
 
         # If a previous release was given, extract info and check it
         if prev_release:
@@ -844,10 +870,11 @@ class Map(object):
             # If the new version was given, make the suffix from it
             if new_ver:
                 self.logger.debug("[guess]: Using new version to make suffix")
-                new_suffix = "".join(("_" + i for i in new_ver))
+                new_suffix = "".join(("_" + i for i in new_ver if i is not
+                                      None))
 
             elif not prev_ver:
-                self.logger.debug("[guess]: Guessing latest release to make suffix")
+                self.logger.debug("[guess]: find latest release")
                 # Guess the latest release
                 head = self.guess_latest_release()
                 if head[3]:
@@ -858,7 +885,8 @@ class Map(object):
                 if prev_ver:
                     self.logger.debug("[guess]: Bumping release")
                     new_ver = bump_version(prev_ver, abi_break)
-                    new_suffix = "".join(("_" + str(i) for i in new_ver))
+                    new_suffix = "".join(("_" + str(i) for i in new_ver if i is
+                                          not None))
 
         if not new_prefix or not new_suffix:
             # ERROR: could not guess the name
@@ -1105,9 +1133,6 @@ def update(args):
                                " not found."])
                 logger.warn(msg)
                 # warnings.warn(msg)
-    else:
-        # Execution should never reach this point
-        raise Exception("No strategy was provided (add/delete/symbols)")
 
     # Remove duplicates
     added = list(set(added))
@@ -1256,8 +1281,10 @@ def new(args):
     elif args.name and args.version:
         # Parse the given version string to get the version information
         version = get_version_from_string(args.version)
-        # Construct the release info list
-        release_info = [None, args.name, None, version]
+        # Create a release string
+        rel_string = "_".join([args.name] + [str(i) for i in version])
+        # Parse the release string
+        release_info = get_info_from_release_string(rel_string)
     else:
         msg = "".join(["It is necessary to provide either release name or",
                        " name and version"])
@@ -1294,7 +1321,7 @@ def new(args):
 
         name = new_map.guess_name(new_release=release_info[0],
                                   new_prefix=release_info[1],
-                                  new_ver=release_info[3])
+                                  new_suffix=release_info[2])
 
         debug_msg = "".join(["Generated name: \'", name, "\'"])
         logger.debug(debug_msg)
