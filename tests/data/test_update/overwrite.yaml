@@ -1,0 +1,19 @@
+# Testing overwriting the map
+-
+  input:
+    args:
+      - "update"
+      - "--symbols"
+      - "--out"
+      - "overwrite.map"
+      - "overwrite.map"
+    stdin: "overwrite.in"
+  output:
+    file: "overwrite.out"
+    stdout: "overwrite.stdout"
+    warnings:
+      - "Overwriting existing file 'overwrite.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'overwrite.map' to 'overwrite.map.old'."
+      - "ABI break detected: symbols were removed."
+    exceptions:

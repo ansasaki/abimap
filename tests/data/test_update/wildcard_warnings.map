@@ -1,0 +1,37 @@
+# Broken map with various missuses of the '*' wildcard
+
+NOTBASE_1_1_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} BASE_1_0_0;
+
+BASE_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+
+GLOBAL_WILDCARD_1_2_0
+{
+    global:
+        *;
+} BASE_1_0_0;
+
+SCOPES_1_3_0
+{
+    scope:
+        two_symbol;
+} BASE_1_0_0;
+
+OTHER_BASE_1_0_0
+{
+    global:
+        three_symbol;
+    local:
+        *;
+} ;

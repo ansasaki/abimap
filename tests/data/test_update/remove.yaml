@@ -1,0 +1,52 @@
+# Testing remove strategy
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "--out"
+      - "remove.map"
+      - "remove.map"
+    stdin: "symbol.in"
+  output:
+    file: "remove.out"
+    stdout: "remove.stdout"
+    warnings:
+      - "Overwriting existing file 'remove.map'"
+      - "Given paths in '--out' and 'file' are the same."
+      - "Moving 'remove.map' to 'remove.map.old'."
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "unexistent_symbol.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "unexistent_symbol.stdout"
+    warnings:
+      - "Requested to remove 'symbol', but not found."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "remove_with_wildcard.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "remove_with_wildcard.stdout"
+    warnings:
+      - "WITH_WILDCARD_1_0_0 contains the '*' wildcard in global scope. \
+        It is probably exporting symbols it should not."
+      - "The '*' wildcard was found in more than one place:"
+      - "WITH_WILDCARD_1_0_0: in 'global'"
+      - "WITH_WILDCARD_1_0_0: in 'local'"
+      - "ABI break detected: symbols were removed."
+      - "Wildcard '*' found in global. Removed to avoid exporting unexpected \
+        symbols."
+    exceptions:

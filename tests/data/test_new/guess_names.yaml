@@ -1,0 +1,63 @@
+# Testing add strategy
+-
+  input:
+    args:
+      - "new"
+      - "-n separated"
+      - "-v 1.1.0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "separated.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "-r release_1.1.0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "given_release.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "-r release_1.1.0"
+      - "-v 2.0.0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "release_and_version.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "-r release_1.1.0"
+      - "-name other"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "release_and_name.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "-r 1.0.0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+      - "Release provided is not well formed (a well formed release contain
+        the library identifier and the version information). \
+        Suggested: something like LIBNAME_1_2_3"
+    exceptions:
+      - "Could not retrieve release information."

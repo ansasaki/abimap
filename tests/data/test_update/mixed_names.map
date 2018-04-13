@@ -1,0 +1,21 @@
+# Map with releases with mixed names
+
+NAME_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+
+ROGUE_RELEASE_4_5_6
+{
+    global:
+        three_symbol;
+} ;
+
+OTHER_DIFFERENT_NAME_1_1_0
+{
+    global:
+        two_symbol;
+} NAME_1_0_0;

@@ -1,0 +1,10 @@
+# This map file was automatically updated
+
+LIBTC5_6_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+

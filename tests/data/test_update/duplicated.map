@@ -1,0 +1,18 @@
+# Broken map with duplicated releases
+# This is non-critical, only warning generated
+
+LIBTC5_1_0_0
+{
+    global:
+        other_symbol;
+    local:
+        *;
+} ;
+
+LIBTC5_1_0_0
+{
+    global:
+        some_symbol;
+    local:
+        *;
+} ;

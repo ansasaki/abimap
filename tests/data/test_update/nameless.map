@@ -1,0 +1,9 @@
+# Broken map with a release with invalid characters in the name
+
+&^$@
+{
+    global:
+        other_symbol;
+    local:
+        *;
+} ;

@@ -24,7 +24,7 @@ class Single_Logger(object):
     __instance = None
 
     @classmethod
-    def getLogger(cls, name):
+    def getLogger(cls, name, filename=None):
         """
         Get the unique instance of the logger
 
@@ -34,6 +34,10 @@ class Single_Logger(object):
         if Single_Logger.__instance is None:
             # Get logger
             logger = logging.getLogger(name)
+
+            if filename:
+                file_handler = logging.FileHandler(filename)
+                logger.addHandler(file_handler)
 
             # Setup a handler to print warnings and above to stderr
             console_handler = logging.StreamHandler()
@@ -59,7 +63,7 @@ def get_version_from_string(version_string):
     # Get logger
     logger = Single_Logger.getLogger(__name__)
 
-    m = re.findall(r'[a-zA-Z0-9]+', version_string)
+    m = re.findall(r'[0-9]+', version_string)
 
     if m:
         if len(m) < 2:
@@ -68,14 +72,14 @@ def get_version_from_string(version_string):
             logger.warn(msg)
             # warnings.warn(msg)
         if len(m) > 3:
-            msg = "".join(["Version has too many parts; provide 3 or less ",
-                           "( e.g. '0.1.2')"])
+            msg = "".join(["Version has too many parts; provide 3 or less",
+                           " ( e.g. '0.1.2')"])
             logger.warn(msg)
             # warnings.warn(msg)
     else:
         msg = "".join(["Could not get version parts. Provide digits separated",
-                       "by non-alphanumeric characters.",
-                       "(e.g. 0_1_2 or 0.1.2)"])
+                       " by non-alphanumeric characters.",
+                       " (e.g. 0_1_2 or 0.1.2)"])
         logger.error(msg)
         raise Exception(msg)
 
@@ -96,10 +100,22 @@ def get_info_from_release_string(release):
     :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
     """
 
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
     version = [None, None, None]
-    ver_suffix = ''
-    prefix = ''
-    tail = ''
+    ver_suffix = None
+    prefix = None
+    tail = None
+
+    if not release:
+        logger.warn("No release provided")
+        return None
+
+    # Remove eventual white spaces
+    m = re.match(r'\s+', release)
+    if m:
+        release = release[m.end():]
 
     # Search for the first ocurrence of a version like sequence
     m = re.search(r'_+[0-9]+', release)
@@ -108,22 +124,30 @@ def get_info_from_release_string(release):
         prefix = release[:m.start()]
         tail = release[m.start():]
     else:
-        # The release does not have version info, but can have trailing '_'
-        m = re.search(r'_+$', release)
+        # Check if the prefix contain at least a letter
+        m = re.findall(r'[a-zA-Z]+', release)
         if m:
-            # If so, remove the trailing '_'
-            prefix = release[:m.start()]
-        else:
-            # Otherwise the prefix is the whole release name
             prefix = release
+        else:
+            # If not, reject the prefix
+            msg = "".join(["Release provided is not well formed",
+                           " (a well formed release contain the library",
+                           " identifier and the version information).",
+                           " Suggested: something like LIBNAME_1_2_3"])
+            logger.warn(msg)
+            return None
 
     if tail:
         # Search and get the version information
         version = get_version_from_string(tail)
-        if version:
-            # for i in version:
-            #    ver_suffix += "_%d" %(i)
-            ver_suffix = "".join(["_" + str(i) for i in version])
+        ver_suffix = "".join(["_" + str(i) for i in version if i is not None])
+
+    if prefix:
+        # The prefix can have trailing '_'
+        m = re.search(r'_+$', prefix)
+        if m:
+            # If so, remove the trailing '_'
+            prefix = prefix[:m.start()]
 
     # Return the information got
     return [release, prefix, ver_suffix, version]
@@ -201,12 +225,12 @@ class ParserError(Exception):
 
     def __str__(self):
         content = "".join(["In file ", self.filename,
-                           ", line ", self.line + 1,
-                           ", column ", self.column,
+                           ", line ", str(self.line + 1),
+                           ", column ", str(self.column),
                            ": ", self.message,
                            "\n",
                            self.context,
-                           " " * (self.column - 1),
+                           (" " * (self.column - 1)),
                            "^"])
         return content
 
@@ -280,10 +304,7 @@ class Map(object):
         self.filename = ''
         self.lines = []
         if filename:
-            try:
-                self.read(filename)
-            except ParserError as e:
-                raise(e)
+            self.read(filename)
 
     def parse(self, lines):
         """
@@ -329,9 +350,10 @@ class Map(object):
                         self.logger.debug(">>Name")
                         m = re.match(r'\w+', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0],
-                                              last[1], "Invalid Release"
-                                              "identifier")
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0],
+                                              last[1],
+                                              "Invalid Release identifier")
                         else:
                             # New release found
                             name = m.group(0)
@@ -346,9 +368,10 @@ class Map(object):
                             state += 1
                             if has_duplicate:
                                 msg = "".join(["Duplicated Release identifier"
-                                               "\'", name, "\'"])
+                                               " \'", name, "\'"])
                                 # This is non-critical, only warning
-                                self.logger.warn(ParserError(lines[index],
+                                self.logger.warn(ParserError(self.filename,
+                                                             lines[index],
                                                              index,
                                                              column, msg))
                             continue
@@ -357,7 +380,8 @@ class Map(object):
                         self.logger.debug(">>Opening")
                         m = re.match(r'\{', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Missing \'{\'")
                         else:
                             column += m.end()
@@ -369,14 +393,15 @@ class Map(object):
                         self.logger.debug(">>Element")
                         m = re.match(r'\}', line[column:])
                         if m:
-                            self.logger.debug(">>Release closer, jump to Previous")
+                            self.logger.debug(">>Closer, jump to Previous")
                             column += m.end()
                             last = (index, column)
                             state = 4
                             continue
                         m = re.match(r'\w+|\*', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Invalid identifier")
                         else:
                             # In this case the position before the
@@ -394,9 +419,10 @@ class Map(object):
                             m = re.match(r':', line[column:])
                             if m is None:
                                 msg = "".join(["Missing \';\' or \':\' after",
-                                               "\'", identifier, "\'"])
+                                               " \'", identifier, "\'"])
                                 # In this case the current position is used
-                                raise ParserError(lines[index], index, column,
+                                raise ParserError(self.filename,
+                                                  lines[index], index, column,
                                                   msg)
                             else:
                                 # New visibility found
@@ -412,11 +438,12 @@ class Map(object):
                                 v = ('global', [])
                                 r.symbols.append(v)
                                 msg = "".join(["Missing visibility scope",
-                                               "before \'", identifier, "\'.",
+                                               " before \'", identifier, "\'.",
                                                " Symbols considered in",
-                                               "\'global:\'"])
+                                               " \'global:\'"])
                                 # Non-critical, only warning
-                                self.logger.warn(ParserError(lines[last[0]],
+                                self.logger.warn(ParserError(self.filename,
+                                                             lines[last[0]],
                                                              last[0], last[1],
                                                              msg))
                             else:
@@ -439,8 +466,9 @@ class Map(object):
                             continue
                         m = re.match(r'\w+', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1], "Invalid"
-                                              " identifier")
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
+                                              "Invalid identifier")
                         else:
                             # Found previous release identifier
                             column += m.end()
@@ -452,7 +480,8 @@ class Map(object):
                         self.logger.debug(">>Previous closer")
                         m = re.match(r'^;', line[column:])
                         if m is None:
-                            raise ParserError(lines[last[0]], last[0], last[1],
+                            raise ParserError(self.filename,
+                                              lines[last[0]], last[0], last[1],
                                               "Missing \';\'")
                         else:
                             # Found previous closer
@@ -462,10 +491,7 @@ class Map(object):
                             # Move back the state to find other releases
                             state = 0
                             continue
-                    else:
-                        # Should never reach this
-                        raise ParserError(lines[last[0]], last[0], last[1], "Unknown"
-                                          "parser state")
+
                 except ParserError as e:
                     # Any exception raised is considered an error
                     self.logger.error(e)
@@ -486,24 +512,10 @@ class Map(object):
         with open(filename, "r") as f:
             self.filename = filename
             self.lines = f.readlines()
-            try:
-                self.parse(self.lines)
-                self.init = True
-            except ParserError as e:
-                raise e
-
-    def all_symbols(self):
-        """
-        Returns all symbols from all releases contained in the Map object
-
-        :returns: A set containing all the symbols in all releases
-        """
-
-        symbols = []
-        for release in self.releases:
-            for scope, scope_symbols in release.symbols:
-                symbols.extend(scope_symbols)
-        return set(symbols)
+            self.parse(self.lines)
+            # Check the map read
+            self.check()
+            self.init = True
 
     def all_global_symbols(self):
         """
@@ -574,7 +586,6 @@ class Map(object):
                 while dep:
                     # If the found dependency was already in the list
                     if dep in current:
-                        print(self)
                         msg = "".join(["Circular dependency detected!\n",
                                        "    "] +
                                       [i + "->" for i in current] +
@@ -791,13 +802,17 @@ class Map(object):
                 return new_prefix.upper() + new_suffix
             elif new_ver:
                 self.logger.debug("[guess]: Prefix and version found, using them")
-                new_suffix = "".join(["_" + str(i) for i in new_ver])
+                new_suffix = "".join(["_" + str(i) for i in new_ver if i is not
+                                      None])
                 return new_prefix.upper() + new_suffix
 
         # If the new release name was given (and could not be parsed), use it
+        # but give a warning
         if new_release:
             self.logger.debug("[guess]: New release found, using it")
             return new_release.upper()
+
+        # TODO entrypoint for --guess (if guess)
 
         # If a previous release was given, extract info and check it
         if prev_release:
@@ -855,10 +870,11 @@ class Map(object):
             # If the new version was given, make the suffix from it
             if new_ver:
                 self.logger.debug("[guess]: Using new version to make suffix")
-                new_suffix = "".join(("_" + i for i in new_ver))
+                new_suffix = "".join(("_" + i for i in new_ver if i is not
+                                      None))
 
             elif not prev_ver:
-                self.logger.debug("[guess]: Guessing latest release to make suffix")
+                self.logger.debug("[guess]: find latest release")
                 # Guess the latest release
                 head = self.guess_latest_release()
                 if head[3]:
@@ -869,7 +885,8 @@ class Map(object):
                 if prev_ver:
                     self.logger.debug("[guess]: Bumping release")
                     new_ver = bump_version(prev_ver, abi_break)
-                    new_suffix = "".join(("_" + str(i) for i in new_ver))
+                    new_suffix = "".join(("_" + str(i) for i in new_ver if i is
+                                          not None))
 
         if not new_prefix or not new_suffix:
             # ERROR: could not guess the name
@@ -910,7 +927,7 @@ class Map(object):
         self.releases = new_list
 
 
-class Release:
+class Release(object):
     """
     A internal representation of a release version and its symbols
 
@@ -1031,7 +1048,7 @@ def update(args):
     """
 
     # Get logger
-    logger = Single_Logger.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__, filename=args.logfile)
 
     logger.info("Command: update")
     logger.debug("Arguments provided: ")
@@ -1057,7 +1074,7 @@ def update(args):
         check_files('--out', args.out, 'file', args.file, args.dry)
 
     # Read the current map file
-    cur_map = Map(filename=args.file)
+    cur_map = Map(filename=args.file, logger=logger)
 
     # Get all global symbols
     all_symbols = list(cur_map.all_global_symbols())
@@ -1116,9 +1133,6 @@ def update(args):
                                " not found."])
                 logger.warn(msg)
                 # warnings.warn(msg)
-    else:
-        # Execution should never reach this point
-        raise Exception("No strategy was provided (add/delete/symbols)")
 
     # Remove duplicates
     added = list(set(added))
@@ -1239,7 +1253,7 @@ def new(args):
     """
 
     # Get logger
-    logger = Single_Logger.getLogger(__name__)
+    logger = Single_Logger.getLogger(__name__, filename=args.logfile)
 
     logger.info("Command: new")
     logger.debug("Arguments provided: ")
@@ -1267,8 +1281,10 @@ def new(args):
     elif args.name and args.version:
         # Parse the given version string to get the version information
         version = get_version_from_string(args.version)
-        # Construct the release info list
-        release_info = [None, args.name, None, version]
+        # Create a release string
+        rel_string = "_".join([args.name] + [str(i) for i in version])
+        # Parse the release string
+        release_info = get_info_from_release_string(rel_string)
     else:
         msg = "".join(["It is necessary to provide either release name or",
                        " name and version"])
@@ -1305,7 +1321,7 @@ def new(args):
 
         name = new_map.guess_name(new_release=release_info[0],
                                   new_prefix=release_info[1],
-                                  new_ver=release_info[3])
+                                  new_suffix=release_info[2])
 
         debug_msg = "".join(["Generated name: \'", name, "\'"])
         logger.debug(debug_msg)
@@ -1363,11 +1379,13 @@ def get_arg_parser():
     file_args.add_argument('-o', '--out',
                            help='Output file (defaults to stdout)')
     file_args.add_argument('-i', '--in',
-                           help='Read from a file instead of stdio',
+                           help='Read from this file instead of stdio',
                            dest='input')
     file_args.add_argument('-d', '--dry',
                            help='Do everything, but do not modify the files',
                            action='store_true')
+    file_args.add_argument('-l', '--logfile',
+                           help='Log to this file')
 
     # Common verbosity arguments
     verb_args = argparse.ArgumentParser(add_help=False)
@@ -1441,7 +1459,7 @@ def get_arg_parser():
 # User interface
 if __name__ == "__main__":
 
-    class C:
+    class C(object):
         """
         Empty class used as a namespace
         """

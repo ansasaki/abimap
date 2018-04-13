@@ -6,18 +6,24 @@
     - 1
     - 0
     - 0
+  warnings:
+  exceptions:
 -
   input: '___1__0___0___'
   output:
     - 1
     - 0
     - 0
+  warnings:
+  exceptions:
 -
   input: '1.0.0'
   output:
     - 1
     - 0
     - 0
+  warnings:
+  exceptions:
 -
   input: '1_0_0_1_0_0'
   output:
@@ -27,9 +33,28 @@
     - 1
     - 0
     - 0
+  warnings:
+    - "Version has too many parts; provide 3 or less ( e.g. '0.1.2')"
+  exceptions:
 -
   input: '12_34_56'
   output:
     - 12
     - 34
     - 56
+  warnings:
+  exceptions:
+-
+  input: '12'
+  output:
+    - 12
+  warnings:
+    - "Provide at least a major and a minor version digit (eg. '1.2.3' or '1_2')"
+  exceptions:
+-
+  input: '({!@'
+  output:
+  warnings:
+  exceptions:
+    - "Could not get version parts. Provide digits separated by /
+      non-alphanumeric characters. (e.g. 0_1_2 or 0.1.2)"

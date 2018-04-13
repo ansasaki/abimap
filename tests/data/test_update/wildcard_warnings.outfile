@@ -1,0 +1,10 @@
+# This map file was automatically updated
+
+SCOPES_2_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+
