@@ -37,6 +37,11 @@ class Single_Logger(object):
 
             if filename:
                 file_handler = logging.FileHandler(filename)
+                file_format = "".join(["[%(levelname)s] (%(asctime)s) in",
+                                       " %(filename)s, line %(lineno)d:",
+                                       " %(message)s"])
+                file_formatter = logging.Formatter(file_format)
+                file_handler.setFormatter(file_formatter)
                 logger.addHandler(file_handler)
 
             # Setup a handler to print warnings and above to stderr
