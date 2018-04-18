@@ -31,13 +31,10 @@ class Single_Logger(object):
         :param name: The name of the module (usually just __name__)
         :returns: An instance of logging.Logger
         """
+
         if Single_Logger.__instance is None:
             # Get logger
             logger = logging.getLogger(name)
-
-            if filename:
-                file_handler = logging.FileHandler(filename)
-                logger.addHandler(file_handler)
 
             # Setup a handler to print warnings and above to stderr
             console_handler = logging.StreamHandler()
@@ -49,6 +46,17 @@ class Single_Logger(object):
             logger.addHandler(console_handler)
 
             Single_Logger.__instance = logger
+
+        if filename:
+            # If a new logfile is added, a handler is added
+            file_handler = logging.FileHandler(filename)
+            file_format = "".join(["[%(levelname)s] (%(asctime)s) in",
+                                   " %(filename)s, line %(lineno)d:",
+                                   " %(message)s"])
+            file_formatter = logging.Formatter(file_format)
+            file_handler.setFormatter(file_formatter)
+            Single_Logger.__instance.addHandler(file_handler)
+
         return Single_Logger.__instance
 
 

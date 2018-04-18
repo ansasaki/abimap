@@ -146,5 +146,24 @@ def run_tc(tc, datadir, capsys, caplog):
             for expected in tc_out["warnings"]:
                 assert expected in caplog.text
 
+        # If a log file was supposed to exist, check the content
+        if args.logfile:
+            if os.path.isfile(args.logfile):
+                with open(args.logfile, "r") as log:
+                    logged = log.read()
+                    if tc_out["warnings"]:
+                        for expected in tc_out["warnings"]:
+                            assert expected in logged
+                    if tc_out["exceptions"]:
+                        for expected in tc_out["exceptions"]:
+                            assert expected in logged
+            else:
+                if tc_out["warnings"] or tc_out["exceptions"]:
+                    with capsys.disabled():
+                        print(tc)
+                        print("Expected to have a logfile:\n" + args.logfile)
+                    # Fail
+                    assert 0
+
         # Clear the captured log and output so far
         caplog.clear()
