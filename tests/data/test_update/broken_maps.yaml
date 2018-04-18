@@ -19,6 +19,7 @@
     args:
       - "update"
       - "--symbols"
+      - "--allow-abi-break"
       - "--out"
       - "duplicated.out"
       - "duplicated.map"
@@ -80,6 +81,7 @@
     args:
       - "update"
       - "--symbols"
+      - "--allow-abi-break"
       - "--out"
       - "missing_visibility.out"
       - "missing_visibility.map"
@@ -173,6 +175,7 @@
     args:
       - "update"
       - "--symbols"
+      - "--allow-abi-break"
       - "--out"
       - "wildcard_warnings.out"
       - "wildcard_warnings.map"
@@ -204,6 +207,7 @@
     args:
       - "update"
       - "--symbols"
+      - "--allow-abi-break"
       - "--out"
       - "baseless.out"
       - "baseless.map"
