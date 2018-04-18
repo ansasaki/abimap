@@ -4,6 +4,7 @@
     args:
       - "update"
       - "--remove"
+      - "--allow-abi-break"
       - "--out"
       - "remove.map"
       - "remove.map"
@@ -22,6 +23,7 @@
     args:
       - "update"
       - "--remove"
+      - "--allow-abi-break"
       - "unexistent_symbol.map"
     stdin: "symbol.in"
   output:
@@ -35,6 +37,7 @@
     args:
       - "update"
       - "--remove"
+      - "--allow-abi-break"
       - "remove_with_wildcard.map"
     stdin: "symbol.in"
   output:
@@ -50,3 +53,16 @@
       - "Wildcard '*' found in global. Removed to avoid exporting unexpected \
         symbols."
     exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "base.map"
+    stdin: "remove.in"
+  output:
+    file:
+    stdout: "dont_break_api.stdout"
+    warnings:
+    exceptions:
+      - "ABI break detected: symbols would be removed"

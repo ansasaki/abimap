@@ -4,6 +4,7 @@
     args:
       - "update"
       - "--symbols"
+      - "--allow-abi-break"
       - "--out"
       - "overwrite.map"
       - "overwrite.map"

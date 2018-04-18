@@ -1177,7 +1177,7 @@ def update(args):
             cur_map.releases.append(r)
 
     if removed:
-        if args.care:
+        if not args.allow_abi_break:
             msg = "ABI break detected: symbols would be removed"
             logger.error(msg)
             raise Exception(msg)
@@ -1420,8 +1420,8 @@ def get_arg_parser():
                                       " \'-i\', the symbols are read"
                                       " from the given file. Otherwise the"
                                       " symbols are read from stdin.")
-    parser_up.add_argument("-c", "--care",
-                           help="Do not continue if the ABI would be broken",
+    parser_up.add_argument("--allow-abi-break",
+                           help="Allow removing symbols, and to break ABI",
                            action='store_true')
     group = parser_up.add_mutually_exclusive_group(required=True)
     group.add_argument("-a", "--add", help="Adds the symbols to the map file.",
