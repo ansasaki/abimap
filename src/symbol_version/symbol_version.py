@@ -191,17 +191,13 @@ def bump_version(version, abi_break):
     if abi_break:
         if version[0] is not None:
             new_version.append(version[0] + 1)
-        if len(version) > 1:
-            for i in version[1:]:
-                new_version.append(0)
+        new_version.extend([0] * len(version[1:]))
     else:
         if version[0] is not None:
             new_version.append(version[0])
         if version[1] is not None:
             new_version.append(version[1] + 1)
-        if len(version) > 2:
-            for i in version[2:]:
-                new_version.append(0)
+        new_version.extend([0] * len(version[2:]))
     return new_version
 
 
