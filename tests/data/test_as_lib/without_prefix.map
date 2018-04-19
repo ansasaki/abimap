@@ -1,0 +1,10 @@
+# Map without prefix
+
+1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+
