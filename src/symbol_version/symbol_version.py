@@ -20,6 +20,18 @@ VERBOSITY_MAP = {"debug": logging.DEBUG,
 class Single_Logger(object):
     """
     A singleton logger for the module
+
+    This class is a singleton logger factory. It takes advantage of the
+    uniqueness of class attributes to hold a unique instance of the logger for
+    the module.
+    It logs to the default log output, and prints WARNING and ERROR messages to
+    stderr.
+    It allows the caller to provide a file to receive the log (the messages will
+    be logged by all handlers: to stderr if WARNING or ERROR, to default log,
+    and to the provided file)
+
+    Attributes:
+        __instance: Holds the unique instance given by the factory when called.
     """
     __instance = None
 
