@@ -80,7 +80,7 @@ def test_guess_name_without_version(datadir):
     with cd(datadir):
         with pytest.raises(Exception) as e:
             m.read("without_version.map")
-            m.guess_name()
+            m.guess_name(None, guess=True)
 
             assert expected in str(e.value)
 
@@ -96,7 +96,7 @@ def test_guess_name_without_prefix(datadir):
     with cd(datadir):
         with pytest.raises(Exception) as e:
             m.read("without_prefix.map")
-            m.guess_name()
+            m.guess_name(None, guess=True)
 
             assert expected in str(e.value)
 
@@ -107,4 +107,4 @@ def test_guess_name_without_similar_prefix(datadir):
 
     with cd(datadir):
         m.read("without_similar_prefix.map")
-        m.guess_name()
+        m.guess_name(None, guess=True)

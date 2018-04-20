@@ -636,9 +636,7 @@ class Map(object):
 
         return latest
 
-    def guess_name(self, abi_break=False, new_release=None, new_prefix=None,
-                   new_suffix=None, new_ver=None, prev_release=None,
-                   prev_prefix=None, prev_ver=None):
+    def guess_name(self, new_release, abi_break=False, guess=False):
         """
         Use the given information to guess the name for the new release
 
@@ -646,74 +644,35 @@ class Map(object):
             - The new prefix: Usually the library name (e.g. LIBX)
             - The new suffix: The version information (e.g. _1_2_3)
 
-        If the new prefix is not provided:
-            1. Try previous prefix, if given
-            2. Try previous release name, if given
-                - This will also set the version, if not set yet
-            3. Try to find a common prefix between release names
-            4. Try to find latest release
+        If the new release is not provided, try a guess strategy:
+            If the new prefix is not provided:
+                1. Try to find a common prefix between release names
+                2. Try to find latest release
 
-        If the new suffix is not provided:
-            1. Try previous version, if given
-            2. Try previous release name, if given
-                - This will also set the prefix, if not set yet
-            4. Try to find latest release version
+            If the new suffix is not provided:
+                1. Try to find latest release version and bump
 
-        :param abi_break:   Boolean, indicates if the ABI was broken
         :param new_release: String, the name of the new release. If this is
-                            provided, the guessing is avoided and this will
-                            be used as the release name
-        :param new_prefix:  The prefix to be used (library name)
-        :param new_suffix:  The suffix to be used (version, like \'_1_0_0\')
-        :param new_ver:     A list of int, the components of the version (e.g.
-                            [CURRENT, AGE, RELEASE]).
-        :param prev_release:    The name of the previous release.
-        :param prev_prefix:     The previous release prefix (library name)
-        :param prev_ver:        A list of int, the components of the previous
-                                version (e.g. [CURRENT, AGE, RELEASE])
+        :param abi_break:   Boolean, indicates if the ABI was broken
+        :param guess:       Boolean, indicates if should try to guess
         :returns: The guessed release name (new prefix + new suffix)
         """
+
+        new_prefix = None
+        new_suffix = None
+
+        if new_release:
+            new_prefix = new_release[1]
+            new_suffix = new_release[2]
 
         # If the two required parts were given, just combine and return
         if new_prefix:
             if new_suffix:
                 self.logger.debug("[guess]: Two parts found, using them")
                 return new_prefix.upper() + new_suffix
-            elif new_ver:
-                self.logger.debug("[guess]: Prefix and version found, using them")
-                new_suffix = "".join(["_" + str(i) for i in new_ver if i is not
-                                      None])
-                return new_prefix.upper() + new_suffix
 
-        # If the new release name was given (and could not be parsed), use it
-        # but give a warning
-        if new_release:
-            self.logger.debug("[guess]: New release found, using it")
-            return new_release.upper()
-
-        # TODO entrypoint for --guess (if guess)
-
-        # If a previous release was given, extract info and check it
-        if prev_release:
-            self.logger.debug("[guess]: Previous release found")
-            info = get_info_from_release_string(prev_release)
-            # If the prefix was successfully extracted
-            if info[1]:
-                # Use it as the new prefix, if none was given
-                if not new_prefix:
-                    new_prefix = info[1]
-
-            # If the version was successfully extracted
-            if info[3]:
-                if not prev_ver:
-                    prev_ver = info[3]
-
-        if not new_prefix:
-            if prev_prefix:
-                self.logger.debug("[guess]: Using previous prefix as the new")
-                # Reuse the prefix from the previous release, if available
-                new_prefix = prev_prefix
-            else:
+        if guess:
+            if not new_prefix:
                 self.logger.debug("[guess]: Trying to find common prefix")
                 # Find a common prefix between all releases
                 names = [release.name for release in self.releases]
@@ -741,18 +700,10 @@ class Map(object):
                         head = self.guess_latest_release()
                         new_prefix = head[1]
 
-        # At this point, new_prefix can still be None
+            # At this point, new_prefix can still be None
 
-        if not new_suffix:
-            self.logger.debug("[guess]: Guessing new suffix")
-
-            # If the new version was given, make the suffix from it
-            if new_ver:
-                self.logger.debug("[guess]: Using new version to make suffix")
-                new_suffix = "".join(("_" + i for i in new_ver if i is not
-                                      None))
-
-            elif not prev_ver:
+            if not new_suffix:
+                self.logger.debug("[guess]: Guessing new suffix")
                 self.logger.debug("[guess]: find latest release")
                 # Guess the latest release
                 head = self.guess_latest_release()
@@ -760,8 +711,7 @@ class Map(object):
                     self.logger.debug("[guess]: Got suffix from latest")
                     prev_ver = head[3]
 
-            if not new_suffix:
-                if prev_ver:
+                    # Bump the previous release version
                     self.logger.debug("[guess]: Bumping release")
                     new_ver = bump_version(prev_ver, abi_break)
                     new_suffix = "".join(("_" + str(i) for i in new_ver if i is
@@ -1073,6 +1023,41 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
                     raise e
 
 
+def get_info_from_args(args):
+    """
+    Get the release information from the provided arguments
+
+    It is possible to set the new release name to be used through the command
+    line arguments.
+
+    :param args: Arguments given in command line parsed by argparse
+    """
+
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
+    release_info = None
+    if args.release:
+        # Parse the release name string to get info
+        release_info = get_info_from_release_string(args.release)
+        # TODO insert name or version when provided
+    elif args.name and args.version:
+        # Parse the given version string to get the version information
+        version = get_version_from_string(args.version)
+        # Create a release string
+        rel_string = "_".join([args.name] + [str(i) for i in version])
+        # Parse the release string
+        release_info = get_info_from_release_string(rel_string)
+    else:
+        if not args.guess or args.func == new:
+            msg = "".join(["It is necessary to provide either release name or",
+                           " name and version"])
+            logger.error(msg)
+            raise Exception(msg)
+
+    return release_info
+
+
 ###############################################################################
 # INTERFACE
 ###############################################################################
@@ -1116,6 +1101,11 @@ def update(args):
     # If output is given, check with the file to be updated
     if args.out and args.file:
         check_files('--out', args.out, 'file', args.file, args.dry)
+
+    # Get the release information provided in the arguments
+    release_info = get_info_from_args(args)
+    logger.debug("Release info in args:")
+    logger.debug(str(release_info))
 
     # Read the current map file
     cur_map = Map(filename=args.file, logger=logger)
@@ -1207,7 +1197,7 @@ def update(args):
     if added:
         r = Release()
         # Guess the name for the new release
-        r.name = cur_map.guess_name()
+        r.name = cur_map.guess_name(release_info, guess=args.guess)
         r.name.upper()
 
         # Add the symbols added to global scope
@@ -1234,7 +1224,8 @@ def update(args):
         r = Release()
 
         # Guess the name of the new release
-        r.name = cur_map.guess_name(abi_break=True)
+        r.name = cur_map.guess_name(release_info, abi_break=True,
+                                    guess=args.guess)
         r.name.upper()
 
         # Add the symbols added to global scope
@@ -1318,29 +1309,9 @@ def new(args):
     if args.out and args.input:
         check_files('--out', args.out, '--in', args.input, args.dry)
 
-    release_info = None
-    if args.release:
-        # Parse the release name string to get info
-        release_info = get_info_from_release_string(args.release)
-    elif args.name and args.version:
-        # Parse the given version string to get the version information
-        version = get_version_from_string(args.version)
-        # Create a release string
-        rel_string = "_".join([args.name] + [str(i) for i in version])
-        # Parse the release string
-        release_info = get_info_from_release_string(rel_string)
-    else:
-        msg = "".join(["It is necessary to provide either release name or",
-                       " name and version"])
-        logger.error(msg)
-        raise Exception(msg)
-
-    if not release_info:
-        msg = "Could not retrieve release information."
-        logger.error(msg)
-        raise Exception(msg)
-
-    logger.debug("Release information:")
+    # Get the release information provided in the arguments
+    release_info = get_info_from_args(args)
+    logger.debug("Release info in args:")
     logger.debug(str(release_info))
 
     # Generate the list of the new symbols
@@ -1363,9 +1334,7 @@ def new(args):
         new_map = Map()
         r = Release()
 
-        name = new_map.guess_name(new_release=release_info[0],
-                                  new_prefix=release_info[1],
-                                  new_suffix=release_info[2])
+        name = new_map.guess_name(release_info)
 
         debug_msg = "".join(["Generated name: \'", name, "\'"])
         logger.debug(debug_msg)
@@ -1444,6 +1413,19 @@ def get_arg_parser():
     group_verb.add_argument('--debug', help='Makes the program print debug info',
                             dest='verbosity', action='store_const', const='debug')
 
+    # Common release name arguments
+    name_args = argparse.ArgumentParser(add_help=False)
+    name_args.add_argument("-n", "--name",
+                           help="The name of the library (e.g. libx)")
+    name_args.add_argument("-v", "--version",
+                           help="The release version (e.g. 1_0_0 or 1.0.0)")
+    name_args.add_argument("-r", "--release",
+                           help="The full name of the release to be used"
+                           " (e.g. LIBX_1_0_0)")
+    name_args.add_argument("--no_guess",
+                           help="Disable next release name guessing",
+                           action="store_false", dest="guess")
+
     # Main arguments parser
     parser = argparse.ArgumentParser(description="Helper tools for linker"
                                      " version script maintenance",
@@ -1458,7 +1440,8 @@ def get_arg_parser():
 
     # Update subcommand parser
     parser_up = subparsers.add_parser("update", help="Update the map file",
-                                      parents=[file_args, verb_args],
+                                      parents=[file_args, verb_args,
+                                               name_args],
                                       epilog="A list of symbols is expected as"
                                       " the input.\nIf a file is provided with"
                                       " \'-i\', the symbols are read"
@@ -1470,7 +1453,7 @@ def get_arg_parser():
     group = parser_up.add_mutually_exclusive_group(required=True)
     group.add_argument("-a", "--add", help="Adds the symbols to the map file.",
                        action='store_true')
-    group.add_argument("-r", "--remove", help="Remove the symbols from the map"
+    group.add_argument("--remove", help="Remove the symbols from the map"
                        " file. This breaks the ABI.", action="store_true")
     group.add_argument("-s", "--symbols",
                        help="Compare the given symbol list with the current"
@@ -1482,19 +1465,13 @@ def get_arg_parser():
     # New subcommand parser
     parser_new = subparsers.add_parser("new",
                                        help="Create a new map file",
-                                       parents=[file_args, verb_args],
+                                       parents=[file_args, verb_args,
+                                                name_args],
                                        epilog="A list of symbols is expected"
                                        "as the input.\nIf a file is provided"
                                        " with \'-i\', the symbols are read"
                                        " from the given file. Otherwise the"
                                        " symbols are read from stdin.")
-    parser_new.add_argument("-n", "--name",
-                            help="The name of the library (e.g. libx)")
-    parser_new.add_argument("-v", "--version",
-                            help="The release version (e.g. 1_0_0)")
-    parser_new.add_argument("-r", "--release",
-                            help="The full name of the release to be used"
-                            " (e.g. LIBX_1_0_0)")
     parser_new.set_defaults(func=new)
 
     return parser
