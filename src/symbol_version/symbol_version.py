@@ -1040,7 +1040,20 @@ def get_info_from_args(args):
     if args.release:
         # Parse the release name string to get info
         release_info = get_info_from_release_string(args.release)
-        # TODO insert name or version when provided
+
+        if args.name:
+            m = re.search(r'\w+', args.name)
+            if m:
+                release_info[1] = m.group()
+        if args.version:
+            version = get_version_from_string(args.version)
+            new_suffix = "".join(("_" + str(i) for i in version))
+            release_info[2] = new_suffix
+            release_info[3] = version
+
+        if release_info:
+            if release_info[1] and release_info[2]:
+                release_info[0] = release_info[1] + release_info[2]
     elif args.name and args.version:
         # Parse the given version string to get the version information
         version = get_version_from_string(args.version)
@@ -1104,8 +1117,6 @@ def update(args):
 
     # Get the release information provided in the arguments
     release_info = get_info_from_args(args)
-    logger.debug("Release info in args:")
-    logger.debug(str(release_info))
 
     # Read the current map file
     cur_map = Map(filename=args.file, logger=logger)
@@ -1311,6 +1322,15 @@ def new(args):
 
     # Get the release information provided in the arguments
     release_info = get_info_from_args(args)
+
+    # In the new command, there is no way to guess the name, since there are
+    # not previous information. So the exception have to be raised early to
+    # avoid collecting the new symbols and then find out we do not have a name
+    if not release_info:
+        msg = "Please provide the release name."
+        logger.error(msg)
+        raise Exception(msg)
+
     logger.debug("Release info in args:")
     logger.debug(str(release_info))
 

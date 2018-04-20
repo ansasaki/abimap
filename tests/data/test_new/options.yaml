@@ -81,9 +81,7 @@
         the library identifier and the version information). \
         Suggested: something like LIBNAME_1_2_3"
     exceptions:
-      - "Insufficient information to guess the new release name. Releases \
-        found do not have version information or a valid library name. \
-        Please provide the complete name of the release."
+      - "Please provide the release name."
 -
   input:
     args:
