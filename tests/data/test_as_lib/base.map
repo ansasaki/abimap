@@ -1,0 +1,9 @@
+# Simple base map
+
+BASE_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;

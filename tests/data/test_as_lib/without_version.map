@@ -1,0 +1,9 @@
+# Map without version information
+
+BASE
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;

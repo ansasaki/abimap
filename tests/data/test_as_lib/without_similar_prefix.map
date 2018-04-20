@@ -1,0 +1,18 @@
+# Map without similar prefix
+
+BASE_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+
+OTHER_BASE_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
+

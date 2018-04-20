@@ -17,6 +17,10 @@ VERBOSITY_MAP = {"debug": logging.DEBUG,
                  "quiet": logging.CRITICAL}
 
 
+###############################################################################
+# Classes
+###############################################################################
+
 class Single_Logger(object):
     """
     A singleton logger for the module
@@ -72,159 +76,6 @@ class Single_Logger(object):
         return Single_Logger.__instance
 
 
-def get_version_from_string(version_string):
-    """
-    Get the version numbers from a string
-
-    :param version_string: A string composed by numbers separated by non
-    alphanumeric characters (e.g. 0_1_2 or 0.1.2)
-    :returns: A list of the numbers in the string
-    """
-    # Get logger
-    logger = Single_Logger.getLogger(__name__)
-
-    m = re.findall(r'[0-9]+', version_string)
-
-    if m:
-        if len(m) < 2:
-            msg = "".join(["Provide at least a major and a minor",
-                           " version digit (eg. '1.2.3' or '1_2')"])
-            logger.warn(msg)
-            # warnings.warn(msg)
-        if len(m) > 3:
-            msg = "".join(["Version has too many parts; provide 3 or less",
-                           " ( e.g. '0.1.2')"])
-            logger.warn(msg)
-            # warnings.warn(msg)
-    else:
-        msg = "".join(["Could not get version parts. Provide digits separated",
-                       " by non-alphanumeric characters.",
-                       " (e.g. 0_1_2 or 0.1.2)"])
-        logger.error(msg)
-        raise Exception(msg)
-
-    version = [int(i) for i in m]
-
-    return version
-
-
-def get_info_from_release_string(release):
-    """
-    Get the information from a release name
-
-    The given string is split in a prefix (usually the name of the lib) and a
-    suffix (the version part, e.g. '_1_4_7'). A list with the version info
-    converted to ints is also contained in the returned list.
-
-    :param release: A string in format 'LIBX_1_0_0' or similar
-    :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
-    """
-
-    # Get logger
-    logger = Single_Logger.getLogger(__name__)
-
-    version = [None, None, None]
-    ver_suffix = None
-    prefix = None
-    tail = None
-
-    if not release:
-        logger.warn("No release provided")
-        return None
-
-    # Remove eventual white spaces
-    m = re.match(r'\s+', release)
-    if m:
-        release = release[m.end():]
-
-    # Search for the first ocurrence of a version like sequence
-    m = re.search(r'_+[0-9]+', release)
-    if m:
-        # If found, remove the version like sequence to get the prefix
-        prefix = release[:m.start()]
-        tail = release[m.start():]
-    else:
-        # Check if the prefix contain at least a letter
-        m = re.findall(r'[a-zA-Z]+', release)
-        if m:
-            prefix = release
-        else:
-            # If not, reject the prefix
-            msg = "".join(["Release provided is not well formed",
-                           " (a well formed release contain the library",
-                           " identifier and the version information).",
-                           " Suggested: something like LIBNAME_1_2_3"])
-            logger.warn(msg)
-            return None
-
-    if tail:
-        # Search and get the version information
-        version = get_version_from_string(tail)
-        ver_suffix = "".join(["_" + str(i) for i in version if i is not None])
-
-    if prefix:
-        # The prefix can have trailing '_'
-        m = re.search(r'_+$', prefix)
-        if m:
-            # If so, remove the trailing '_'
-            prefix = prefix[:m.start()]
-
-    # Return the information got
-    return [release, prefix, ver_suffix, version]
-
-
-# TODO: Make bump strategy customizable
-def bump_version(version, abi_break):
-    """
-    Bump a version depending if the ABI was broken or not
-
-    If the ABI was broken, CUR is bumped; AGE and REV are set to zero.
-    Otherwise, CUR is kept, AGE is bumped, and REV is set to zero.
-    This also works with versions without the REV component (e.g. [1, 4, None])
-
-    :param version:     A list in format [CUR, AGE, REV]
-    :param abi_break:   A boolean indication if the ABI was broken
-    :returns:           A list in format [CUR, AGE, REV]
-    """
-
-    new_version = []
-    if abi_break:
-        if version[0] is not None:
-            new_version.append(version[0] + 1)
-        new_version.extend([0] * len(version[1:]))
-    else:
-        if version[0] is not None:
-            new_version.append(version[0])
-        if version[1] is not None:
-            new_version.append(version[1] + 1)
-        new_version.extend([0] * len(version[2:]))
-    return new_version
-
-
-def clean_symbols(symbols):
-    """
-    Receives a list of lines read from the input and returns a list of words
-
-    :param symbols: A list of lines containing symbols
-    :returns:       A list of the obtained symbols
-    """
-
-    # Split the lines into potential symbols and remove invalid characters
-    clean = []
-    if symbols:
-        for line in symbols:
-            parts = re.split(r'\W+', line)
-            if parts:
-                for symbol in parts:
-                    m = re.match(r'\w+', symbol)
-                    if m:
-                        clean.append(m.group())
-
-    return clean
-
-
-# Error classes
-
 class ParserError(Exception):
     """
     Exception type raised by the map parser
@@ -266,8 +117,6 @@ class ParserError(Exception):
         self.column = column
         self.message = message
 
-
-# Map class
 
 class Map(object):
     """
@@ -531,7 +380,6 @@ class Map(object):
             self.parse(self.lines)
             # Check the map read
             self.check()
-            self.init = True
 
     def all_global_symbols(self):
         """
@@ -540,6 +388,11 @@ class Map(object):
 
         :returns: A set containing all global symbols in all releases
         """
+
+        if not self.init:
+            msg = "Map not checked, run check()"
+            self.logger.error(msg)
+            raise Exception(msg)
 
         symbols = []
         for release in self.releases:
@@ -629,6 +482,11 @@ class Map(object):
 
         Reports errors found in the structure of the map in form of warnings.
         """
+
+        if not self.releases:
+            msg = "Empty map"
+            self.logger.error(msg)
+            raise Exception(msg)
 
         have_wildcard = []
         seems_base = []
@@ -746,6 +604,9 @@ class Map(object):
             cur = "".join(content)
             self.logger.info(cur)
 
+        # After calling a check, the map is considered initialized
+        self.init = True
+
     def guess_latest_release(self):
         """
         Try to guess the latest release
@@ -757,7 +618,7 @@ class Map(object):
         """
 
         if not self.init:
-            msg = "Map not initialized, try to read a file first"
+            msg = "Map not checked, run check()"
             self.logger.error(msg)
             raise Exception(msg)
 
@@ -768,8 +629,10 @@ class Map(object):
         latest = [None, None, '_0_0_0', None]
         for release in heads:
             info = get_info_from_release_string(release)
-            if info[2] > latest[2]:
-                latest = info
+            # This check is necessary because the suffix can be missing
+            if info[2]:
+                if info[2] > latest[2]:
+                    latest = info
 
         return latest
 
@@ -908,7 +771,8 @@ class Map(object):
             # ERROR: could not guess the name
             msg = "".join(["Insufficient information to guess the new release",
                            " name. Releases found do not have version",
-                           " information."])
+                           " information or a valid library name. Please",
+                           " provide the complete name of the release."])
             self.logger.error(msg)
             raise Exception(msg)
 
@@ -923,6 +787,11 @@ class Map(object):
 
         :param top_release: The release whose dependencies should be prioritized
         """
+
+        if not self.init:
+            msg = "Map not checked, run check()"
+            self.logger.error(msg)
+            raise Exception(msg)
 
         self.releases.sort(key=lambda release: release.name)
         dependencies = self.dependencies()
@@ -1004,6 +873,161 @@ class Release(object):
         return duplicates
 
 
+###############################################################################
+# Utility functions
+###############################################################################
+
+def get_version_from_string(version_string):
+    """
+    Get the version numbers from a string
+
+    :param version_string: A string composed by numbers separated by non
+    alphanumeric characters (e.g. 0_1_2 or 0.1.2)
+    :returns: A list of the numbers in the string
+    """
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
+    m = re.findall(r'[0-9]+', version_string)
+
+    if m:
+        if len(m) < 2:
+            msg = "".join(["Provide at least a major and a minor",
+                           " version digit (eg. '1.2.3' or '1_2')"])
+            logger.warn(msg)
+            # warnings.warn(msg)
+        if len(m) > 3:
+            msg = "".join(["Version has too many parts; provide 3 or less",
+                           " ( e.g. '0.1.2')"])
+            logger.warn(msg)
+            # warnings.warn(msg)
+    else:
+        msg = "".join(["Could not get version parts. Provide digits separated",
+                       " by non-alphanumeric characters.",
+                       " (e.g. 0_1_2 or 0.1.2)"])
+        logger.error(msg)
+        raise Exception(msg)
+
+    version = [int(i) for i in m]
+
+    return version
+
+
+def get_info_from_release_string(release):
+    """
+    Get the information from a release name
+
+    The given string is split in a prefix (usually the name of the lib) and a
+    suffix (the version part, e.g. '_1_4_7'). A list with the version info
+    converted to ints is also contained in the returned list.
+
+    :param release: A string in format 'LIBX_1_0_0' or similar
+    :returns: A list in format [release, prefix, suffix, [CUR, AGE, REV]]
+    """
+
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
+    version = [None, None, None]
+    ver_suffix = None
+    prefix = None
+    tail = None
+
+    if not release:
+        logger.warn("No release provided")
+        return None
+
+    # Remove eventual white spaces
+    m = re.match(r'\s+', release)
+    if m:
+        release = release[m.end():]
+
+    # Search for the first ocurrence of a version like sequence
+    m = re.search(r'_+[0-9]+', release)
+    if m:
+        # If found, remove the version like sequence to get the prefix
+        prefix = release[:m.start()]
+        tail = release[m.start():]
+    else:
+        # Check if the prefix contain at least a letter
+        m = re.findall(r'[a-zA-Z]+', release)
+        if m:
+            prefix = release
+        else:
+            # If not, reject the prefix
+            msg = "".join(["Release provided is not well formed",
+                           " (a well formed release contain the library",
+                           " identifier and the version information).",
+                           " Suggested: something like LIBNAME_1_2_3"])
+            logger.warn(msg)
+            return None
+
+    if tail:
+        # Search and get the version information
+        version = get_version_from_string(tail)
+        ver_suffix = "".join(["_" + str(i) for i in version if i is not None])
+
+    if prefix:
+        # The prefix can have trailing '_'
+        m = re.search(r'_+$', prefix)
+        if m:
+            # If so, remove the trailing '_'
+            prefix = prefix[:m.start()]
+
+    # Return the information got
+    return [release, prefix, ver_suffix, version]
+
+
+# TODO: Make bump strategy customizable
+def bump_version(version, abi_break):
+    """
+    Bump a version depending if the ABI was broken or not
+
+    If the ABI was broken, CUR is bumped; AGE and REV are set to zero.
+    Otherwise, CUR is kept, AGE is bumped, and REV is set to zero.
+    This also works with versions without the REV component (e.g. [1, 4, None])
+
+    :param version:     A list in format [CUR, AGE, REV]
+    :param abi_break:   A boolean indication if the ABI was broken
+    :returns:           A list in format [CUR, AGE, REV]
+    """
+
+    new_version = []
+    if abi_break:
+        if version[0] is not None:
+            new_version.append(version[0] + 1)
+        new_version.extend([0] * len(version[1:]))
+    else:
+        if version[0] is not None:
+            new_version.append(version[0])
+        if version[1] is not None:
+            new_version.append(version[1] + 1)
+        new_version.extend([0] * len(version[2:]))
+    return new_version
+
+
+def clean_symbols(symbols):
+    """
+    Receives a list of lines read from the input and returns a list of words
+
+    :param symbols: A list of lines containing symbols
+    :returns:       A list of the obtained symbols
+    """
+
+    # Split the lines into potential symbols and remove invalid characters
+    clean = []
+    if symbols:
+        for line in symbols:
+            parts = re.split(r'\W+', line)
+            if parts:
+                for symbol in parts:
+                    m = re.match(r'\w+', symbol)
+                    if m:
+                        clean.append(m.group())
+
+    return clean
+
+
 def check_files(out_arg, out_name, in_arg, in_name, dry):
     """
     Check if output and input are the same file. Create a backup if so.
@@ -1048,6 +1072,10 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
                     logger.error(msg)
                     raise e
 
+
+###############################################################################
+# INTERFACE
+###############################################################################
 
 def update(args):
     """
