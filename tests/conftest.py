@@ -102,8 +102,8 @@ def run_tc(tc, datadir, capsys, caplog):
         if tc_out["exceptions"]:
             with pytest.raises(Exception) as e:
                 args.func(args)
-                for expected in tc_out["exceptions"]:
-                    assert expected in str(e.value)
+            for expected in tc_out["exceptions"]:
+                assert expected in str(e.value)
         else:
             args.func(args)
 

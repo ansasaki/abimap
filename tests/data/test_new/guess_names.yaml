@@ -38,8 +38,10 @@
   input:
     args:
       - "new"
-      - "-r release_1.1.0"
-      - "-name other"
+      - "-r"
+      - "release_1.1.0"
+      - "--name"
+      - "other"
     stdin: "symbol.in"
   output:
     file:
@@ -60,4 +62,4 @@
         the library identifier and the version information). \
         Suggested: something like LIBNAME_1_2_3"
     exceptions:
-      - "Could not retrieve release information."
+      - "Please provide the release name."
