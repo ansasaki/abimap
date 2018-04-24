@@ -1,13 +1,6 @@
 .. start-badges
 
-.. list-table::
-    :stub-columns: 1
-
-    * - docs
-      - |docs|
-    * - tests
-      - | |travis|
-        | |coveralls| |codecov|
+|docs| |travis| |coveralls| |codecov|
 
 .. |docs| image:: https://readthedocs.org/projects/symbol_version/badge/?style=flat
     :target: https://readthedocs.org/projects/symbol-version
@@ -74,7 +67,7 @@ It contains the symbols exported by the library grouped by the releases where th
     };
 
 In this example, the release ``LIB_EXAMPLE_1_0_0`` introduces the symbols ``symbol`` and ``another_symbol``.
-The ``*`` wildcard in ``local`` catches all other symbols, meaning only ``symbol`` and ``another_symbol`` are globally exported as part of the library [API](https://en.wikipedia.org/wiki/Application_programming_interface).
+The ``*`` wildcard in ``local`` catches all other symbols, meaning only ``symbol`` and ``another_symbol`` are globally exported as part of the library [API]_.
 
 If a compatible change is made, it would introduce a new release, like::
 
@@ -148,33 +141,38 @@ or (to create a new map)::
 
   $ cat symbols_list | ./symbol_version.py new -r lib_example_1_0_0 -o new.map
 
+or (to check the content of a existing map)::
+
+  $ ./symbol_version check my.map
+
 Long version
 ------------
 
 Runing  ``$ python symbol_version.py -h`` will give::
 
-  usage: symbol_version.py [-h] {update,new} ...
+  usage: symbol_version.py [-h] {update,new,check} ...
 
   Helper tools for linker version script maintenance
 
   optional arguments:
-    -h, --help    show this help message and exit
+    -h, --help          show this help message and exit
 
   Subcommands:
     Valid subcommands:
 
-    {update,new}  These subcommands have their own set of options
-      update      Update the map file
-      new         Create a new map file
+    {update,new,check}  These subcommands have their ownset of options
+      update            Update the map file
+      new               Create a new map file
+      check             Check the map file
 
-  Call a subcommand passing '-h' to see its specific options
-
-There are two subcommands, ``update`` and ``new``
+There are three subcommands, ``update``, ``new``, and ``check``
 Running ``$ python symbol_script.py update -h`` will give::
 
   usage: symbol_version.py update [-h] [-o OUT] [-i INPUT] [-d]
                                   [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                                  [-c] (-a | -r | -s)
+                                  [-l LOGFILE] [-n NAME] [-v VERSION]
+                                  [-r RELEASE] [--no_guess] [--allow-abi-break]
+                                  (-a | --remove | -s)
                                   file
 
   positional arguments:
@@ -183,15 +181,24 @@ Running ``$ python symbol_script.py update -h`` will give::
   optional arguments:
     -h, --help            show this help message and exit
     -o OUT, --out OUT     Output file (defaults to stdout)
-    -i INPUT, --in INPUT  Read from a file instead of stdio
+    -i INPUT, --in INPUT  Read from this file instead of stdio
     -d, --dry             Do everything, but do not modify the files
     --verbosity {quiet,error,warning,info,debug}
                           Set the program verbosity
     --quiet               Makes the program quiet
     --debug               Makes the program print debug info
-    -c, --care            Do not continue if the ABI would be broken
+    -l LOGFILE, --logfile LOGFILE
+                          Log to this file
+    -n NAME, --name NAME  The name of the library (e.g. libx)
+    -v VERSION, --version VERSION
+                          The release version (e.g. 1_0_0 or 1.0.0)
+    -r RELEASE, --release RELEASE
+                          The full name of the release to be used (e.g.
+                          LIBX_1_0_0)
+    --no_guess            Disable next release name guessing
+    --allow-abi-break     Allow removing symbols, and to break ABI
     -a, --add             Adds the symbols to the map file.
-    -r, --remove          Remove the symbols from the map file. This breaks the
+    --remove              Remove the symbols from the map file. This breaks the
                           ABI.
     -s, --symbols         Compare the given symbol list with the current map
                           file and update accordingly. May break the ABI.
@@ -225,6 +232,25 @@ Running  ``$ python symbol_script.py new -h`` will give::
   A list of symbols is expected as the input. If a file is provided with '-i',
   the symbols are read from the given file. Otherwise the symbols are read from
   stdin.
+
+Running  ``$ python symbol_script.py check -h`` will give::
+
+  usage: symbol_version.py check [-h]
+                                 [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                                 [-l LOGFILE]
+                                 file
+
+  positional arguments:
+    file                  The map file to be checked
+
+  optional arguments:
+    -h, --help            show this help message and exit
+    --verbosity {quiet,error,warning,info,debug}
+                          Set the program verbosity
+    --quiet               Makes the program quiet
+    --debug               Makes the program print debug info
+    -l LOGFILE, --logfile LOGFILE
+                          Log to this file
 
 References:
 -----------
