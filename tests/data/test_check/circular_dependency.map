@@ -1,0 +1,28 @@
+# Broken map with circular dependency
+
+LIBTC5_9_2_0
+{
+    global:
+        one_symbol;
+} LIBTC5_9_1_0;
+
+LIBTC5_9_1_0
+{
+    global:
+        two_symbol;
+} LIBTC5_9_0_0;
+
+LIBTC5_9_0_0
+{
+    global:
+        three_symbol;
+} LIBTC5_9_2_0;
+
+LIBBASE_1_0_0
+{
+    global:
+        zero_symbol;
+    local:
+        *;
+} ;
+

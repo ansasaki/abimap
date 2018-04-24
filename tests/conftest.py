@@ -14,6 +14,9 @@ def datadir(tmpdir, request):
     Fixture responsible for searching a folder with the same name of test
     module in the \'data\' directory and, if available, moving all contents
     to a temporary directory so tests can use them freely.
+
+    :param tmpdir: fixture which creates a temporary directory
+    :param request: the test request context
     """
 
     filename = request.module.__file__
@@ -37,6 +40,9 @@ def datadir(tmpdir, request):
 def testcases(datadir, capsys):
     """
     Returns the test cases for a given test
+
+    :param datadir: fixture which gives a temporary dir with the test files
+    :param capsys: fixture which captures the outputs to stderr and stdout
     """
 
     input_list = datadir.listdir()
@@ -60,7 +66,15 @@ def testcases(datadir, capsys):
 
 
 class cd:
-    """Class used to manage the working directory"""
+    """
+    Class used to manage the working directory
+
+    Use as context manager::
+
+        with cd(datadir):
+            # Here you are in the temporary working directory
+
+    """
 
     def __init__(self, new_path):
         self.new_path = str(new_path)
@@ -80,6 +94,7 @@ def run_tc(tc, datadir, capsys, caplog):
     :param tc: The tescase
     :param datadir: The path to the directory where the test input are
     :param capsys: The output capture fixture
+    :param caplog: The log capture fixture
     """
 
     # Change directory to the temporary directory

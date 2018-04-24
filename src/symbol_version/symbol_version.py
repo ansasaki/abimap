@@ -1086,6 +1086,19 @@ def update(args):
           unified in a new release. This is an incompatible change, the SONAME
           of the library should be bumped
 
+    If --symbols is provided, the symbols provided are considered all the
+    exported symbols in the new version. Such set of symbols is compared to the
+    previous existing symbols. If symbols are added, but nothing removed, it is
+    a compatible change. Otherwise, it is an incompatible change and the SONAME
+    of the library should be bumped.
+
+    If --add is provided, the symbols provided are considered new symbols to be
+    added. This is a compatible change.
+
+    If --remove is provided, the symbols provided are considered the symbols to
+    be removed. This is an incompatible change and the SONAME of the library
+    should be bumped.
+
     :param args: Arguments given in command line parsed by argparse
     """
 
@@ -1291,7 +1304,7 @@ def update(args):
 
 def new(args):
     """
-    \'new\' subcommand implementation
+    \'new\' subcommand
 
     Create a new version script file containing the provided symbols.
 
@@ -1398,6 +1411,33 @@ def new(args):
         # warnings.warn(msg)
 
 
+def check(args):
+    """
+    \'check\' subcommand
+
+    Check the content of a symbol version script
+
+    :param args: Arguments given in command line parsed by argparse
+    """
+
+    # Get logger
+    logger = Single_Logger.getLogger(__name__, filename=args.logfile)
+
+    logger.info("Command: check")
+    logger.debug("Arguments provided: ")
+    logger.debug(str(args))
+
+    # Set the verbosity if provided
+    if args.verbosity:
+        logger.setLevel(VERBOSITY_MAP[args.verbosity])
+
+    # Read the map file
+    smap = Map(filename=args.file, logger=logger)
+
+    # Check the map file
+    smap.check()
+
+
 def get_arg_parser():
     """
     Get a parser for the command line arguments
@@ -1417,8 +1457,6 @@ def get_arg_parser():
     file_args.add_argument('-d', '--dry',
                            help='Do everything, but do not modify the files',
                            action='store_true')
-    file_args.add_argument('-l', '--logfile',
-                           help='Log to this file')
 
     # Common verbosity arguments
     verb_args = argparse.ArgumentParser(add_help=False)
@@ -1432,6 +1470,8 @@ def get_arg_parser():
                             const='quiet')
     group_verb.add_argument('--debug', help='Makes the program print debug info',
                             dest='verbosity', action='store_const', const='debug')
+    verb_args.add_argument('-l', '--logfile',
+                           help='Log to this file')
 
     # Common release name arguments
     name_args = argparse.ArgumentParser(add_help=False)
@@ -1493,6 +1533,12 @@ def get_arg_parser():
                                        " from the given file. Otherwise the"
                                        " symbols are read from stdin.")
     parser_new.set_defaults(func=new)
+
+    # Check subcommand parser
+    parser_check = subparsers.add_parser("check", help="Check the map file",
+                                         parents=[verb_args])
+    parser_check.add_argument("file", help="The map file to be checked")
+    parser_check.set_defaults(func=check)
 
     return parser
 

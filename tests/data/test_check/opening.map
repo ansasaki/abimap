@@ -1,0 +1,8 @@
+# Broken map missing opening '{'
+
+LIBTC5_1_0_0
+    global:
+        other_symbol;
+    local:
+        *;
+} ;

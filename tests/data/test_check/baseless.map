@@ -1,0 +1,7 @@
+# Map without base release and without wildcard
+
+BASELESS_1_0_0
+{
+    global:
+        one_symbol;
+} ;
