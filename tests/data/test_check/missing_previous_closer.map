@@ -1,0 +1,15 @@
+# Broken map missing the previous closer ';'
+
+LIBTC5_7_0_0
+{
+    global:
+        other_symbol;
+} LIBBASE_1_0_0
+
+LIBBASE_1_0_0
+{
+    global:
+        another_symbol;
+    local:
+        *;
+} ;

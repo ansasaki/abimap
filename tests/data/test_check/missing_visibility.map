@@ -1,0 +1,10 @@
+# Broken map missing visibility scope
+# Non-critical, only warning generated
+
+LIBTC5_5_0_0
+{
+        other_symbol;
+    local:
+        *;
+} ;
+
