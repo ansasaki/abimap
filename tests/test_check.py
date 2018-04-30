@@ -8,7 +8,7 @@ import os
 import pytest
 from conftest import cd
 
-from symbol_version import symbol_version
+from smap import smap
 
 
 def run_tc(tc, datadir, capsys, caplog):
@@ -24,7 +24,7 @@ def run_tc(tc, datadir, capsys, caplog):
     # Change directory to the temporary directory
     with cd(datadir):
         # Get a parser
-        parser = symbol_version.get_arg_parser()
+        parser = smap.get_arg_parser()
 
         tc_in = tc["input"]
         tc_out = tc["output"]

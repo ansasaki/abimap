@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use symbol_version in a project::
+To use smap in a project::
 
-	import symbol_version
+	import smap

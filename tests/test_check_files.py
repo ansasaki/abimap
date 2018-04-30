@@ -6,29 +6,29 @@
 import filecmp
 import os
 
-from symbol_version import symbol_version
+from smap import smap
 
 
 def test_different_non_existent_files(datadir):
     in_name = os.path.join(str(datadir), "in.map")
     out_name = os.path.join(str(datadir), "new.map")
 
-    symbol_version.check_files("--out", str(out_name),
-                               "--in", str(in_name), False)
+    smap.check_files("--out", str(out_name),
+                     "--in", str(in_name), False)
 
-    symbol_version.check_files("--out", str(out_name),
-                               "--in", str(in_name), True)
+    smap.check_files("--out", str(out_name),
+                     "--in", str(in_name), True)
 
 
 def test_different_overwrite(datadir):
     in_name = os.path.join(str(datadir), "in.map")
     out_name = os.path.join(str(datadir), "out.map")
 
-    symbol_version.check_files("--out", str(out_name),
-                               "--in", str(in_name), False)
+    smap.check_files("--out", str(out_name),
+                     "--in", str(in_name), False)
 
-    symbol_version.check_files("--out", str(out_name),
-                               "--in", str(in_name), True)
+    smap.check_files("--out", str(out_name),
+                     "--in", str(in_name), True)
 
 
 def test_same_file(datadir, caplog):
@@ -38,8 +38,8 @@ def test_same_file(datadir, caplog):
     input_name = str(in_name)
 
     # Running with "--dry" the files are not modified (the warning is given)
-    symbol_version.check_files("--out", input_name,
-                               "--in", input_name, True)
+    smap.check_files("--out", input_name,
+                     "--in", input_name, True)
 
     # The expected message
     expected = "".join(["Given paths in '--out' and '--in'",
@@ -55,8 +55,8 @@ def test_same_file(datadir, caplog):
     caplog.clear()
 
     # Running without "--dry"
-    symbol_version.check_files("--out", input_name,
-                               "--in", input_name, False)
+    smap.check_files("--out", input_name,
+                     "--in", input_name, False)
 
     # Check expected warning
     expected = "".join(["Moving ",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for symbol_version."""
+"""Top-level package for smap."""
 
 __author__ = """Anderson Toshiyuki Sasaki"""
 __email__ = 'ansasaki@redhat.com'

@@ -2,26 +2,26 @@
 
 |docs| |travis| |coveralls| |codecov|
 
-.. |docs| image:: https://readthedocs.org/projects/symbol_version/badge/?style=flat
+.. |docs| image:: https://readthedocs.org/projects/smap/badge/?style=flat
     :target: https://readthedocs.org/projects/symbol-version
     :alt: Documentation Status
 
-.. |travis| image:: https://travis-ci.org/ansasaki/symbol_version.svg?branch=master
+.. |travis| image:: https://travis-ci.org/ansasaki/smap.svg?branch=master
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/ansasaki/symbol_version
+    :target: https://travis-ci.org/ansasaki/smap
 
-.. |coveralls| image:: https://coveralls.io/repos/ansasaki/symbol_version/badge.svg?branch=master
+.. |coveralls| image:: https://coveralls.io/repos/ansasaki/smap/badge.svg?branch=master
     :alt: Coverage Status
-    :target: https://coveralls.io/github/ansasaki/symbol_version?branch=master
+    :target: https://coveralls.io/github/ansasaki/smap?branch=master
 
-.. |codecov| image:: https://codecov.io/github/ansasaki/symbol_version/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/github/ansasaki/smap/coverage.svg?branch=master
     :alt: Coverage Status
-    :target: https://codecov.io/github/ansasaki/symbol_version
+    :target: https://codecov.io/github/ansasaki/smap
 
 
 .. end-badges
 
-symbol_version
+smap
 ==============
 
 A helper for library maintainers to use symbol versioning
@@ -106,10 +106,10 @@ The symbol ``symbol`` was removed (and that is why it was incompatible). And a n
 
 Note that all global symbols in all releases were merged in a unique new release.
 
-symbol_version.py script usage
+smap.py script usage
 ------------------------------
 
-This project delivers only a script, ``symbol_version.py``. This is my first project in python, so feel free to point out ways to improve it.
+This project delivers only a script, ``smap.py``. This is my first project in python, so feel free to point out ways to improve it.
 
 Both available sub-commands (``update`` and ``new``) expect a list of symbols given in stdin. The list of symbols are words separated by non-alphanumeric characters (matches with the regular expression ``[a-zA-Z0-9_]+``). For example::
 
@@ -127,30 +127,30 @@ tl;dr
 -----
 ::
 
-  $ python symbol_version.py update -s lib_example.map < symbols_list
+  $ python smap.py update -s lib_example.map < symbols_list
 
 or (setting an output)::
 
-  $ python symbol_version.py update -s lib_example.map -o new.map < symbols_list
+  $ python smap.py update -s lib_example.map -o new.map < symbols_list
 
 or::
 
-  $ cat symbols_list | ./symbol_version.py update -s lib_example.map -o new.map
+  $ cat symbols_list | ./smap.py update -s lib_example.map -o new.map
 
 or (to create a new map)::
 
-  $ cat symbols_list | ./symbol_version.py new -r lib_example_1_0_0 -o new.map
+  $ cat symbols_list | ./smap.py new -r lib_example_1_0_0 -o new.map
 
 or (to check the content of a existing map)::
 
-  $ ./symbol_version check my.map
+  $ ./smap check my.map
 
 Long version
 ------------
 
-Runing  ``$ python symbol_version.py -h`` will give::
+Runing  ``$ python smap.py -h`` will give::
 
-  usage: symbol_version.py [-h] {update,new,check} ...
+  usage: smap.py [-h] {update,new,check} ...
 
   Helper tools for linker version script maintenance
 
@@ -168,7 +168,7 @@ Runing  ``$ python symbol_version.py -h`` will give::
 There are three subcommands, ``update``, ``new``, and ``check``
 Running ``$ python symbol_script.py update -h`` will give::
 
-  usage: symbol_version.py update [-h] [-o OUT] [-i INPUT] [-d]
+  usage: smap.py update [-h] [-o OUT] [-i INPUT] [-d]
                                   [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
                                   [-l LOGFILE] [-n NAME] [-v VERSION]
                                   [-r RELEASE] [--no_guess] [--allow-abi-break]
@@ -209,7 +209,7 @@ Running ``$ python symbol_script.py update -h`` will give::
 
 Running  ``$ python symbol_script.py new -h`` will give::
 
-  usage: symbol_version.py new [-h] [-o OUT] [-i INPUT] [-d]
+  usage: smap.py new [-h] [-o OUT] [-i INPUT] [-d]
                                [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
                                [-n NAME] [-v VERSION] [-r RELEASE]
 
@@ -235,7 +235,7 @@ Running  ``$ python symbol_script.py new -h`` will give::
 
 Running  ``$ python symbol_script.py check -h`` will give::
 
-  usage: symbol_version.py check [-h]
+  usage: smap.py check [-h]
                                  [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
                                  [-l LOGFILE]
                                  file

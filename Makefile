@@ -53,7 +53,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 src/symbol_version tests
+	flake8 src/smap tests
 
 test: ## run tests quickly with the default Python
 	pytest -vv --ignore=src/
@@ -62,16 +62,16 @@ test-all: tox.ini## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	py.test --cov=symbol_version --cov-config .coveragerc --cov-report=term-missing -vv tests
+	py.test --cov=smap --cov-config .coveragerc --cov-report=term-missing -vv tests
 	coverage combine --append
 	coverage report
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/symbol_version.rst
+	rm -f docs/smap.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ src/symbol_version
+	sphinx-apidoc -o docs/ src/smap
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
