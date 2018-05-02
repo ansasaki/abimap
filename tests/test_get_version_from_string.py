@@ -3,7 +3,7 @@
 
 import pytest
 
-from symbol_version import symbol_version
+from smap import smap
 
 
 def test_get_version_from_string(testcases, caplog):
@@ -11,7 +11,7 @@ def test_get_version_from_string(testcases, caplog):
         for tc in testcases:
             if tc["exceptions"]:
                 with pytest.raises(Exception) as e:
-                    assert (symbol_version.get_version_from_string(tc["input"]) ==
+                    assert (smap.get_version_from_string(tc["input"]) ==
                             tc["output"])
                     for expected in tc["exceptions"]:
                         assert expected in str(e.value)
@@ -19,7 +19,7 @@ def test_get_version_from_string(testcases, caplog):
                         for expected in tc["warnings"]:
                             assert "WARNING  " + expected in caplog.text
             else:
-                assert (symbol_version.get_version_from_string(tc["input"]) ==
+                assert (smap.get_version_from_string(tc["input"]) ==
                         tc["output"])
                 if tc["warnings"]:
                     for expected in tc["warnings"]:

@@ -1398,12 +1398,12 @@ def new(args):
         if args.out:
             with open(args.out, "w") as outfile:
                 outfile.write("# This map file was created with"
-                              " symbol_version.py\n\n")
+                              " smap.py\n\n")
                 outfile.write(str(new_map))
         else:
             # Print to stdout
             sys.stdout.write("# This map file was created with"
-                             " symbol_version.py\n\n")
+                             " smap.py\n\n")
             sys.stdout.write(str(new_map))
     else:
         msg = "No valid symbols provided. Nothing done."

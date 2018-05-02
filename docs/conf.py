@@ -22,7 +22,7 @@ if os.getenv('SPELLCHECK'):
 
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'symbol_version'
+project = u'smap'
 year = '2018'
 author = u'Anderson Toshiyuki Sasaki'
 copyright = '{0}, {1}'.format(year, author)
@@ -31,8 +31,8 @@ version = release = u'0.1.0'
 pygments_style = 'trac'
 templates_path = ['.']
 extlinks = {
-    'issue': ('https://github.com/ansasaki/symbol_version/issues/%s', '#'),
-    'pr': ('https://github.com/ansasaki/symbol_version/pull/%s', 'PR #'),
+    'issue': ('https://github.com/ansasaki/smap/issues/%s', '#'),
+    'pr': ('https://github.com/ansasaki/smap/pull/%s', 'PR #'),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
