@@ -3,7 +3,7 @@
 |docs| |travis| |coveralls| |codecov|
 
 .. |docs| image:: https://readthedocs.org/projects/smap/badge/?style=flat
-    :target: https://readthedocs.org/projects/symbol-version
+    :target: https://readthedocs.org/projects/smap
     :alt: Documentation Status
 
 .. |travis| image:: https://travis-ci.org/ansasaki/smap.svg?branch=master

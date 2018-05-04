@@ -831,10 +831,11 @@ def get_version_from_string(version_string):
     """
     Get the version numbers from a string
 
-    :param version_string: A string composed by numbers separated by non
-    alphanumeric characters (e.g. 0_1_2 or 0.1.2)
+    :param version_string: A string composed by numbers separated by non \
+                           alphanumeric characters (e.g. 0_1_2 or 0.1.2)
     :returns: A list of the numbers in the string
     """
+
     # Get logger
     logger = Single_Logger.getLogger(__name__)
 
