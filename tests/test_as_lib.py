@@ -6,11 +6,11 @@
 import pytest
 from conftest import cd
 
-from smap import smap
+from smap import symver
 
 
 def test_unitialized_all_global_symbols():
-    m = smap.Map()
+    m = symver.Map()
 
     expected = "Map not checked, run check()"
     symbols = None
@@ -23,7 +23,7 @@ def test_unitialized_all_global_symbols():
 
 
 def test_unitialized_guess_latest_release():
-    m = smap.Map()
+    m = symver.Map()
 
     expected = "Map not checked, run check()"
     symbols = None
@@ -36,7 +36,7 @@ def test_unitialized_guess_latest_release():
 
 
 def test_unitialized_sort_releases_nice():
-    m = smap.Map()
+    m = symver.Map()
 
     expected = "Map not checked, run check()"
     symbols = None
@@ -49,7 +49,7 @@ def test_unitialized_sort_releases_nice():
 
 
 def test_empty_map(datadir):
-    m = smap.Map()
+    m = symver.Map()
 
     expected = "Empty map"
 
@@ -70,7 +70,7 @@ def test_empty_map(datadir):
 
 def test_guess_name_without_version(datadir):
 
-    m = smap.Map()
+    m = symver.Map()
 
     expected = "".join(["Insufficient information to guess the new release",
                         " name. Releases found do not have version",
@@ -87,7 +87,7 @@ def test_guess_name_without_version(datadir):
 
 def test_guess_name_without_prefix(datadir):
 
-    m = smap.Map()
+    m = symver.Map()
     expected = "".join(["Insufficient information to guess the new release",
                         " name. Releases found do not have version",
                         " information or a valid library name. Please",
@@ -103,7 +103,7 @@ def test_guess_name_without_prefix(datadir):
 
 def test_guess_name_without_similar_prefix(datadir):
 
-    m = smap.Map()
+    m = symver.Map()
 
     with cd(datadir):
         m.read("without_similar_prefix.map")
