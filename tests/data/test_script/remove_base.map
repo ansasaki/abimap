@@ -1,9 +1,10 @@
 # This map file was created with smap
 
-LIBTC1_1_0_0
+TO_REMOVE_1_0_0
 {
     global:
-        another_symbol;
+        one_symbol;
+        two_symbol;
     local:
         *;
 } ;

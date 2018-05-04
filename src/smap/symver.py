@@ -1398,12 +1398,12 @@ def new(args):
         if args.out:
             with open(args.out, "w") as outfile:
                 outfile.write("# This map file was created with"
-                              " smap.py\n\n")
+                              " smap\n\n")
                 outfile.write(str(new_map))
         else:
             # Print to stdout
             sys.stdout.write("# This map file was created with"
-                             " smap.py\n\n")
+                             " smap\n\n")
             sys.stdout.write(str(new_map))
     else:
         msg = "No valid symbols provided. Nothing done."
@@ -1493,10 +1493,10 @@ def get_arg_parser():
                                      " to see its specific options")
 
     # Subcommands parser
-    subparsers = parser.add_subparsers(title="Subcommands", description="Valid"
-                                       " subcommands:",
+    subparsers = parser.add_subparsers(title="Subcommands",
                                        help="These subcommands have their own"
-                                       "set of options")
+                                       " set of options", dest="subcommand")
+    subparsers.required = True
 
     # Update subcommand parser
     parser_up = subparsers.add_parser("update", help="Update the map file",
@@ -1558,7 +1558,7 @@ if __name__ == "__main__":
     parser = get_arg_parser()
 
     # Parse arguments
-    args = parser.parse_args(sys.argv[1:], namespace=ns)
+    args = parser.parse_args(namespace=ns)
 
     # Run command
     ns.func(args)

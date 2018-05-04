@@ -5,7 +5,7 @@ from distutils import dir_util
 import pytest
 import yaml
 
-from smap import smap
+from smap import symver
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def run_tc(tc, datadir, capsys, caplog):
     # Change directory to the temporary directory
     with cd(datadir):
         # Get a parser
-        parser = smap.get_arg_parser()
+        parser = symver.get_arg_parser()
 
         tc_in = tc["input"]
         tc_out = tc["output"]
