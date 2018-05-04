@@ -23,15 +23,15 @@ tl;dr
 -----
 ::
 
-  $ smap update -s lib_example.map < symbols_list
+  $ smap update lib_example.map < symbols_list
 
 or (setting an output)::
 
-  $ smap update -s lib_example.map -o new.map < symbols_list
+  $ smap update lib_example.map -o new.map < symbols_list
 
 or::
 
-  $ cat symbols_list | smap update -s lib_example.map -o new.map
+  $ cat symbols_list | smap update lib_example.map -o new.map
 
 or (to create a new map)::
 

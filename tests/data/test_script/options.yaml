@@ -27,7 +27,6 @@
   input:
     args:
       - "update"
-      - "--symbols"
       - "--allow-abi-break"
       - "base.map"
     stdin: "symbol.in"
