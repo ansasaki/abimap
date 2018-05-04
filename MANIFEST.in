@@ -12,6 +12,7 @@ include CONTRIBUTING.rst
 include LICENSE
 include README.rst
 include HISTORY.rst
+include USAGE.rst
 
 include Makefile
 
