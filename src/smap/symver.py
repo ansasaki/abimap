@@ -1525,7 +1525,7 @@ def get_arg_parser():
                                        parents=[file_args, verb_args,
                                                 name_args],
                                        epilog="A list of symbols is expected"
-                                       "as the input.\nIf a file is provided"
+                                       " as the input.\nIf a file is provided"
                                        " with \'-i\', the symbols are read"
                                        " from the given file. Otherwise the"
                                        " symbols are read from stdin.")
