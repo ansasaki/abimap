@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.1.0 (2018-04-04)
+0.1.0 (2018-05-09)
 ------------------
 
-* This version is still WIP.
+* First release on PyPI.
