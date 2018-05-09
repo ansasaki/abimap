@@ -1087,11 +1087,11 @@ def update(args):
           unified in a new release. This is an incompatible change, the SONAME
           of the library should be bumped
 
-    If --symbols is provided, the symbols provided are considered all the
-    exported symbols in the new version. Such set of symbols is compared to the
-    previous existing symbols. If symbols are added, but nothing removed, it is
-    a compatible change. Otherwise, it is an incompatible change and the SONAME
-    of the library should be bumped.
+    The symbols provided are considered all the exported symbols in the
+    new version. Such set of symbols is compared to the previous existing
+    symbols. If symbols are added, but nothing removed, it is a compatible
+    change. Otherwise, it is an incompatible change and the SONAME of the
+    library should be bumped.
 
     If --add is provided, the symbols provided are considered new symbols to be
     added. This is a compatible change.
@@ -1160,17 +1160,8 @@ def update(args):
     added = []
     removed = []
 
-    # If the list of all symbols are being compared
-    if args.symbols:
-        for symbol in new_set:
-            if symbol not in all_symbols:
-                added.append(symbol)
-
-        for symbol in all_symbols:
-            if symbol not in new_set:
-                removed.append(symbol)
     # If the list of symbols are being added
-    elif args.add:
+    if args.add:
         # Check the symbols and print a warning if already present
         for symbol in new_symbols:
             if symbol in all_symbols:
@@ -1192,6 +1183,15 @@ def update(args):
                                " not found."])
                 logger.warn(msg)
                 # warnings.warn(msg)
+    # If the list of all symbols are being compared (the default option)
+    else:
+        for symbol in new_set:
+            if symbol not in all_symbols:
+                added.append(symbol)
+
+        for symbol in all_symbols:
+            if symbol not in new_set:
+                removed.append(symbol)
 
     # Remove duplicates
     added = list(set(added))
@@ -1511,15 +1511,11 @@ def get_arg_parser():
     parser_up.add_argument("--allow-abi-break",
                            help="Allow removing symbols, and to break ABI",
                            action='store_true')
-    group = parser_up.add_mutually_exclusive_group(required=True)
+    group = parser_up.add_mutually_exclusive_group()
     group.add_argument("-a", "--add", help="Adds the symbols to the map file.",
                        action='store_true')
     group.add_argument("--remove", help="Remove the symbols from the map"
                        " file. This breaks the ABI.", action="store_true")
-    group.add_argument("-s", "--symbols",
-                       help="Compare the given symbol list with the current"
-                       " map file and update accordingly. May break the ABI.",
-                       action='store_true')
     parser_up.add_argument('file', help='The map file being updated')
     parser_up.set_defaults(func=update)
 
@@ -1529,7 +1525,7 @@ def get_arg_parser():
                                        parents=[file_args, verb_args,
                                                 name_args],
                                        epilog="A list of symbols is expected"
-                                       "as the input.\nIf a file is provided"
+                                       " as the input.\nIf a file is provided"
                                        " with \'-i\', the symbols are read"
                                        " from the given file. Otherwise the"
                                        " symbols are read from stdin.")

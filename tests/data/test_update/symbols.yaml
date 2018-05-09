@@ -3,7 +3,6 @@
   input:
     args:
       - "update"
-      - "--symbols"
       - "--out"
       - "symbols.map"
       - "symbols.map"

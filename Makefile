@@ -32,7 +32,7 @@ help:
 ci-bootstrap: ci/bootstrap.py
 	python ci/bootstrap.py
 
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-test clean-docs
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -52,6 +52,13 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 
+clean-docs: ## remove generated docs files
+	rm -rf dist/docs
+	rm -rf HELP
+	rm -rf HELP_UPDATE
+	rm -rf HELP_NEW
+	rm -rf HELP_CHECK
+
 lint: ## check style with flake8
 	flake8 src/smap tests
 
@@ -68,7 +75,21 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-docs: ## generate Sphinx HTML documentation, including API docs
+usage: ## generate usage content by calling the program
+	echo 'Running  ``$ smap -h`` will give::' > HELP
+	echo >> HELP
+	smap -h | sed -e 's/^/  /' >> HELP
+	echo 'Running ``$ smap update -h`` will give::' > HELP_UPDATE
+	echo >> HELP_UPDATE
+	smap update -h | sed -e 's/^/  /' >> HELP_UPDATE
+	echo 'Running ``$ smap new -h`` will give::' > HELP_NEW
+	echo >> HELP_NEW
+	smap new -h | sed -e 's/^/  /' >> HELP_NEW
+	echo 'Running ``$ smap check -h`` will give::' > HELP_CHECK
+	echo >> HELP_CHECK
+	smap check -h | sed -e 's/^/  /' >> HELP_CHECK
+
+docs: usage ## generate Sphinx HTML documentation, including API docs
 	sphinx-build -E -b doctest docs dist/docs
 	sphinx-build -E -b html docs dist/docs
 	sphinx-build -b linkcheck docs dist/docs

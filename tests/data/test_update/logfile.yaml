@@ -3,7 +3,6 @@
   input:
     args:
       - "update"
-      - "--symbols"
       - "--logfile"
       - "wildcard_warnings.log"
       - "--out"
