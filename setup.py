@@ -43,7 +43,7 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='smap symbol version linker script symver library maintenance',
+    keywords='symver smap symbol version versioning linker script library maintenance',
     name='symver-smap',
     packages=find_packages('src'),
     package_dir={'': 'src'},
