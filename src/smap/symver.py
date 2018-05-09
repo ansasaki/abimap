@@ -1295,11 +1295,11 @@ def update(args):
     # Write out to the output
     if args.out:
         with open(args.out, "w") as outfile:
-            outfile.write("# This map file was automatically updated\n\n")
+            outfile.write("# This map file was updated with smap\n\n")
             outfile.write(str(cur_map))
     else:
         # Print to stdout
-        sys.stdout.write("# This map file was automatically updated\n\n")
+        sys.stdout.write("# This map file was updated with smap\n\n")
         sys.stdout.write(str(cur_map))
 
 
