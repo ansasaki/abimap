@@ -54,10 +54,7 @@ clean-test: ## remove test and coverage artifacts
 
 clean-docs: ## remove generated docs files
 	rm -rf dist/docs
-	rm -rf HELP
-	rm -rf HELP_UPDATE
-	rm -rf HELP_NEW
-	rm -rf HELP_CHECK
+	$(MAKE) -C docs clean
 
 lint: ## check style with flake8
 	flake8 src/smap tests
@@ -76,18 +73,8 @@ coverage: ## check code coverage quickly with the default Python
 	$(BROWSER) htmlcov/index.html
 
 usage: ## generate usage content by calling the program
-	echo 'Running  ``$ smap -h`` will give::' > HELP
-	echo >> HELP
-	smap -h | sed -e 's/^/  /' >> HELP
-	echo 'Running ``$ smap update -h`` will give::' > HELP_UPDATE
-	echo >> HELP_UPDATE
-	smap update -h | sed -e 's/^/  /' >> HELP_UPDATE
-	echo 'Running ``$ smap new -h`` will give::' > HELP_NEW
-	echo >> HELP_NEW
-	smap new -h | sed -e 's/^/  /' >> HELP_NEW
-	echo 'Running ``$ smap check -h`` will give::' > HELP_CHECK
-	echo >> HELP_CHECK
-	smap check -h | sed -e 's/^/  /' >> HELP_CHECK
+	$(MAKE) -C docs all
+	cp docs/readme.rst README.rst
 
 docs: usage ## generate Sphinx HTML documentation, including API docs
 	sphinx-build -E -b doctest docs dist/docs
