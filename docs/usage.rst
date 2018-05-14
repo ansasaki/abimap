@@ -44,16 +44,111 @@ or (to check the content of a existing map)::
 Long version
 ------------
 
-.. include:: ../HELP
+Running  ``smap -h`` will give::
+
+  usage: smap [-h] {update,new,check} ...
+  
+  Helper tools for linker version script maintenance
+  
+  optional arguments:
+    -h, --help          show this help message and exit
+  
+  Subcommands:
+    {update,new,check}  These subcommands have their own set of options
+      update            Update the map file
+      new               Create a new map file
+      check             Check the map file
+  
+  Call a subcommand passing '-h' to see its specific options
 
 Call a subcommand passing '-h' to see its specific options
 There are three subcommands, ``update``, ``new``, and ``check``
 
-.. include:: ../HELP_UPDATE
+Running ``smap update -h`` will give::
 
-.. include:: ../HELP_NEW
+  usage: smap update [-h] [-o OUT] [-i INPUT] [-d]
+                     [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                     [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
+                     [--no_guess] [--allow-abi-break] [-a | --remove]
+                     file
+  
+  positional arguments:
+    file                  The map file being updated
+  
+  optional arguments:
+    -h, --help            show this help message and exit
+    -o OUT, --out OUT     Output file (defaults to stdout)
+    -i INPUT, --in INPUT  Read from this file instead of stdio
+    -d, --dry             Do everything, but do not modify the files
+    --verbosity {quiet,error,warning,info,debug}
+                          Set the program verbosity
+    --quiet               Makes the program quiet
+    --debug               Makes the program print debug info
+    -l LOGFILE, --logfile LOGFILE
+                          Log to this file
+    -n NAME, --name NAME  The name of the library (e.g. libx)
+    -v VERSION, --version VERSION
+                          The release version (e.g. 1_0_0 or 1.0.0)
+    -r RELEASE, --release RELEASE
+                          The full name of the release to be used (e.g.
+                          LIBX_1_0_0)
+    --no_guess            Disable next release name guessing
+    --allow-abi-break     Allow removing symbols, and to break ABI
+    -a, --add             Adds the symbols to the map file.
+    --remove              Remove the symbols from the map file. This breaks the
+                          ABI.
+  
+  A list of symbols is expected as the input. If a file is provided with '-i',
+  the symbols are read from the given file. Otherwise the symbols are read from
+  stdin.
 
-.. include:: ../HELP_CHECK
+Running ``smap new -h`` will give::
+
+  usage: smap new [-h] [-o OUT] [-i INPUT] [-d]
+                  [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                  [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE] [--no_guess]
+  
+  optional arguments:
+    -h, --help            show this help message and exit
+    -o OUT, --out OUT     Output file (defaults to stdout)
+    -i INPUT, --in INPUT  Read from this file instead of stdio
+    -d, --dry             Do everything, but do not modify the files
+    --verbosity {quiet,error,warning,info,debug}
+                          Set the program verbosity
+    --quiet               Makes the program quiet
+    --debug               Makes the program print debug info
+    -l LOGFILE, --logfile LOGFILE
+                          Log to this file
+    -n NAME, --name NAME  The name of the library (e.g. libx)
+    -v VERSION, --version VERSION
+                          The release version (e.g. 1_0_0 or 1.0.0)
+    -r RELEASE, --release RELEASE
+                          The full name of the release to be used (e.g.
+                          LIBX_1_0_0)
+    --no_guess            Disable next release name guessing
+  
+  A list of symbols is expected as the input. If a file is provided with '-i',
+  the symbols are read from the given file. Otherwise the symbols are read from
+  stdin.
+
+Running ``smap check -h`` will give::
+
+  usage: smap check [-h]
+                    [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                    [-l LOGFILE]
+                    file
+  
+  positional arguments:
+    file                  The map file to be checked
+  
+  optional arguments:
+    -h, --help            show this help message and exit
+    --verbosity {quiet,error,warning,info,debug}
+                          Set the program verbosity
+    --quiet               Makes the program quiet
+    --debug               Makes the program print debug info
+    -l LOGFILE, --logfile LOGFILE
+                          Log to this file
 
 Import as a library:
 --------------------
