@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import sys
-
 from itertools import chain
 
 # import warnings
@@ -978,11 +977,11 @@ def clean_symbols(symbols):
         duplicates = set()
         for i in clean:
             if not previous:
-                cur = i
+                previous = i
             else:
                 if previous == i:
                     duplicates.add(previous)
-                previous = i;
+                previous = i
         if duplicates:
             dup_list = "".join((" " * 4 + dup + "\n" for dup in
                                 sorted(duplicates)))
@@ -1147,8 +1146,8 @@ def update(args):
     # Read the current map file
     cur_map = Map(filename=args.file, logger=logger)
 
-    # Get all global symbols
-    all_symbols = list(cur_map.all_global_symbols())
+    # Get all global symbols (it is a set)
+    all_symbols = cur_map.all_global_symbols()
 
     # Generate the list of the new symbols
     new_symbols = []
@@ -1169,13 +1168,13 @@ def update(args):
     # All symbols read
     new_set = set(new_symbols)
 
-    added = []
-    removed = []
+    added_set = set()
+    removed_set = set()
 
     # If the list of symbols are being added
     if args.add:
         # Check the symbols and print a warning if already present
-        for symbol in new_symbols:
+        for symbol in new_set:
             if symbol in all_symbols:
                 msg = "".join(["The symbol \'", symbol, "\' is already",
                                " present in a previous version. Keep the",
@@ -1183,13 +1182,13 @@ def update(args):
                 logger.warn(msg)
                 # warnings.warn(msg)
 
-        added.extend(new_symbols)
+        added_set.update(new_set)
     # If the list of symbols are being removed
     elif args.remove:
         # Remove the symbols to be removed
-        for symbol in new_symbols:
+        for symbol in new_set:
             if symbol in all_symbols:
-                removed.append(symbol)
+                removed_set.add(symbol)
             else:
                 msg = "".join(["Requested to remove \'", symbol, "\', but",
                                " not found."])
@@ -1199,28 +1198,28 @@ def update(args):
     else:
         for symbol in new_set:
             if symbol not in all_symbols:
-                added.append(symbol)
+                added_set.add(symbol)
 
         for symbol in all_symbols:
             if symbol not in new_set:
-                removed.append(symbol)
+                removed_set.add(symbol)
 
-    # Remove duplicates
-    added = list(set(added))
-    removed = list(set(removed))
+    # Make lists from the sets
+    added = list(added_set)
+    removed = list(removed_set)
 
     # Print the modifications
     if added:
         added.sort()
         content = ["Added:\n"]
-        content.extend(["    " + symbol + "\n" for symbol in added])
+        content.extend(("    " + symbol + "\n" for symbol in added))
         msg = "".join(content)
         print(msg)
 
     if removed:
         removed.sort()
         content = ["Removed:\n"]
-        content.extend(["    " + symbol + "\n" for symbol in removed])
+        content.extend(("    " + symbol + "\n" for symbol in removed))
         msg = "".join(content)
         print(msg)
 
@@ -1266,14 +1265,7 @@ def update(args):
         r.name.upper()
 
         # Add the symbols added to global scope
-        all_symbols.extend(added)
-
-        # Remove duplicates
-        all_symbols = list(set(all_symbols))
-
-        # Remove the symbols to be removed
-        for symbol in removed:
-            all_symbols.remove(symbol)
+        all_symbols.update(added_set)
 
         # Remove the '*' wildcard, if present
         if '*' in all_symbols:
@@ -1283,7 +1275,14 @@ def update(args):
             # warnings.warn(msg)
             all_symbols.remove('*')
 
-        r.symbols.append(('global', all_symbols))
+        # Remove the symbols to be removed and convert to a list
+        all_symbols_list = [symbol for symbol in all_symbols if
+                            symbol not in removed_set]
+
+        # Sort the list
+        all_symbols_list.sort()
+
+        r.symbols.append(('global', all_symbols_list))
 
         # Add the wildcard to the local symbols
         r.symbols.append(('local', ['*']))
