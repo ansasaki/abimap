@@ -173,3 +173,16 @@
       - "The '*' wildcard was not found"
       - "No base version release found"
     exceptions:
+-
+  input:
+    args:
+      - "check"
+      - "only_visibility.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+      - "The '*' wildcard was not found"
+      - "No base version release found"
+    exceptions:
