@@ -147,8 +147,8 @@ class Map(object):
                   in a file
         """
 
-        content = "".join([str(release) + "\n" for release in
-                           self.releases])
+        content = "".join((str(release) + "\n" for release in self.releases if
+                           release))
         return content
 
     # Constructor
@@ -792,21 +792,15 @@ class Release(object):
         self.symbols = []
 
     def __str__(self):
-        content = ''
-        content += self.name
-        content += "\n{\n"
+        vs = []
         for visibility, symbols in self.symbols:
             symbols.sort()
-            content += "    "
-            content += visibility
-            content += ":\n"
-            for symbol in symbols:
-                content += "        "
-                content += symbol
-                content += ";\n"
-        content += "} "
-        content += self.previous
-        content += ";\n"
+            vs.extend([" " * 4, visibility, ":\n",
+                       ";\n".join((" " * 8 + symbol for symbol in symbols)),
+                       ";\n"])
+        content = "".join(chain([self.name, "\n{\n"],
+                                vs,
+                                ["} ", self.previous, ";\n"]))
         return content
 
     def duplicates(self):
