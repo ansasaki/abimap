@@ -93,4 +93,16 @@
     warnings:
     exceptions:
       - "It is necessary to provide either release name or name and version"
-
+-
+  input:
+    args:
+      - "new"
+      - "--release"
+      - "duplicated_input_1_0_0"
+    stdin: "duplicated_input.in"
+  output:
+    file:
+    stdout: "duplicated_input.stdout"
+    warnings:
+      - "Duplicated symbols provided:\n    a\n    b\n\n"
+    exceptions:

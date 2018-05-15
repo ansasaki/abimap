@@ -796,8 +796,9 @@ class Release(object):
         for visibility, symbols in self.symbols:
             symbols.sort()
             vs.extend([" " * 4, visibility, ":\n",
-                       ";\n".join((" " * 8 + symbol for symbol in symbols)),
-                       ";\n"])
+                       "".join((" " * 8 +
+                                symbol +
+                                ";\n" for symbol in symbols))])
         content = "".join(chain([self.name, "\n{\n"],
                                 vs,
                                 ["} ", self.previous, ";\n"]))
@@ -961,11 +962,31 @@ def clean_symbols(symbols):
     :returns:       A list of the obtained symbols
     """
 
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
     # Split the lines into potential symbols and remove invalid characters
     clean = []
     if symbols:
         no_invalid = chain(*(re.split(r'\W+', i) for i in symbols))
         clean.extend((i for i in no_invalid if i))
+
+    # Report duplicated symbols
+    if clean:
+        clean.sort()
+        previous = None
+        duplicates = set()
+        for i in clean:
+            if not previous:
+                cur = i
+            else:
+                if previous == i:
+                    duplicates.add(previous)
+                previous = i;
+        if duplicates:
+            dup_list = "".join((" " * 4 + dup + "\n" for dup in
+                                sorted(duplicates)))
+            logger.warn("Duplicated symbols provided:\n%s", dup_list)
 
     return clean
 
@@ -1355,6 +1376,8 @@ def new(args):
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
 
+    new_symbols_set = set(new_symbols)
+
     if new_symbols:
         new_map = Map()
         r = Release()
@@ -1368,7 +1391,7 @@ def new(args):
         r.name = name.upper()
 
         # Add the symbols to global scope
-        r.symbols.append(('global', new_symbols))
+        r.symbols.append(('global', sorted(new_symbols_set)))
 
         # Add the wildcard to the local symbols
         r.symbols.append(('local', ['*']))
