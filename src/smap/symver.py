@@ -812,16 +812,16 @@ class Release(object):
     def duplicates(self):
         duplicates = []
         for scope, symbols in self.symbols:
-            seen = []
-            release_dups = []
+            seen = set()
+            release_dups = set()
             if symbols:
                 for symbol in symbols:
                     if symbol not in seen:
-                        seen.append(symbol)
+                        seen.add(symbol)
                     else:
-                        release_dups.append(symbol)
+                        release_dups.add(symbol)
                 if release_dups:
-                    duplicates.append((scope, set(release_dups)))
+                    duplicates.append((scope, list(release_dups)))
         return duplicates
 
 
