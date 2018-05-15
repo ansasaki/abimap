@@ -218,3 +218,17 @@
     stdout: "mixed_names.stdout"
     warnings:
     exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "only_visibility.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "only_visibility.stdout"
+    warnings:
+      - "The '*' wildcard was not found"
+      - "No base version release found"
+    exceptions:
