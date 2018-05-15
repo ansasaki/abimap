@@ -8,6 +8,8 @@ import re
 import shutil
 import sys
 
+from itertools import chain
+
 # import warnings
 
 VERBOSITY_MAP = {"debug": logging.DEBUG,
@@ -968,13 +970,8 @@ def clean_symbols(symbols):
     # Split the lines into potential symbols and remove invalid characters
     clean = []
     if symbols:
-        for line in symbols:
-            parts = re.split(r'\W+', line)
-            if parts:
-                for symbol in parts:
-                    m = re.match(r'\w+', symbol)
-                    if m:
-                        clean.append(m.group())
+        no_invalid = chain(*(re.split(r'\W+', i) for i in symbols))
+        clean.extend((i for i in no_invalid if i))
 
     return clean
 
