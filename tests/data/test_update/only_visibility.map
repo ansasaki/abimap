@@ -1,0 +1,8 @@
+# Map without symbols, only visibility scopes
+
+ONLY_VISIBILITY_1_0_0
+{
+    global:
+    local:
+} ;
+

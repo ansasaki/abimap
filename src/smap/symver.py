@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import sys
+from itertools import chain
 
 # import warnings
 
@@ -145,8 +146,8 @@ class Map(object):
                   in a file
         """
 
-        content = "".join([str(release) + "\n" for release in
-                           self.releases])
+        content = "".join((str(release) + "\n" for release in self.releases if
+                           release))
         return content
 
     # Constructor
@@ -790,36 +791,31 @@ class Release(object):
         self.symbols = []
 
     def __str__(self):
-        content = ''
-        content += self.name
-        content += "\n{\n"
+        vs = []
         for visibility, symbols in self.symbols:
             symbols.sort()
-            content += "    "
-            content += visibility
-            content += ":\n"
-            for symbol in symbols:
-                content += "        "
-                content += symbol
-                content += ";\n"
-        content += "} "
-        content += self.previous
-        content += ";\n"
+            vs.extend([" " * 4, visibility, ":\n",
+                       "".join((" " * 8 +
+                                symbol +
+                                ";\n" for symbol in symbols))])
+        content = "".join(chain([self.name, "\n{\n"],
+                                vs,
+                                ["} ", self.previous, ";\n"]))
         return content
 
     def duplicates(self):
         duplicates = []
         for scope, symbols in self.symbols:
-            seen = []
-            release_dups = []
+            seen = set()
+            release_dups = set()
             if symbols:
                 for symbol in symbols:
                     if symbol not in seen:
-                        seen.append(symbol)
+                        seen.add(symbol)
                     else:
-                        release_dups.append(symbol)
+                        release_dups.add(symbol)
                 if release_dups:
-                    duplicates.append((scope, set(release_dups)))
+                    duplicates.append((scope, list(release_dups)))
         return duplicates
 
 
@@ -965,16 +961,31 @@ def clean_symbols(symbols):
     :returns:       A list of the obtained symbols
     """
 
+    # Get logger
+    logger = Single_Logger.getLogger(__name__)
+
     # Split the lines into potential symbols and remove invalid characters
     clean = []
     if symbols:
-        for line in symbols:
-            parts = re.split(r'\W+', line)
-            if parts:
-                for symbol in parts:
-                    m = re.match(r'\w+', symbol)
-                    if m:
-                        clean.append(m.group())
+        no_invalid = chain(*(re.split(r'\W+', i) for i in symbols))
+        clean.extend((i for i in no_invalid if i))
+
+    # Report duplicated symbols
+    if clean:
+        clean.sort()
+        previous = None
+        duplicates = set()
+        for i in clean:
+            if not previous:
+                previous = i
+            else:
+                if previous == i:
+                    duplicates.add(previous)
+                previous = i
+        if duplicates:
+            dup_list = "".join((" " * 4 + dup + "\n" for dup in
+                                sorted(duplicates)))
+            logger.warn("Duplicated symbols provided:\n%s", dup_list)
 
     return clean
 
@@ -1135,8 +1146,8 @@ def update(args):
     # Read the current map file
     cur_map = Map(filename=args.file, logger=logger)
 
-    # Get all global symbols
-    all_symbols = list(cur_map.all_global_symbols())
+    # Get all global symbols (it is a set)
+    all_symbols = cur_map.all_global_symbols()
 
     # Generate the list of the new symbols
     new_symbols = []
@@ -1157,13 +1168,13 @@ def update(args):
     # All symbols read
     new_set = set(new_symbols)
 
-    added = []
-    removed = []
+    added_set = set()
+    removed_set = set()
 
     # If the list of symbols are being added
     if args.add:
         # Check the symbols and print a warning if already present
-        for symbol in new_symbols:
+        for symbol in new_set:
             if symbol in all_symbols:
                 msg = "".join(["The symbol \'", symbol, "\' is already",
                                " present in a previous version. Keep the",
@@ -1171,13 +1182,13 @@ def update(args):
                 logger.warn(msg)
                 # warnings.warn(msg)
 
-        added.extend(new_symbols)
+        added_set.update(new_set)
     # If the list of symbols are being removed
     elif args.remove:
         # Remove the symbols to be removed
-        for symbol in new_symbols:
+        for symbol in new_set:
             if symbol in all_symbols:
-                removed.append(symbol)
+                removed_set.add(symbol)
             else:
                 msg = "".join(["Requested to remove \'", symbol, "\', but",
                                " not found."])
@@ -1187,28 +1198,28 @@ def update(args):
     else:
         for symbol in new_set:
             if symbol not in all_symbols:
-                added.append(symbol)
+                added_set.add(symbol)
 
         for symbol in all_symbols:
             if symbol not in new_set:
-                removed.append(symbol)
+                removed_set.add(symbol)
 
-    # Remove duplicates
-    added = list(set(added))
-    removed = list(set(removed))
+    # Make lists from the sets
+    added = list(added_set)
+    removed = list(removed_set)
 
     # Print the modifications
     if added:
         added.sort()
         content = ["Added:\n"]
-        content.extend(["    " + symbol + "\n" for symbol in added])
+        content.extend(("    " + symbol + "\n" for symbol in added))
         msg = "".join(content)
         print(msg)
 
     if removed:
         removed.sort()
         content = ["Removed:\n"]
-        content.extend(["    " + symbol + "\n" for symbol in removed])
+        content.extend(("    " + symbol + "\n" for symbol in removed))
         msg = "".join(content)
         print(msg)
 
@@ -1254,14 +1265,7 @@ def update(args):
         r.name.upper()
 
         # Add the symbols added to global scope
-        all_symbols.extend(added)
-
-        # Remove duplicates
-        all_symbols = list(set(all_symbols))
-
-        # Remove the symbols to be removed
-        for symbol in removed:
-            all_symbols.remove(symbol)
+        all_symbols.update(added_set)
 
         # Remove the '*' wildcard, if present
         if '*' in all_symbols:
@@ -1271,7 +1275,14 @@ def update(args):
             # warnings.warn(msg)
             all_symbols.remove('*')
 
-        r.symbols.append(('global', all_symbols))
+        # Remove the symbols to be removed and convert to a list
+        all_symbols_list = [symbol for symbol in all_symbols if
+                            symbol not in removed_set]
+
+        # Sort the list
+        all_symbols_list.sort()
+
+        r.symbols.append(('global', all_symbols_list))
 
         # Add the wildcard to the local symbols
         r.symbols.append(('local', ['*']))
@@ -1364,6 +1375,8 @@ def new(args):
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
 
+    new_symbols_set = set(new_symbols)
+
     if new_symbols:
         new_map = Map()
         r = Release()
@@ -1377,7 +1390,7 @@ def new(args):
         r.name = name.upper()
 
         # Add the symbols to global scope
-        r.symbols.append(('global', new_symbols))
+        r.symbols.append(('global', sorted(new_symbols_set)))
 
         # Add the wildcard to the local symbols
         r.symbols.append(('local', ['*']))
