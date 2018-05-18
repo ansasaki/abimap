@@ -112,25 +112,6 @@ def test_guess_name_without_similar_prefix(datadir):
         # It is expected the name to use the latest release prefix
         assert name == "UNRELATED_NAME_1_2_0"
 
-def test_empty_map(datadir):
-    m = symver.Map()
-
-    expected = "Empty map"
-
-    with pytest.raises(Exception) as e:
-        m.check()
-        assert expected in str(e.value)
-
-    with cd(datadir):
-        m.read("base.map")
-
-        m.check()
-
-        out = str(m)
-
-        with open("empty_map.stdout") as tcout:
-            assert out == tcout.read()
-
 
 def test_released_map(datadir):
     m = symver.Map()
