@@ -107,8 +107,10 @@ def test_guess_name_without_similar_prefix(datadir):
 
     with cd(datadir):
         m.read("without_similar_prefix.map")
-        m.guess_name(None, guess=True)
+        name = m.guess_name(None, guess=True)
 
+        # It is expected the name to use the latest release prefix
+        assert name == "UNRELATED_NAME_1_2_0"
 
 def test_empty_map(datadir):
     m = symver.Map()
@@ -128,6 +130,7 @@ def test_empty_map(datadir):
 
         with open("empty_map.stdout") as tcout:
             assert out == tcout.read()
+
 
 def test_released_map(datadir):
     m = symver.Map()
