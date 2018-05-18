@@ -1,0 +1,9 @@
+# Simple released release map
+
+RELEASED_1_0_0   # Released
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;

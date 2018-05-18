@@ -231,7 +231,7 @@ class Map(object):
                             r.name = m.group(0)
                             releases.append(r)
                             last = (index, column)
-                            state += 1
+
                             if has_duplicate:
                                 msg = "".join(["Duplicated Release identifier"
                                                " \'", name, "\'"])
@@ -240,6 +240,18 @@ class Map(object):
                                                              lines[index],
                                                              index,
                                                              column, msg))
+
+                            # Search for the special release marker comment
+                            m = re.match(r'\s*#.\s*released.*$',
+                                         line[column:],
+                                         re.IGNORECASE)
+                            if m:
+                                column += m.end()
+                                r.released = True
+                                last = (index, column)
+
+                            # Advance to the next state
+                            state += 1
                             continue
                     # Searching for the '{'
                     elif state == 1:
@@ -788,6 +800,7 @@ class Release(object):
     def __init__(self):
         self.name = ''
         self.previous = ''
+        self.released = False
         self.symbols = []
 
     def __str__(self):

@@ -108,3 +108,35 @@ def test_guess_name_without_similar_prefix(datadir):
     with cd(datadir):
         m.read("without_similar_prefix.map")
         m.guess_name(None, guess=True)
+
+
+def test_empty_map(datadir):
+    m = symver.Map()
+
+    expected = "Empty map"
+
+    with pytest.raises(Exception) as e:
+        m.check()
+        assert expected in str(e.value)
+
+    with cd(datadir):
+        m.read("base.map")
+
+        m.check()
+
+        out = str(m)
+
+        with open("empty_map.stdout") as tcout:
+            assert out == tcout.read()
+
+def test_released_map(datadir):
+    m = symver.Map()
+
+    with cd(datadir):
+        m.read("released.map")
+
+        m.check()
+
+        r = m.releases[0]
+
+        assert r.released
