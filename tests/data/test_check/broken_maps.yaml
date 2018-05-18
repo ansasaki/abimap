@@ -148,7 +148,7 @@
         predecessor)"
       - "GLOBAL_WILDCARD_1_2_0 contains the '*' wildcard in global scope. \
         It is probably exporting symbols it should not."
-      - "SCOPES_1_3_0contains unknown scope named scope (different from  \
+      - "SCOPES_1_3_0 contains unknown scope named scope (different from \
         'global' and 'local')"
       - "The '*' wildcard was found in more than one place:"
       - "    NOTBASE_1_1_0: in 'local'"
