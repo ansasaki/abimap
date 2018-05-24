@@ -1,0 +1,10 @@
+# Map missing global declaration before any scope, but added later
+
+MISSING_GLOBAL_1_0_0
+{
+    one_symbol;
+    local:
+        *;
+    global:
+        two_symbol;
+} ;

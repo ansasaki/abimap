@@ -4,6 +4,31 @@
     args:
       - "update"
       - "--add"
+      - "add.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "sanity_add.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "--final"
+      - "add.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "add_final.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
       - "--out"
       - "add.map"
       - "add.map"
@@ -92,4 +117,72 @@
     warnings:
       - "Overwriting existing file 'dry.in'"
       - "Given paths in '--out' and '--in' are the same."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "-r"
+      - "EXISTING_1_0_0"
+      - "update_existing.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "update_existing.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "-r"
+      - "EXISTING_1_0_0"
+      - "update_released.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "update_released.stdout"
+    warnings:
+    exceptions:
+      - "Released releases cannot be modified. Abort."
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "--final"
+      - "-r"
+      - "EXISTING_1_0_0"
+      - "update_existing.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "update_existing_final.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "split.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "split.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "missing_global.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "missing_global.stdout"
+    warnings:
     exceptions:

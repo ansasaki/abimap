@@ -1,0 +1,22 @@
+-
+  input:
+    args:
+      - "check"
+      - "base.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "check"
+      - "split.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:

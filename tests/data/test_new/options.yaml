@@ -3,6 +3,31 @@
   input:
     args:
       - "new"
+      - "--release"
+      - "SANITY_1_0_0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "sanity.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--final"
+      - "--release"
+      - "SANITY_1_0_0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "sanity_final.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "new"
       - "--out"
       - "with_output.map"
       - "--release"

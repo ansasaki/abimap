@@ -183,7 +183,7 @@ Running ``smap update -h`` will give::
   usage: smap update [-h] [-o OUT] [-i INPUT] [-d]
                      [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
                      [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
-                     [--no_guess] [--allow-abi-break] [-a | --remove]
+                     [--no_guess] [--allow-abi-break] [-f] [-a | --remove]
                      file
   
   positional arguments:
@@ -208,6 +208,8 @@ Running ``smap update -h`` will give::
                           LIBX_1_0_0)
     --no_guess            Disable next release name guessing
     --allow-abi-break     Allow removing symbols, and to break ABI
+    -f, --final           Mark the modified release as final, preventing later
+                          changes.
     -a, --add             Adds the symbols to the map file.
     --remove              Remove the symbols from the map file. This breaks the
                           ABI.
@@ -221,6 +223,7 @@ Running ``smap new -h`` will give::
   usage: smap new [-h] [-o OUT] [-i INPUT] [-d]
                   [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
                   [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE] [--no_guess]
+                  [-f]
   
   optional arguments:
     -h, --help            show this help message and exit
@@ -240,6 +243,8 @@ Running ``smap new -h`` will give::
                           The full name of the release to be used (e.g.
                           LIBX_1_0_0)
     --no_guess            Disable next release name guessing
+    -f, --final           Mark the new release as final, preventing later
+                          changes.
   
   A list of symbols is expected as the input. If a file is provided with '-i',
   the symbols are read from the given file. Otherwise the symbols are read from
