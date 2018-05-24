@@ -1,0 +1,11 @@
+# Map with global symbols split
+
+SPLIT_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+    global:
+        two_symbol;
+} ;

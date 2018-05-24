@@ -298,8 +298,11 @@ class Map(object):
                                                   msg)
                             else:
                                 # New visibility found
-                                v = (identifier, [])
-                                r.symbols.append(v)
+                                if identifier in r.symbols:
+                                    v = r.symbols[identifier]
+                                else:
+                                    v = []
+                                    r.symbols[identifier] = v
                                 column += m.end()
                                 last = (index, column)
                                 state = 2
@@ -307,8 +310,8 @@ class Map(object):
                         else:
                             if v is None:
                                 # There was no open visibility scope
-                                v = ('global', [])
-                                r.symbols.append(v)
+                                v = []
+                                r.symbols['global'] = v
                                 msg = "Missing visibility scope before"\
                                       " \'{0}\'. Symbols considered in"\
                                       " 'global:\'".format(identifier)
@@ -319,7 +322,7 @@ class Map(object):
                                                              msg))
                             else:
                                 # Symbol found
-                                v[1].append(identifier)
+                                v.append(identifier)
                                 column += m.end()
                                 last = (index, column)
                                 # Move back the state to find elements
@@ -402,9 +405,8 @@ class Map(object):
 
         symbols = []
         for release in self.releases:
-            for scope, scope_symbols in release.symbols:
-                if scope.lower() == 'global':
-                    symbols.extend(scope_symbols)
+            if 'global' in release.symbols:
+                symbols.extend(release.symbols['global'])
         return set(symbols)
 
     def duplicates(self):
@@ -507,7 +509,7 @@ class Map(object):
 
         # Check '*' wildcard usage
         for release in self.releases:
-            for scope, symbols in release.symbols:
+            for scope, symbols in release.symbols.items():
                 if scope == 'local':
                     if symbols:
                         if "*" in symbols:
@@ -762,22 +764,27 @@ class Release(object):
         self.name = ''
         self.previous = ''
         self.released = False
-        self.symbols = []
+        self.symbols = dict()
 
     def __str__(self):
+        released = ""
         vs = []
-        for visibility, symbols in self.symbols:
-            symbols.sort()
-            vs.extend([" " * 4, visibility, ":\n",
+        visibilities = sorted(self.symbols.keys())
+        if self.released:
+            released = "    # Released"
+        for v in visibilities:
+            symbols = sorted(self.symbols[v])
+            vs.extend([" " * 4, v, ":\n",
                        "".join((" " * 8 + symbol + ";\n"
                                 for symbol in symbols))])
-        content = "".join(chain(self.name, "\n{\n", vs, "} ",
-                          self.previous, ";\n"))
+        content = "".join(chain(self.name, released, "\n",
+                                "{\n", vs, "} ",
+                                self.previous, ";\n"))
         return content
 
     def duplicates(self):
         duplicates = []
-        for scope, symbols in self.symbols:
+        for scope, symbols in (self.symbols.items()):
             seen = set()
             release_dups = set()
             if symbols:
@@ -938,7 +945,6 @@ def clean_symbols(symbols):
 
     # Report duplicated symbols
     if clean:
-        clean.sort()
         previous = None
         duplicates = set()
         for i in clean:
@@ -1181,22 +1187,39 @@ def update(args):
         print("No symbols added or removed. Nothing done.")
         return
 
+    r = None
+
     if added:
-        r = Release()
-        # Guess the name for the new release
-        r.name = cur_map.guess_name(release_info, guess=args.guess)
-        r.name.upper()
+        if release_info:
+            for to_up in (rs for rs in cur_map.releases if rs and rs.name ==
+                          release_info[0]):
+                # If the release to be modified is released
+                if to_up.released:
+                    msg = "Released releases cannot be modified. Abort."
+                    logger.error(msg)
+                    raise Exception(msg)
+
+                r = to_up
+        else:
+            r = Release()
+            # Guess the name for the new release
+            r.name = cur_map.guess_name(release_info, guess=args.guess)
+            r.name.upper()
+            r.symbols['global'] = []
+
+            if not removed:
+                # Add the name for the previous release
+                r.previous = latest[0]
+
+                # Put the release on the map
+                cur_map.releases.append(r)
+
+        # If this is the final change to the release, mark as released
+        if args.final:
+            r.released = True
 
         # Add the symbols added to global scope
-        r.symbols.append(("global", added))
-
-        if not removed:
-            # Add the name for the previous release
-            r.previous = latest[0]
-
-            # Put the release on the map
-            cur_map.releases.append(r)
-
+        r.symbols['global'].extend(added)
     if removed:
         if not args.allow_abi_break:
             msg = "ABI break detected: symbols would be removed"
@@ -1226,13 +1249,15 @@ def update(args):
         all_symbols_list = [symbol for symbol in all_symbols if
                             symbol not in removed_set]
 
-        # Sort the list
-        all_symbols_list.sort()
-
-        r.symbols.append(('global', all_symbols_list))
+        # Update the global symbols
+        r.symbols.update({'global': all_symbols_list})
 
         # Add the wildcard to the local symbols
-        r.symbols.append(('local', ['*']))
+        r.symbols.update({'local': ['*']})
+
+        # If this is the final change to the release, mark as released
+        if args.final:
+            r.released = True
 
         # Put the release on the map
         new_map.releases.append(r)
@@ -1335,10 +1360,13 @@ def new(args):
         r.name = name.upper()
 
         # Add the symbols to global scope
-        r.symbols.append(('global', sorted(new_symbols_set)))
+        r.symbols['global'] = list(new_symbols_set)
 
         # Add the wildcard to the local symbols
-        r.symbols.append(('local', ['*']))
+        r.symbols['local'] = ['*']
+
+        if args.final:
+            r.released = True
 
         # Put the release on the map
         new_map.releases.append(r)
@@ -1469,6 +1497,10 @@ def get_arg_parser():
     parser_up.add_argument("--allow-abi-break",
                            help="Allow removing symbols, and to break ABI",
                            action='store_true')
+    parser_up.add_argument("-f", "--final",
+                           help="Mark the modified release as final,"
+                           " preventing later changes.",
+                           action='store_true')
     group = parser_up.add_mutually_exclusive_group()
     group.add_argument("-a", "--add", help="Adds the symbols to the map file.",
                        action='store_true')
@@ -1487,6 +1519,10 @@ def get_arg_parser():
                                        " with \'-i\', the symbols are read"
                                        " from the given file. Otherwise the"
                                        " symbols are read from stdin.")
+    parser_new.add_argument("-f", "--final",
+                            help="Mark the new release as final,"
+                                 " preventing later changes.",
+                            action='store_true')
     parser_new.set_defaults(func=new)
 
     # Check subcommand parser

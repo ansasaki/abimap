@@ -76,6 +76,19 @@
   input:
     args:
       - "check"
+      - "missing_global.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+      - "Missing visibility scope before"
+      - "Symbols considered in 'global:'"
+    exceptions:
+-
+  input:
+    args:
+      - "check"
       - "invalid_previous.map"
     stdin:
   output:

@@ -124,3 +124,21 @@ def test_released_map(datadir):
         r = m.releases[0]
 
         assert r.released
+
+
+def test_print_released_map(datadir):
+    m = symver.Map()
+
+    with cd(datadir):
+        m.read("base.map")
+
+        m.check()
+
+        r = m.releases[0]
+
+        r.released = True
+
+        out = str(m)
+
+        with open("print_released.stdout") as tcout:
+            assert out == tcout.read()

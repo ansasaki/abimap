@@ -5,6 +5,35 @@
       - "update"
       - "--remove"
       - "--allow-abi-break"
+      - "remove.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "remove_sanity.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "--final"
+      - "--allow-abi-break"
+      - "remove.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "remove_final.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "--allow-abi-break"
       - "--out"
       - "remove.map"
       - "remove.map"

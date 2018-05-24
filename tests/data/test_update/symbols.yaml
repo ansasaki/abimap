@@ -3,6 +3,29 @@
   input:
     args:
       - "update"
+      - "symbols.map"
+    stdin: "symbols.in"
+  output:
+    file:
+    stdout: "symbols_sanity.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--final"
+      - "symbols.map"
+    stdin: "symbols.in"
+  output:
+    file:
+    stdout: "symbols_final.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
       - "--out"
       - "symbols.map"
       - "symbols.map"
@@ -15,3 +38,30 @@
       - "Given paths in '--out' and 'file' are the same."
       - "Moving 'symbols.map' to 'symbols.map.old'."
     exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "-r"
+      - "EXISTING_1_0_0"
+      - "update_existing.map"
+    stdin: "update_existing.in"
+  output:
+    file:
+    stdout: "update_existing.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "-r"
+      - "EXISTING_1_0_0"
+      - "update_released.map"
+    stdin: "update_released.in"
+  output:
+    file:
+    stdout: "update_released.stdout"
+    warnings:
+    exceptions:
+      - "Released releases cannot be modified. Abort."
