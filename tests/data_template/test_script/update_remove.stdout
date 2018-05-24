@@ -1,0 +1,14 @@
+Removed:
+    one_symbol
+
+Merging all symbols in a single new release
+# This map file was updated with PROGRAM_NAME_VERSION
+
+TO_REMOVE_2_0_0
+{
+    global:
+        two_symbol;
+    local:
+        *;
+} ;
+

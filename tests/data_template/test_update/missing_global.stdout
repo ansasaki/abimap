@@ -1,0 +1,20 @@
+Added:
+    symbol
+
+# This map file was updated with PROGRAM_NAME_VERSION
+
+MISSING_GLOBAL_1_1_0
+{
+    global:
+        symbol;
+} MISSING_GLOBAL_1_0_0;
+
+MISSING_GLOBAL_1_0_0
+{
+    global:
+        one_symbol;
+        two_symbol;
+    local:
+        *;
+} ;
+

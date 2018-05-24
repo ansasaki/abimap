@@ -32,6 +32,11 @@ help:
 ci-bootstrap: ci/bootstrap.py
 	python ci/bootstrap.py
 
+bootstrap-tests:
+	@SMAP_NAME_VERSION=`python version.py`; \
+	echo "Setting name and version in tests as $${SMAP_NAME_VERSION}"; \
+	$(MAKE) -C tests SMAP_NAME_VERSION=$${SMAP_NAME_VERSION}
+
 clean: clean-build clean-pyc clean-test clean-docs
 
 clean-build: ## remove build artifacts
@@ -51,6 +56,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+	rm -rf tests/data
 
 clean-docs: ## remove generated docs files
 	rm -rf dist/docs
@@ -59,7 +65,7 @@ clean-docs: ## remove generated docs files
 lint: ## check style with flake8
 	flake8 src/smap tests
 
-test: ## run tests quickly with the default Python
+test: bootstrap-tests## run tests quickly with the default Python
 	pytest -vv --ignore=src/
 
 test-all: tox.ini## run tests on every Python version with tox

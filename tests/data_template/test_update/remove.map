@@ -1,0 +1,11 @@
+# This map file was created with PROGRAM_NAME_VERSION
+
+LIBTC2_1_0_0
+{
+    global:
+        another_symbol;
+        symbol;
+    local:
+        *;
+} ;
+

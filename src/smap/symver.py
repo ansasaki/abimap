@@ -9,6 +9,8 @@ import shutil
 import sys
 from itertools import chain
 
+from ._version import __version__
+
 VERBOSITY_MAP = {"debug": logging.DEBUG,
                  "info": logging.INFO,
                  "warning": logging.WARNING,
@@ -464,7 +466,7 @@ class Map(object):
                     if dep in current:
                         msg = ("Circular dependency detected!\n"
                                "    {0}".format("->".join(chain(current,
-                                                                dep))))
+                                                                [dep]))))
                         self.logger.error(msg)
                         raise Exception(msg)
                     # Append the dependency to the current list
@@ -556,9 +558,8 @@ class Map(object):
                 # The '*' wildcard was found in more than one place
                 self.logger.warn("The \'*\' wildcard was found in more than"
                                  " one place:")
-                self.logger.warn("".join((" " * 4 + name + ": in \'" +
-                                          scope + "\'"
-                                          for name, scope in have_wildcard)))
+                for name, scope in have_wildcard:
+                    self.logger.warn("    %s: in \'%s\'", name, scope)
         else:
             self.logger.warn("The \'*\' wildcard was not found")
 
@@ -566,15 +567,16 @@ class Map(object):
             if len(seems_base) > 1:
                 # There is more than one release without predecessor and
                 # containing '*' wildcard in local scope
-                self.logger.warn("More than one release seems the base version"
-                                 " (contains the local wildcard and does not"
-                                 " have a predecessor version):")
-                self.logger.warn("    " + name for name in seems_base)
+                self.logger.warn("More than one release seem to be the base"
+                                 " version (contain the local wildcard and"
+                                 " do not have a predecessor version):")
+                for name in seems_base:
+                    self.logger.warn("    %s", name)
         else:
             self.logger.warn("No base version release found")
 
         dependencies = self.dependencies()
-        self.logger.info("Found dependencies: ")
+        self.logger.info("Found dependencies:")
         for release in dependencies:
             content = "".join(chain(" " * 4,
                                     (dep + "->" for dep in release)))
@@ -1275,15 +1277,17 @@ def update(args):
         print("This is a dry run, the files were not modified.")
         return
 
-    # Write out to the output
-    if args.out:
-        with open(args.out, "w") as outfile:
-            outfile.write("# This map file was updated with smap\n\n")
-            outfile.write(str(cur_map))
-    else:
-        # Print to stdout
-        sys.stdout.write("# This map file was updated with smap\n\n")
-        sys.stdout.write(str(cur_map))
+    try:
+        if args.out:
+            f = open(args.out, "w")
+        else:
+            f = sys.stdout
+        f.write("# This map file was updated with"
+                " smap-{0}\n\n".format(__version__))
+        f.write(str(cur_map))
+    finally:
+        if args.out:
+            f.close()
 
 
 def new(args):
@@ -1381,19 +1385,17 @@ def new(args):
             print("This is a dry run, the files were not modified.")
             return
 
-        # Write out to the output
-        if args.out:
-            # TODO Add version info
-            with open(args.out, "w") as outfile:
-                outfile.write("# This map file was created with"
-                              " smap\n\n")
-                outfile.write(str(new_map))
-        else:
-            # TODO Add version info
-            # Print to stdout
-            sys.stdout.write("# This map file was created with"
-                             " smap\n\n")
-            sys.stdout.write(str(new_map))
+        try:
+            if args.out:
+                f = open(args.out, "w")
+            else:
+                f = sys.stdout
+            f.write("# This map file was created with"
+                    " smap-{0}\n\n".format(__version__))
+            f.write(str(new_map))
+        finally:
+            if args.out:
+                f.close()
     else:
         logger.warn("No valid symbols provided. Nothing done.")
 
@@ -1423,6 +1425,23 @@ def check(args):
 
     # Check the map file
     smap.check()
+
+
+def version(args):
+    """
+    \'version\' subcommand
+
+    Prints and returns the program name and version.
+
+    :param args: Arguments given in command line parsed by argparse
+    :returns: A string containing the program name and version
+    """
+
+    name_version = "smap-" + __version__
+
+    print(name_version)
+
+    return name_version
 
 
 def get_arg_parser():
@@ -1530,6 +1549,10 @@ def get_arg_parser():
                                          parents=[verb_args])
     parser_check.add_argument("file", help="The map file to be checked")
     parser_check.set_defaults(func=check)
+
+    # Check subcommand parser
+    parser_version = subparsers.add_parser("version", help="Print version")
+    parser_version.set_defaults(func=version)
 
     return parser
 

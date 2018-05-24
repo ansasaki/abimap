@@ -1,0 +1,11 @@
+# This map file was created with PROGRAM_NAME_VERSION
+
+TO_REMOVE_1_0_0
+{
+    global:
+        one_symbol;
+        two_symbol;
+    local:
+        *;
+} ;
+
