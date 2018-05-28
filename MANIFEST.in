@@ -14,7 +14,8 @@ include README.rst
 include HISTORY.rst
 
 include Makefile
+include version.py
 
 include tox.ini .travis.yml
 
-global-exclude docs/_build* *.swp
+global-exclude docs/_build* *.swp tests/data

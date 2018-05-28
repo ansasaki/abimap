@@ -1,0 +1,33 @@
+# Testing with logfile option
+-
+  input:
+    args:
+      - "update"
+      - "--logfile"
+      - "wildcard_warnings.log"
+      - "--out"
+      - "wildcard_warnings_with_log.out"
+      - "wildcard_warnings.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "wildcard_warnings_no_abi_break.stdout"
+    warnings:
+      - "NOTBASE_1_1_0 should not contain the local wildcard because it is \
+        not the base version (it refers to version BASE_1_0_0 as its \
+        predecessor)"
+      - "GLOBAL_WILDCARD_1_2_0 contains the '*' wildcard in global scope. \
+        It is probably exporting symbols it should not."
+      - "SCOPES_1_3_0 contains unknown scope named scope (different from \
+        'global' and 'local')"
+      - "The '*' wildcard was found in more than one place:"
+      - "    NOTBASE_1_1_0: in 'local'"
+      - "    BASE_1_0_0: in 'local'"
+      - "    GLOBAL_WILDCARD_1_2_0: in 'global'"
+      - "    OTHER_BASE_1_0_0: in 'local'"
+      - "More than one release seem to be the base version (contain the \
+        local wildcard and do not have a predecessor version):"
+      - "   BASE_1_0_0"
+      - "   OTHER_BASE_1_0_0"
+    exceptions:
+      - "ABI break detected: symbols would be removed"

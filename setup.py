@@ -3,12 +3,17 @@
 
 """The setup script."""
 
+import os
 from glob import glob
 from os.path import basename
 from os.path import splitext
 
 from setuptools import find_packages
 from setuptools import setup
+from version import get_version
+
+package_name = "symver-smap"
+here = os.path.abspath(os.path.dirname(__file__))
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -21,6 +26,8 @@ requirements = []
 setup_requirements = ['pytest-runner']
 
 test_requirements = ['pytest', 'pyyaml', 'pytest-cov', 'pytest-console-scripts']
+
+version = get_version()
 
 setup(
     author="Anderson Toshiyuki Sasaki",
@@ -44,10 +51,11 @@ setup(
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='symver smap symbol version versioning linker script library maintenance',
-    name='symver-smap',
+    name=package_name,
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/smap/*.py')],
+    py_modules=[splitext(basename(path))[0] for path in glob(
+        os.path.join(here, 'src', 'smap', '*.py'))],
     entry_points={
         'console_scripts': ['smap=smap.main:main']
     },
@@ -55,6 +63,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/ansasaki/smap',
-    version='0.1.0',
+    version=version,
     zip_safe=False,
 )

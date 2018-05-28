@@ -1,0 +1,10 @@
+# This map file was created with PROGRAM_NAME_VERSION
+
+EXISTING_1_0_0            #      released
+{
+    global:
+        existing_symbol;
+    local:
+        *;
+} ;
+

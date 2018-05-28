@@ -1,0 +1,16 @@
+# This map file was updated with PROGRAM_NAME_VERSION
+
+LIBX_1_1_0
+{
+    global:
+        new_symbol;
+} LIBX_1_0_0;
+
+LIBX_1_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+

@@ -1,0 +1,14 @@
+Added:
+    symbol
+
+# This map file was updated with PROGRAM_NAME_VERSION
+
+EXISTING_1_0_0
+{
+    global:
+        existing_symbol;
+        symbol;
+    local:
+        *;
+} ;
+

@@ -1,0 +1,234 @@
+# Testing broken map files (some just give warnings)
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "nameless.out"
+      - "nameless.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid Release identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--allow-abi-break"
+      - "--out"
+      - "duplicated.out"
+      - "duplicated.map"
+    stdin: "symbol.in"
+  output:
+    file: "duplicated.outfile"
+    stdout: "duplicated.stdout"
+    warnings:
+      - "Duplicated Release identifier"
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "opening.out"
+      - "opening.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing '{'"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "invalid_element.out"
+      - "invalid_element.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "missing_semicolon.out"
+      - "missing_semicolon.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing ';' or ':' after"
+-
+  input:
+    args:
+      - "update"
+      - "--allow-abi-break"
+      - "--out"
+      - "missing_visibility.out"
+      - "missing_visibility.map"
+    stdin: "symbol.in"
+  output:
+    file: "missing_visibility.outfile"
+    stdout: "missing_visibility.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+      - "Missing visibility scope before"
+      - "Symbols considered in 'global:'"
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "invalid_previous.out"
+      - "invalid_previous.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Invalid identifier"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "missing_previous_closer.out"
+      - "missing_previous_closer.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing ';'"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "non_existing_previous.out"
+      - "non_existing_previous.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Release 'LIBTC5_8_0_0' not found"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "duplicated_dependency.out"
+      - "duplicated_dependency.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+      - "Duplicated Release identifier 'LIBTC5_9_0_0'"
+    exceptions:
+      - "defined more than 1 release 'LIBTC5_9_0_0'"
+-
+  input:
+    args:
+      - "update"
+      - "--out"
+      - "circular_dependency.out"
+      - "circular_dependency.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Circular dependency detected!"
+-
+  input:
+    args:
+      - "update"
+      - "--allow-abi-break"
+      - "--out"
+      - "wildcard_warnings.out"
+      - "wildcard_warnings.map"
+    stdin: "symbol.in"
+  output:
+    file: "wildcard_warnings.outfile"
+    stdout: "wildcard_warnings.stdout"
+    warnings:
+      - "NOTBASE_1_1_0 should not contain the local wildcard because it is \
+        not the base version (it refers to version BASE_1_0_0 as its \
+        predecessor)"
+      - "GLOBAL_WILDCARD_1_2_0 contains the '*' wildcard in global scope. \
+        It is probably exporting symbols it should not."
+      - "SCOPES_1_3_0 contains unknown scope named scope (different from \
+        'global' and 'local')"
+      - "The '*' wildcard was found in more than one place:"
+      - "    NOTBASE_1_1_0: in 'local'"
+      - "    BASE_1_0_0: in 'local'"
+      - "    GLOBAL_WILDCARD_1_2_0: in 'global'"
+      - "    OTHER_BASE_1_0_0: in 'local'"
+      - "More than one release seem to be the base version (contain the \
+        local wildcard and do not have a predecessor version):"
+      - "   BASE_1_0_0"
+      - "   OTHER_BASE_1_0_0"
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--allow-abi-break"
+      - "--out"
+      - "baseless.out"
+      - "baseless.map"
+    stdin: "symbol.in"
+  output:
+    file: "baseless.out"
+    stdout: "baseless.stdout"
+    warnings:
+      - "The '*' wildcard was not found"
+      - "No base version release found"
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "mixed_names.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "mixed_names.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "only_visibility.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "only_visibility.stdout"
+    warnings:
+      - "The '*' wildcard was not found"
+      - "No base version release found"
+    exceptions:

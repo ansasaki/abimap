@@ -41,19 +41,25 @@ or (to check the content of a existing map)::
 
   $ smap check my.map
 
+or (to check the current version)::
+
+  $ smap version
+
 Long version
 ------------
 
-INCLUDE_HELP_PLACEHOLDER
+INCLUDE HELP_PLACEHOLDER
 
 Call a subcommand passing '-h' to see its specific options
-There are three subcommands, ``update``, ``new``, and ``check``
+There are four subcommands, ``update``, ``new``, ``check``, and ``version``
 
-INCLUDE_HELP_UPDATE_PLACEHOLDER
+INCLUDE HELP_UPDATE_PLACEHOLDER
 
 INCLUDE HELP_NEW_PLACEHOLDER
 
-INCLUDE_HELP_CHECK_PLACEHOLDER
+INCLUDE HELP_CHECK_PLACEHOLDER
+
+INCLUDE HELP_VERSION_PLACEHOLDER
 
 Import as a library:
 --------------------

@@ -1,0 +1,14 @@
+Removed:
+    symbol
+
+Merging all symbols in a single new release
+# This map file was updated with PROGRAM_NAME_VERSION
+
+LIBTC2_2_0_0    # Released
+{
+    global:
+        another_symbol;
+    local:
+        *;
+} ;
+

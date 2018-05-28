@@ -1,0 +1,10 @@
+# This map file was created with PROGRAM_NAME_VERSION
+
+WITH_OUTPUT_1_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+

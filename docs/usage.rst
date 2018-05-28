@@ -41,28 +41,34 @@ or (to check the content of a existing map)::
 
   $ smap check my.map
 
+or (to check the current version)::
+
+  $ smap version
+
 Long version
 ------------
 
 Running  ``smap -h`` will give::
 
-  usage: smap [-h] {update,new,check} ...
+  usage: smap [-h] {update,new,check,version} ...
   
   Helper tools for linker version script maintenance
   
   optional arguments:
-    -h, --help          show this help message and exit
+    -h, --help            show this help message and exit
   
   Subcommands:
-    {update,new,check}  These subcommands have their own set of options
-      update            Update the map file
-      new               Create a new map file
-      check             Check the map file
+    {update,new,check,version}
+                          These subcommands have their own set of options
+      update              Update the map file
+      new                 Create a new map file
+      check               Check the map file
+      version             Print version
   
   Call a subcommand passing '-h' to see its specific options
 
 Call a subcommand passing '-h' to see its specific options
-There are three subcommands, ``update``, ``new``, and ``check``
+There are four subcommands, ``update``, ``new``, ``check``, and ``version``
 
 Running ``smap update -h`` will give::
 
@@ -154,6 +160,13 @@ Running ``smap check -h`` will give::
     --debug               Makes the program print debug info
     -l LOGFILE, --logfile LOGFILE
                           Log to this file
+
+Running ``smap version -h`` will give::
+
+  usage: smap version [-h]
+  
+  optional arguments:
+    -h, --help  show this help message and exit
 
 Import as a library:
 --------------------

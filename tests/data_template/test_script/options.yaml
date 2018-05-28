@@ -1,0 +1,75 @@
+# Testcases to test the command line interface
+-
+  input:
+    args:
+      - "new"
+      - "--release"
+      - "RELEASE_1_0_0"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "new.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "base.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "update_add.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--allow-abi-break"
+      - "base.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "update_symbols.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--remove"
+      - "--allow-abi-break"
+      - "remove_base.map"
+    stdin: "update_remove.in"
+  output:
+    file:
+    stdout: "update_remove.stdout"
+    warnings:
+      - "ABI break detected: symbols were removed."
+    exceptions:
+-
+  input:
+    args:
+      - "new"
+      - "--release"
+      - "RELEASE_1_0_0"
+    stdin: "empty.in"
+  output:
+    file:
+    stdout:
+    warnings:
+      - "No valid symbols provided. Nothing done."
+    exceptions:
+-
+  input:
+    args:
+      - "version"
+    stdin: "empty.in"
+  output:
+    file:
+    stdout: "version.stdout"
+    warnings:
+    exceptions:

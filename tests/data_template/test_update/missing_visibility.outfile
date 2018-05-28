@@ -1,0 +1,10 @@
+# This map file was updated with PROGRAM_NAME_VERSION
+
+LIBTC5_6_0_0
+{
+    global:
+        symbol;
+    local:
+        *;
+} ;
+
