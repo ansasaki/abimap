@@ -1556,7 +1556,7 @@ def get_arg_parser():
     parser_check.add_argument("file", help="The map file to be checked")
     parser_check.set_defaults(func=check)
 
-    # Check subcommand parser
+    # Version subcommand parser
     parser_version = subparsers.add_parser("version", help="Print version")
     parser_version.set_defaults(func=version)
 
