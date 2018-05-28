@@ -451,7 +451,7 @@ class Map(object):
                 raise Exception(msg)
             return found[0].previous
 
-        solved = []
+        solved = set()
         deps = []
         for release in self.releases:
             # If the dependencies of the current release were resolved, skip
@@ -474,13 +474,11 @@ class Map(object):
 
                     # Remove the releases that are not heads from the list
                     if dep in solved:
-                        for i in deps:
-                            if i[0] == dep:
-                                deps.remove(i)
+                        deps = [i for i in deps if i[0] != dep]
                     else:
-                        solved.append(dep)
+                        solved.add(dep)
                     dep = get_dependency(self.releases, dep)
-                solved.append(release.name)
+                solved.add(release.name)
                 deps.append(current)
         return deps
 
