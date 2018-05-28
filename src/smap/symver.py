@@ -859,9 +859,7 @@ def get_info_from_release_string(release):
         return None
 
     # Remove eventual white spaces
-    m = re.match(r'\s+', release)
-    if m:
-        release = release[m.end():]
+    release = release.lstrip()
 
     # Search for the first ocurrence of a version like sequence
     m = re.search(r'_+[0-9]+', release)
@@ -889,10 +887,7 @@ def get_info_from_release_string(release):
 
     if prefix:
         # The prefix can have trailing '_'
-        m = re.search(r'_+$', prefix)
-        if m:
-            # If so, remove the trailing '_'
-            prefix = prefix[:m.start()]
+        prefix = prefix.rstrip("_")
 
     # Return the information got
     return [release, prefix, ver_suffix, version]
