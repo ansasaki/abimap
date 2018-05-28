@@ -386,11 +386,12 @@ class Map(object):
         """
 
         with open(filename, "r") as f:
-            self.filename = filename
             self.lines = f.readlines()
-            self.parse(self.lines)
-            # Check the map read
-            self.check()
+
+        self.filename = filename
+        self.parse(self.lines)
+        # Check the map read
+        self.check()
 
     def all_global_symbols(self):
         """
@@ -1108,16 +1109,16 @@ def update(args):
 
     # Generate the list of the new symbols
     new_symbols = []
+    lines = None
     if args.input:
         with open(args.input, "r") as symbols_fp:
             lines = symbols_fp.readlines()
-            for line in lines:
-                new_symbols.extend(line.split())
     else:
         # Read from stdin
         lines = sys.stdin.readlines()
-        for line in lines:
-            new_symbols.extend(line.split())
+
+    for line in lines:
+        new_symbols.extend(line.split())
 
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
@@ -1328,16 +1329,16 @@ def new(args):
 
     # Generate the list of the new symbols
     new_symbols = []
+    lines = None
     if args.input:
         with open(args.input, "r") as symbols_fp:
             lines = symbols_fp.readlines()
-            for line in lines:
-                new_symbols.extend(line.split())
     else:
         # Read from stdin
         lines = sys.stdin.readlines()
-        for line in lines:
-            new_symbols.extend(line.split())
+
+    for line in lines:
+        new_symbols.extend(line.split())
 
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
