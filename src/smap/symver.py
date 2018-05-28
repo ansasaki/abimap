@@ -252,23 +252,23 @@ class Map(object):
                     # Searching for the '{'
                     elif state == 1:
                         self.logger.debug(">>Opening")
-                        m = re.match(r'\{', line[column:])
-                        if m is None:
+                        found = line.find('{', column)
+                        if found < 0:
                             raise ParserError(self.filename,
                                               lines[last[0]], last[0], last[1],
                                               "Missing \'{\'")
                         else:
-                            column += m.end()
+                            column += (found + 1)
                             v = None
                             last = (index, column)
                             state += 1
                             continue
                     elif state == 2:
                         self.logger.debug(">>Element")
-                        m = re.match(r'\}', line[column:])
-                        if m:
+                        found = line.find('}', column)
+                        if found >= 0:
                             self.logger.debug(">>Closer, jump to Previous")
-                            column += m.end()
+                            column += (found + 1)
                             last = (index, column)
                             state = 4
                             continue
@@ -287,17 +287,17 @@ class Map(object):
                             continue
                     elif state == 3:
                         self.logger.debug(">>Element closer")
-                        m = re.match(r';', line[column:])
-                        if m is None:
+                        found = line.find(';', column)
+                        if found < 0:
                             # It was not Symbol. Maybe a new visibility.
-                            m = re.match(r':', line[column:])
-                            if m is None:
+                            found = line.find(':', column)
+                            if found != column:
                                 msg = "Missing \';\' or \':\' after"" \'{0}\'"\
                                       .format(identifier)
                                 # In this case the current position is used
                                 raise ParserError(self.filename,
-                                                  lines[index], index, column,
-                                                  msg)
+                                                  lines[index], index,
+                                                  column, msg)
                             else:
                                 # New visibility found
                                 if identifier in r.symbols:
@@ -305,11 +305,11 @@ class Map(object):
                                 else:
                                     v = []
                                     r.symbols[identifier] = v
-                                column += m.end()
+                                column += (found + 1)
                                 last = (index, column)
                                 state = 2
                                 continue
-                        else:
+                        elif found == column:
                             if v is None:
                                 # There was no open visibility scope
                                 v = []
@@ -325,17 +325,24 @@ class Map(object):
                             else:
                                 # Symbol found
                                 v.append(identifier)
-                                column += m.end()
+                                column += (found + 1)
                                 last = (index, column)
                                 # Move back the state to find elements
                                 state = 2
                                 continue
+                        else:
+                            msg = "Missing \';\' or \':\' after"" \'{0}\'"\
+                                  .format(identifier)
+                            # In this case the current position is used
+                            raise ParserError(self.filename,
+                                              lines[index], index,
+                                              column, msg)
                     elif state == 4:
                         self.logger.debug(">>Previous")
-                        m = re.match(r'^;', line[column:])
-                        if m:
+                        found = line.find(";", column)
+                        if found == column:
                             self.logger.debug(">>Empty previous")
-                            column += m.end()
+                            column += (found + 1)
                             last = (index, column)
                             # Move back the state to find other releases
                             state = 0
@@ -354,19 +361,24 @@ class Map(object):
                             continue
                     elif state == 5:
                         self.logger.debug(">>Previous closer")
-                        m = re.match(r'^;', line[column:])
-                        if m is None:
+                        found = line.find(";", column)
+                        if found < 0:
                             raise ParserError(self.filename,
                                               lines[last[0]], last[0], last[1],
                                               "Missing \';\'")
-                        else:
+                        elif found == column:
                             # Found previous closer
-                            column += m.end()
+                            column += (found + 1)
                             r.previous = identifier
                             last = (index, column)
                             # Move back the state to find other releases
                             state = 0
                             continue
+                        else:
+                            raise ParserError(self.filename,
+                                              lines[index], index,
+                                              column,
+                                              "Unexpected character")
 
                 except ParserError as e:
                     # Any exception raised is considered an error
@@ -386,11 +398,12 @@ class Map(object):
         """
 
         with open(filename, "r") as f:
-            self.filename = filename
             self.lines = f.readlines()
-            self.parse(self.lines)
-            # Check the map read
-            self.check()
+
+        self.filename = filename
+        self.parse(self.lines)
+        # Check the map read
+        self.check()
 
     def all_global_symbols(self):
         """
@@ -451,7 +464,7 @@ class Map(object):
                 raise Exception(msg)
             return found[0].previous
 
-        solved = []
+        solved = set()
         deps = []
         for release in self.releases:
             # If the dependencies of the current release were resolved, skip
@@ -474,13 +487,11 @@ class Map(object):
 
                     # Remove the releases that are not heads from the list
                     if dep in solved:
-                        for i in deps:
-                            if i[0] == dep:
-                                deps.remove(i)
+                        deps = [i for i in deps if i[0] != dep]
                     else:
-                        solved.append(dep)
+                        solved.add(dep)
                     dep = get_dependency(self.releases, dep)
-                solved.append(release.name)
+                solved.add(release.name)
                 deps.append(current)
         return deps
 
@@ -861,9 +872,7 @@ def get_info_from_release_string(release):
         return None
 
     # Remove eventual white spaces
-    m = re.match(r'\s+', release)
-    if m:
-        release = release[m.end():]
+    release = release.lstrip()
 
     # Search for the first ocurrence of a version like sequence
     m = re.search(r'_+[0-9]+', release)
@@ -891,10 +900,7 @@ def get_info_from_release_string(release):
 
     if prefix:
         # The prefix can have trailing '_'
-        m = re.search(r'_+$', prefix)
-        if m:
-            # If so, remove the trailing '_'
-            prefix = prefix[:m.start()]
+        prefix = prefix.rstrip("_")
 
     # Return the information got
     return [release, prefix, ver_suffix, version]
@@ -1115,16 +1121,16 @@ def update(args):
 
     # Generate the list of the new symbols
     new_symbols = []
+    lines = None
     if args.input:
         with open(args.input, "r") as symbols_fp:
             lines = symbols_fp.readlines()
-            for line in lines:
-                new_symbols.extend(line.split())
     else:
         # Read from stdin
         lines = sys.stdin.readlines()
-        for line in lines:
-            new_symbols.extend(line.split())
+
+    for line in lines:
+        new_symbols.extend(line.split())
 
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
@@ -1335,16 +1341,16 @@ def new(args):
 
     # Generate the list of the new symbols
     new_symbols = []
+    lines = None
     if args.input:
         with open(args.input, "r") as symbols_fp:
             lines = symbols_fp.readlines()
-            for line in lines:
-                new_symbols.extend(line.split())
     else:
         # Read from stdin
         lines = sys.stdin.readlines()
-        for line in lines:
-            new_symbols.extend(line.split())
+
+    for line in lines:
+        new_symbols.extend(line.split())
 
     # Clean the input removing invalid symbols
     new_symbols = clean_symbols(new_symbols)
@@ -1550,7 +1556,7 @@ def get_arg_parser():
     parser_check.add_argument("file", help="The map file to be checked")
     parser_check.set_defaults(func=check)
 
-    # Check subcommand parser
+    # Version subcommand parser
     parser_version = subparsers.add_parser("version", help="Print version")
     parser_version.set_defaults(func=version)
 

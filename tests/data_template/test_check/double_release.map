@@ -1,0 +1,9 @@
+# Broken release with more than one identifier in release name
+
+BASE_1_0_0 extra
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;
