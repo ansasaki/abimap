@@ -1,0 +1,10 @@
+# Broken map missing a colon or semicolon
+
+MISSING_SEMICOLON_3_0_0
+{
+    global:
+        other_symbol
+    local:
+        *;
+} ;
+

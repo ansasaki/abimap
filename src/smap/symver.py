@@ -252,23 +252,23 @@ class Map(object):
                     # Searching for the '{'
                     elif state == 1:
                         self.logger.debug(">>Opening")
-                        m = re.match(r'\{', line[column:])
-                        if m is None:
+                        found = line.find('{', column)
+                        if found < 0:
                             raise ParserError(self.filename,
                                               lines[last[0]], last[0], last[1],
                                               "Missing \'{\'")
                         else:
-                            column += m.end()
+                            column += (found + 1)
                             v = None
                             last = (index, column)
                             state += 1
                             continue
                     elif state == 2:
                         self.logger.debug(">>Element")
-                        m = re.match(r'\}', line[column:])
-                        if m:
+                        found = line.find('}', column)
+                        if found >= 0:
                             self.logger.debug(">>Closer, jump to Previous")
-                            column += m.end()
+                            column += (found + 1)
                             last = (index, column)
                             state = 4
                             continue
@@ -287,17 +287,17 @@ class Map(object):
                             continue
                     elif state == 3:
                         self.logger.debug(">>Element closer")
-                        m = re.match(r';', line[column:])
-                        if m is None:
+                        found = line.find(';', column)
+                        if found < 0:
                             # It was not Symbol. Maybe a new visibility.
-                            m = re.match(r':', line[column:])
-                            if m is None:
+                            found = line.find(':', column)
+                            if found != column:
                                 msg = "Missing \';\' or \':\' after"" \'{0}\'"\
                                       .format(identifier)
                                 # In this case the current position is used
                                 raise ParserError(self.filename,
-                                                  lines[index], index, column,
-                                                  msg)
+                                                  lines[index], index,
+                                                  column, msg)
                             else:
                                 # New visibility found
                                 if identifier in r.symbols:
@@ -305,11 +305,11 @@ class Map(object):
                                 else:
                                     v = []
                                     r.symbols[identifier] = v
-                                column += m.end()
+                                column += (found + 1)
                                 last = (index, column)
                                 state = 2
                                 continue
-                        else:
+                        elif found == column:
                             if v is None:
                                 # There was no open visibility scope
                                 v = []
@@ -325,17 +325,24 @@ class Map(object):
                             else:
                                 # Symbol found
                                 v.append(identifier)
-                                column += m.end()
+                                column += (found + 1)
                                 last = (index, column)
                                 # Move back the state to find elements
                                 state = 2
                                 continue
+                        else:
+                            msg = "Missing \';\' or \':\' after"" \'{0}\'"\
+                                  .format(identifier)
+                            # In this case the current position is used
+                            raise ParserError(self.filename,
+                                              lines[index], index,
+                                              column, msg)
                     elif state == 4:
                         self.logger.debug(">>Previous")
-                        m = re.match(r'^;', line[column:])
-                        if m:
+                        found = line.find(";", column)
+                        if found == column:
                             self.logger.debug(">>Empty previous")
-                            column += m.end()
+                            column += (found + 1)
                             last = (index, column)
                             # Move back the state to find other releases
                             state = 0
@@ -354,19 +361,24 @@ class Map(object):
                             continue
                     elif state == 5:
                         self.logger.debug(">>Previous closer")
-                        m = re.match(r'^;', line[column:])
-                        if m is None:
+                        found = line.find(";", column)
+                        if found < 0:
                             raise ParserError(self.filename,
                                               lines[last[0]], last[0], last[1],
                                               "Missing \';\'")
-                        else:
+                        elif found == column:
                             # Found previous closer
-                            column += m.end()
+                            column += (found + 1)
                             r.previous = identifier
                             last = (index, column)
                             # Move back the state to find other releases
                             state = 0
                             continue
+                        else:
+                            raise ParserError(self.filename,
+                                              lines[index], index,
+                                              column,
+                                              "Unexpected character")
 
                 except ParserError as e:
                     # Any exception raised is considered an error

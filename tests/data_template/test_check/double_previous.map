@@ -1,0 +1,15 @@
+# Broken map with more than one identifier in previous
+
+BASE_1_1_0
+{
+    global:
+        new_symbol;
+} BASE_1_0_0 extra;
+
+BASE_1_0_0
+{
+    global:
+        one_symbol;
+    local:
+        *;
+} ;

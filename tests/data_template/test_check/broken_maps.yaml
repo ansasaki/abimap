@@ -39,6 +39,18 @@
   input:
     args:
       - "check"
+      - "double_release.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing '{'"
+-
+  input:
+    args:
+      - "check"
       - "invalid_element.map"
     stdin:
   output:
@@ -58,7 +70,31 @@
     stdout:
     warnings:
     exceptions:
-      - "Missing ';' or ':' after"
+      - "Missing ';' or ':' after 'global'"
+-
+  input:
+    args:
+      - "check"
+      - "missing_semicolon2.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing ';' or ':' after 'other_symbol'"
+-
+  input:
+    args:
+      - "check"
+      - "missing_semicolon3.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Missing ';' or ':' after 'other_symbol'"
 -
   input:
     args:
@@ -109,6 +145,18 @@
     warnings:
     exceptions:
       - "Missing ';'"
+-
+  input:
+    args:
+      - "check"
+      - "double_previous.map"
+    stdin:
+  output:
+    file:
+    stdout:
+    warnings:
+    exceptions:
+      - "Unexpected character"
 -
   input:
     args:
