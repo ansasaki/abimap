@@ -63,3 +63,13 @@
     warnings:
       - "No valid symbols provided. Nothing done."
     exceptions:
+-
+  input:
+    args:
+      - "version"
+    stdin: "empty.in"
+  output:
+    file:
+    stdout: "version.stdout"
+    warnings:
+    exceptions:
