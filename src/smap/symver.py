@@ -902,6 +902,9 @@ def get_info_from_release_string(release):
         # The prefix can have trailing '_'
         prefix = prefix.rstrip("_")
 
+    # Fix common unsupported characters in prefix
+    prefix = prefix.replace("-", "_")
+
     # Return the information got
     return [release, prefix, ver_suffix, version]
 
