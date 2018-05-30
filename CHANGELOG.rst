@@ -2,6 +2,11 @@
 Changelog
 =========
 
+0.2.1 (2018-05-30)
+------------------
+
+* Fixed a bug where invalid characters were accepted in release name
+
 0.2.0 (2018-05-29)
 ------------------
 
