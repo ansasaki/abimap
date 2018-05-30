@@ -110,3 +110,15 @@
   warnings:
     - "No release provided"
   exceptions:
+-
+  input: "lib-x_1_0_0"
+  output:
+    - "lib-x_1_0_0"
+    - "lib_x"
+    - "_1_0_0"
+    -
+        - 1
+        - 0
+        - 0
+  warnings:
+  exceptions:
