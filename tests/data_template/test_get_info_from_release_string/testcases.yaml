@@ -3,8 +3,8 @@
 -
   input: "libx_1_0_0"
   output:
-    - "libx_1_0_0"
-    - "libx"
+    - "LIBX_1_0_0"
+    - "LIBX"
     - "_1_0_0"
     -
       - 1
@@ -15,8 +15,8 @@
 -
   input: "libx_____1____0____0___"
   output:
-    - "libx_____1____0____0___"
-    - "libx"
+    - "LIBX_____1____0____0___"
+    - "LIBX"
     - "_1_0_0"
     -
       - 1
@@ -27,8 +27,8 @@
 -
   input: "libx_1.0.0"
   output:
-    - "libx_1.0.0"
-    - "libx"
+    - "LIBX_1.0.0"
+    - "LIBX"
     - "_1_0_0"
     -
       - 1
@@ -39,8 +39,8 @@
 -
   input: "libx_1_0_0_1_0_0"
   output:
-    - "libx_1_0_0_1_0_0"
-    - "libx"
+    - "LIBX_1_0_0_1_0_0"
+    - "LIBX"
     - "_1_0_0_1_0_0"
     -
       - 1
@@ -54,8 +54,8 @@
 -
   input: "libx_______"
   output:
-    - "libx_______"
-    - "libx"
+    - "LIBX_______"
+    - "LIBX"
     -
     -
         -
@@ -66,8 +66,8 @@
 -
   input: "libx_1_"
   output:
-    - "libx_1_"
-    - "libx"
+    - "LIBX_1_"
+    - "LIBX"
     - "_1"
     -
       - 1
@@ -76,8 +76,8 @@
 -
   input: "lib1_1_0"
   output:
-    - "lib1_1_0"
-    - "lib1"
+    - "LIB1_1_0"
+    - "LIB1"
     - "_1_0"
     -
       - 1
@@ -87,8 +87,8 @@
 -
   input: "libx"
   output:
-    - "libx"
-    - "libx"
+    - "LIBX"
+    - "LIBX"
     -
     -
         -
@@ -113,8 +113,8 @@
 -
   input: "lib-x_1_0_0"
   output:
-    - "lib-x_1_0_0"
-    - "lib_x"
+    - "LIB-X_1_0_0"
+    - "LIB_X"
     - "_1_0_0"
     -
         - 1
