@@ -65,3 +65,30 @@
     warnings:
     exceptions:
       - "Released releases cannot be modified. Abort."
+-
+  input:
+    args:
+      - "update"
+      - "-r"
+      - "WITH_RELEASE_INFO_1_0_0"
+      - "base.map"
+    stdin: "with_release_info.in"
+  output:
+    file:
+    stdout: "with_release_info.stdout"
+    warnings:
+    exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "-r"
+      - "WITH_RELEASE_INFO_1_0_0"
+      - "--allow-abi-break"
+      - "base.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "with_release_abi_break.stdout"
+    warnings:
+    exceptions:

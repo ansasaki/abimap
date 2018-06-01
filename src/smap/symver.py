@@ -906,7 +906,7 @@ def get_info_from_release_string(release):
     prefix = prefix.replace("-", "_")
 
     # Return the information got
-    return [release, prefix, ver_suffix, version]
+    return [release.upper(), prefix.upper(), ver_suffix, version]
 
 
 # TODO: Make bump strategy customizable
@@ -1202,16 +1202,17 @@ def update(args):
 
     if added:
         if release_info:
-            for to_up in (rs for rs in cur_map.releases if rs and rs.name ==
-                          release_info[0]):
-                # If the release to be modified is released
-                if to_up.released:
-                    msg = "Released releases cannot be modified. Abort."
-                    logger.error(msg)
-                    raise Exception(msg)
+            for to_up in cur_map.releases:
+                if to_up and to_up.name == release_info[0]:
+                    # If the release to be modified is released
+                    if to_up.released:
+                        msg = "Released releases cannot be modified. Abort."
+                        logger.error(msg)
+                        raise Exception(msg)
 
-                r = to_up
-        else:
+                    r = to_up
+
+        if not r:
             r = Release()
             # Guess the name for the new release
             r.name = cur_map.guess_name(release_info, guess=args.guess)
