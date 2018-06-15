@@ -1564,24 +1564,3 @@ def get_arg_parser():
     parser_version.set_defaults(func=version)
 
     return parser
-
-
-# User interface
-if __name__ == "__main__":
-
-    class C(object):
-        """
-        Empty class used as a namespace
-        """
-        pass
-
-    ns = C()
-
-    # Get the arguments parser
-    parser = get_arg_parser()
-
-    # Parse arguments
-    args = parser.parse_args(namespace=ns)
-
-    # Run command
-    ns.func(args)
