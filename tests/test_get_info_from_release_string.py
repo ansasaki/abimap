@@ -1,4 +1,3 @@
-# /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """Tests for test_get_info_from_release_string()"""
