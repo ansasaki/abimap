@@ -2,6 +2,12 @@
 History
 =======
 
+0.2.4 (2018-06-15)
+------------------
+
+* Removed dead code, removed executable file permission
+* Removed appveyor related files
+
 0.2.3 (2018-06-15)
 ------------------
 
