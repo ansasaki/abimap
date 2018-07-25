@@ -5,6 +5,7 @@ import pytest
 from smap import symver
 
 
+@pytest.mark.skipif(pytest.__version__ < '3.4', reason="caplog not supported")
 def test_get_version_from_string(testcases, caplog):
     if testcases:
         for tc in testcases:

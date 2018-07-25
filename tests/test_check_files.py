@@ -5,6 +5,8 @@
 import filecmp
 import os
 
+import pytest
+
 from smap import symver
 
 
@@ -30,6 +32,7 @@ def test_different_overwrite(datadir):
                        "--in", str(in_name), True)
 
 
+@pytest.mark.skipif(pytest.__version__ < '3.4', reason="caplog not supported")
 def test_same_file(datadir, caplog):
 
     in_name = os.path.join(str(datadir), "in.map")
