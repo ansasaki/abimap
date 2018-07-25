@@ -57,7 +57,7 @@ setup(
     py_modules=[splitext(basename(path))[0] for path in glob(
         os.path.join(here, 'src', 'smap', '*.py'))],
     entry_points={
-        'console_scripts': ['smap=smap.main:main']
+        'console_scripts': ['smap=smap.main:main', 'symver-smap=smap.main:main']
     },
     setup_requires=setup_requirements,
     test_suite='tests',

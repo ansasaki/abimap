@@ -20,6 +20,12 @@ def run_tc(tc, datadir, capsys, caplog):
     :param caplog: The log capture fixture
     """
 
+    class C(object):
+        """
+        Empty class used as a namespace
+        """
+        pass
+
     # Change directory to the temporary directory
     with cd(datadir):
         # Get a parser
@@ -28,8 +34,12 @@ def run_tc(tc, datadir, capsys, caplog):
         tc_in = tc["input"]
         tc_out = tc["output"]
 
+        # Add the simulated program name
+        ns = C()
+        ns.program = 'smap'
+
         # Parse the testcase arguments
-        args = parser.parse_args(tc_in["args"])
+        args = parser.parse_args(tc_in["args"], namespace=ns)
 
         # Call the function
         if tc_out["exceptions"]:

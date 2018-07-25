@@ -1291,8 +1291,16 @@ def update(args):
             f = open(args.out, "w")
         else:
             f = sys.stdout
+
+        # Set the name of the application in the output
+        name_version = None
+        if args.program:
+            name_version = "{0}-{1}".format(args.program, __version__)
+        else:
+            name_version = "smap-{0}".format(__version__)
+
         f.write("# This map file was updated with"
-                " smap-{0}\n\n".format(__version__))
+                " {0}\n\n".format(name_version))
         f.write(str(cur_map))
     finally:
         if args.out:
@@ -1399,8 +1407,16 @@ def new(args):
                 f = open(args.out, "w")
             else:
                 f = sys.stdout
+
+            # Set the name of the application in the output
+            name_version = None
+            if args.program:
+                name_version = "{0}-{1}".format(args.program, __version__)
+            else:
+                name_version = "smap-{0}".format(__version__)
+
             f.write("# This map file was created with"
-                    " smap-{0}\n\n".format(__version__))
+                    " {0}\n\n".format(name_version))
             f.write(str(new_map))
         finally:
             if args.out:
@@ -1446,7 +1462,10 @@ def version(args):
     :returns: A string containing the program name and version
     """
 
-    name_version = "smap-" + __version__
+    if args.program:
+        name_version = "{0}-{1}".format(args.program, __version__)
+    else:
+        name_version = "smap-{0}".format(__version__)
 
     print(name_version)
 
