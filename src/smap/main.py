@@ -15,6 +15,9 @@ def main():
     # Get the arguments parser
     parser = symver.get_arg_parser()
 
+    # Set the command-line application name
+    ns.program = parser.prog
+
     # Parse arguments
     args = parser.parse_args(namespace=ns)
 
