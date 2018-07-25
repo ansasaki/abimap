@@ -34,8 +34,10 @@ ci-bootstrap: ci/bootstrap.py
 
 bootstrap-tests:
 	@SMAP_NAME_VERSION=`python version.py`; \
+	SMAP_VERSION=`python version_number.py`; \
 	echo "Setting name and version in tests as $${SMAP_NAME_VERSION}"; \
-	$(MAKE) -C tests SMAP_NAME_VERSION=$${SMAP_NAME_VERSION}
+	$(MAKE) -C tests SMAP_NAME_VERSION=$${SMAP_NAME_VERSION} \
+	SMAP_VERSION=$${SMAP_VERSION}
 
 clean: clean-build clean-pyc clean-test clean-docs
 

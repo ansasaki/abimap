@@ -14,12 +14,19 @@ version: $(DIRS)
 	
 
 %:
-	@cd data/$@; \
-	for i in * ; \
-	do \
-	sed -e 's/PROGRAM_NAME_VERSION/${SMAP_NAME_VERSION}/' -i $$i ; \
-	done ;\
-	cd ../..;
+	@if [ -z ${SMAP_NAME_VERSION} ]; \
+	then \
+		echo "Name and version not given"; \
+		exit 1; \
+	else \
+		cd data/$@; \
+		for i in * ; \
+		do \
+			sed -e 's/PROGRAM_NAME_VERSION/${SMAP_NAME_VERSION}/' -i $$i ; \
+			sed -e 's/PROGRAM_VERSION/${SMAP_VERSION}/' -i $$i ; \
+		done ;\
+		cd ../..; \
+	fi;
 
 .PHONY: clean
 

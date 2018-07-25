@@ -2,9 +2,11 @@
 
 """Tests using as library"""
 
+
 import pytest
 from conftest import cd
 
+import smap
 from smap import symver
 
 
@@ -141,3 +143,129 @@ def test_print_released_map(datadir):
 
         with open("print_released.stdout") as tcout:
             assert out == tcout.read()
+
+
+def test_version_different_program_names(capsys):
+    class C(object):
+        """
+        Empty class used as a namespace
+        """
+        pass
+
+    # Get the arguments parser
+    parser = symver.get_arg_parser()
+
+    # Set the options to call the version subcommand
+    options = ['version']
+
+    # Create a namespace and set a custom program name
+    ns = C()
+    ns.program = 'someapp'
+
+    # Parse arguments
+    args = parser.parse_args(options, namespace=ns)
+
+    # Run command and check output
+    ns.func(args)
+    out, err = capsys.readouterr()
+    assert out == "someapp-{0}\n".format(smap.__version__)
+    assert not err
+
+    # Create a namespace and set an empty program name
+    ns = C()
+    ns.program = None
+
+    # Parse arguments
+    args = parser.parse_args(options, namespace=ns)
+
+    # Run command and check output
+    ns.func(args)
+    out, err = capsys.readouterr()
+    assert out == "smap-{0}\n".format(smap.__version__)
+    assert not err
+
+
+def test_new_different_program_name(datadir, capsys):
+    class C(object):
+        """
+        Empty class used as a namespace
+        """
+        pass
+
+    with cd(datadir):
+        # Get the arguments parser
+        parser = symver.get_arg_parser()
+
+        # Set the options to call the version subcommand
+        options = ['new', '-r', 'different_name_1_0_0', '-i', 'symbol.in']
+
+        # Create a namespace and set a custom program name
+        ns = C()
+        ns.program = 'someapp'
+
+        # Parse arguments
+        args = parser.parse_args(options, namespace=ns)
+
+        # Run command and check output
+        ns.func(args)
+        out, err = capsys.readouterr()
+        with open("new_different_name.stdout") as tcout:
+            assert out == tcout.read()
+        assert not err
+
+        # Create a namespace and set an empty program name
+        ns = C()
+        ns.program = None
+
+        # Parse arguments
+        args = parser.parse_args(options, namespace=ns)
+
+        # Run command and check output
+        ns.func(args)
+        out, err = capsys.readouterr()
+        with open("new_default_name.stdout") as tcout:
+            assert out == tcout.read()
+        assert not err
+
+
+def test_update_different_program_name(datadir, capsys):
+    class C(object):
+        """
+        Empty class used as a namespace
+        """
+        pass
+
+    with cd(datadir):
+        # Get the arguments parser
+        parser = symver.get_arg_parser()
+
+        # Set the options to call the version subcommand
+        options = ['update', '-a', '-i', 'symbol.in', "base.map"]
+
+        # Create a namespace and set a custom program name
+        ns = C()
+        ns.program = 'someapp'
+
+        # Parse arguments
+        args = parser.parse_args(options, namespace=ns)
+
+        # Run command and check output
+        ns.func(args)
+        out, err = capsys.readouterr()
+        with open("update_different_name.stdout") as tcout:
+            assert out == tcout.read()
+        assert not err
+
+        # Create a namespace and set an empty program name
+        ns = C()
+        ns.program = None
+
+        # Parse arguments
+        args = parser.parse_args(options, namespace=ns)
+
+        # Run command and check output
+        ns.func(args)
+        out, err = capsys.readouterr()
+        with open("update_default_name.stdout") as tcout:
+            assert out == tcout.read()
+        assert not err
