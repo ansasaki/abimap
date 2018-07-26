@@ -2,6 +2,15 @@
 History
 =======
 
+0.2.5 (2018-07-26)
+------------------
+
+* Add tests using different program names
+* Use the command line application name in output strings
+* Add a new entry point symver-smap for console scripts
+* Skip tests which use caplog if pytest version is < 3.4
+* Added an alias for pytest in setup.cfg. This fixed setup.py for test target
+
 0.2.4 (2018-06-15)
 ------------------
 
