@@ -26,7 +26,7 @@ project = u'abimap'
 year = '2018'
 author = u'Anderson Toshiyuki Sasaki'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'0.2.5'
+version = release = u'0.3.0'
 
 pygments_style = 'trac'
 templates_path = ['.']
