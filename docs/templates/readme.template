@@ -10,7 +10,7 @@
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ansasaki/abimap
 
-.. |coveralls| image:: https://coveralls.io/repos/ansasaki/abimap/badge.svg?branch=master
+.. |coveralls| image:: https://coveralls.io/repos/github/ansasaki/abimap/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://coveralls.io/github/ansasaki/abimap?branch=master
 
