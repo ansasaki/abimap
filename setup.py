@@ -12,7 +12,7 @@ from setuptools import find_packages
 from setuptools import setup
 from version import get_version
 
-package_name = "symver-smap"
+package_name = "abimap"
 here = os.path.abspath(os.path.dirname(__file__))
 
 with open('README.rst') as readme_file:
@@ -50,19 +50,19 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='symver smap symbol version versioning linker script library maintenance',
+    keywords='symver abimap symbol version versioning linker script library maintenance',
     name=package_name,
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob(
-        os.path.join(here, 'src', 'smap', '*.py'))],
+        os.path.join(here, 'src', 'abimap', '*.py'))],
     entry_points={
-        'console_scripts': ['smap=smap.main:main', 'symver-smap=smap.main:main']
+        'console_scripts': ['abimap=abimap.main:main']
     },
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/ansasaki/smap',
+    url='https://github.com/ansasaki/abimap',
     version=version,
     zip_safe=False,
 )

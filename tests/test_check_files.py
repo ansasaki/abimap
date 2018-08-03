@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from smap import symver
+from abimap import symver
 
 
 def test_different_non_existent_files(datadir):

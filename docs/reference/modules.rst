@@ -1,7 +1,7 @@
-smap
-====
+abimap
+======
 
 .. toctree::
    :maxdepth: 4
 
-   smap
+   abimap

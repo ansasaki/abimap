@@ -2,7 +2,7 @@
 
 """Tests for clean_symbols function"""
 
-from smap import symver
+from abimap import symver
 
 
 def test_clean_symbols(testcases):

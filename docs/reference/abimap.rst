@@ -1,21 +1,21 @@
-smap package
-============
+abimap package
+==============
 
 Submodules
 ----------
 
-smap.main module
-----------------
+abimap.main module
+------------------
 
-.. automodule:: smap.main
+.. automodule:: abimap.main
     :members:
     :undoc-members:
     :show-inheritance:
 
-smap.symver module
-------------------
+abimap.symver module
+--------------------
 
-.. automodule:: smap.symver
+.. automodule:: abimap.symver
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ smap.symver module
 Module contents
 ---------------
 
-.. automodule:: smap
+.. automodule:: abimap
     :members:
     :undoc-members:
     :show-inheritance:

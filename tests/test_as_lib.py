@@ -6,8 +6,8 @@
 import pytest
 from conftest import cd
 
-import smap
-from smap import symver
+import abimap
+from abimap import symver
 
 
 def test_unitialized_all_global_symbols():
@@ -168,7 +168,7 @@ def test_version_different_program_names(capsys):
     # Run command and check output
     ns.func(args)
     out, err = capsys.readouterr()
-    assert out == "someapp-{0}\n".format(smap.__version__)
+    assert out == "someapp-{0}\n".format(abimap.__version__)
     assert not err
 
     # Create a namespace and set an empty program name
@@ -181,7 +181,7 @@ def test_version_different_program_names(capsys):
     # Run command and check output
     ns.func(args)
     out, err = capsys.readouterr()
-    assert out == "smap-{0}\n".format(smap.__version__)
+    assert out == "abimap-{0}\n".format(abimap.__version__)
     assert not err
 
 

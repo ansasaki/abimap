@@ -5,7 +5,7 @@ from distutils import dir_util
 import pytest
 import yaml
 
-from smap import symver
+from abimap import symver
 
 
 @pytest.fixture
@@ -113,7 +113,7 @@ def run_tc(tc, datadir, capsys, caplog):
 
         # Add the simulated program name
         ns = C()
-        ns.program = 'smap'
+        ns.program = 'abimap'
 
         # Parse the testcase arguments
         args = parser.parse_args(tc_in["args"], namespace=ns)

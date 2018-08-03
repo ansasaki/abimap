@@ -59,4 +59,4 @@ def run_script(testcases, datadir, script_runner, capsys, caplog, script):
 
 
 def test_main(testcases, datadir, script_runner, capsys, caplog):
-    run_script(testcases, datadir, script_runner, capsys, caplog, "smap")
+    run_script(testcases, datadir, script_runner, capsys, caplog, "abimap")

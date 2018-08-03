@@ -14,7 +14,7 @@ version: $(DIRS)
 	
 
 %:
-	@if [ -z ${SMAP_NAME_VERSION} ]; \
+	@if [ -z ${ABIMAP_NAME_VERSION} ]; \
 	then \
 		echo "Name and version not given"; \
 		exit 1; \
@@ -22,8 +22,8 @@ version: $(DIRS)
 		cd data/$@; \
 		for i in * ; \
 		do \
-			sed -e 's/PROGRAM_NAME_VERSION/${SMAP_NAME_VERSION}/' -i $$i ; \
-			sed -e 's/PROGRAM_VERSION/${SMAP_VERSION}/' -i $$i ; \
+			sed -e 's/PROGRAM_NAME_VERSION/${ABIMAP_NAME_VERSION}/' -i $$i ; \
+			sed -e 's/PROGRAM_VERSION/${ABIMAP_VERSION}/' -i $$i ; \
 		done ;\
 		cd ../..; \
 	fi;

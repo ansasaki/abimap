@@ -33,11 +33,11 @@ ci-bootstrap: ci/bootstrap.py
 	python ci/bootstrap.py
 
 bootstrap-tests:
-	@SMAP_NAME_VERSION=`python version.py`; \
-	SMAP_VERSION=`python version_number.py`; \
-	echo "Setting name and version in tests as $${SMAP_NAME_VERSION}"; \
-	$(MAKE) -C tests SMAP_NAME_VERSION=$${SMAP_NAME_VERSION} \
-	SMAP_VERSION=$${SMAP_VERSION}
+	@ABIMAP_NAME_VERSION=`python version.py`; \
+	ABIMAP_VERSION=`python version_number.py`; \
+	echo "Setting name and version in tests as $${ABIMAP_NAME_VERSION}"; \
+	$(MAKE) -C tests ABIMAP_NAME_VERSION=$${ABIMAP_NAME_VERSION} \
+	ABIMAP_VERSION=$${ABIMAP_VERSION}
 
 clean: clean-build clean-pyc clean-test clean-docs
 
@@ -65,7 +65,7 @@ clean-docs: ## remove generated docs files
 	$(MAKE) -C docs clean
 
 lint: ## check style with flake8
-	flake8 src/smap tests
+	flake8 src/abimap tests
 
 test: bootstrap-tests## run tests quickly with the default Python
 	pytest -vv --ignore=src/
@@ -74,7 +74,7 @@ test-all: tox.ini## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	py.test --cov=smap --cov-config .coveragerc --cov-report=term-missing -vv tests
+	py.test --cov=abimap --cov-config .coveragerc --cov-report=term-missing -vv tests
 	coverage combine --append
 	coverage report
 	coverage html
