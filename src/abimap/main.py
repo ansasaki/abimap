@@ -1,6 +1,6 @@
 """Entrypoint used to generate the command line application"""
 
-from smap import symver
+from abimap import symver
 
 
 def main():

@@ -2,7 +2,7 @@
 Usage
 =====
 
-This project delivers a script, ``smap``. This is my first project in python, so feel free to point out ways to improve it.
+This project delivers a script, ``abimap``. This is my first project in python, so feel free to point out ways to improve it.
 
 The sub-commands ``update`` and ``new`` expect a list of symbols given in stdin. The list of symbols are words separated by non-alphanumeric characters (matches with the regular expression ``[a-zA-Z0-9_]+``). For example::
 
@@ -23,34 +23,34 @@ tl;dr
 -----
 ::
 
-  $ smap update lib_example.map < symbols_list
+  $ abimap update lib_example.map < symbols_list
 
 or (setting an output)::
 
-  $ smap update lib_example.map -o new.map < symbols_list
+  $ abimap update lib_example.map -o new.map < symbols_list
 
 or::
 
-  $ cat symbols_list | smap update lib_example.map -o new.map
+  $ cat symbols_list | abimap update lib_example.map -o new.map
 
 or (to create a new map)::
 
-  $ cat symbols_list | smap new -r lib_example_1_0_0 -o new.map
+  $ cat symbols_list | abimap new -r lib_example_1_0_0 -o new.map
 
 or (to check the content of a existing map)::
 
-  $ smap check my.map
+  $ abimap check my.map
 
 or (to check the current version)::
 
-  $ smap version
+  $ abimap version
 
 Long version
 ------------
 
-Running  ``smap -h`` will give::
+Running  ``abimap -h`` will give::
 
-  usage: smap [-h] {update,new,check,version} ...
+  usage: abimap [-h] {update,new,check,version} ...
   
   Helper tools for linker version script maintenance
   
@@ -70,13 +70,13 @@ Running  ``smap -h`` will give::
 Call a subcommand passing '-h' to see its specific options
 There are four subcommands, ``update``, ``new``, ``check``, and ``version``
 
-Running ``smap update -h`` will give::
+Running ``abimap update -h`` will give::
 
-  usage: smap update [-h] [-o OUT] [-i INPUT] [-d]
-                     [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                     [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
-                     [--no_guess] [--allow-abi-break] [-f] [-a | --remove]
-                     file
+  usage: abimap update [-h] [-o OUT] [-i INPUT] [-d]
+                       [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                       [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
+                       [--no_guess] [--allow-abi-break] [-f] [-a | --remove]
+                       file
   
   positional arguments:
     file                  The map file being updated
@@ -110,12 +110,12 @@ Running ``smap update -h`` will give::
   the symbols are read from the given file. Otherwise the symbols are read from
   stdin.
 
-Running ``smap new -h`` will give::
+Running ``abimap new -h`` will give::
 
-  usage: smap new [-h] [-o OUT] [-i INPUT] [-d]
-                  [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                  [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE] [--no_guess]
-                  [-f]
+  usage: abimap new [-h] [-o OUT] [-i INPUT] [-d]
+                    [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                    [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
+                    [--no_guess] [-f]
   
   optional arguments:
     -h, --help            show this help message and exit
@@ -142,12 +142,12 @@ Running ``smap new -h`` will give::
   the symbols are read from the given file. Otherwise the symbols are read from
   stdin.
 
-Running ``smap check -h`` will give::
+Running ``abimap check -h`` will give::
 
-  usage: smap check [-h]
-                    [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                    [-l LOGFILE]
-                    file
+  usage: abimap check [-h]
+                      [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
+                      [-l LOGFILE]
+                      file
   
   positional arguments:
     file                  The map file to be checked
@@ -161,9 +161,9 @@ Running ``smap check -h`` will give::
     -l LOGFILE, --logfile LOGFILE
                           Log to this file
 
-Running ``smap version -h`` will give::
+Running ``abimap version -h`` will give::
 
-  usage: smap version [-h]
+  usage: abimap version [-h]
   
   optional arguments:
     -h, --help  show this help message and exit
@@ -171,6 +171,6 @@ Running ``smap version -h`` will give::
 Import as a library:
 --------------------
 
-To use smap in a project as a library::
+To use abimap in a project as a library::
 
-	from smap import symver
+	from abimap import symver

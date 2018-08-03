@@ -2,7 +2,7 @@
 
 """Tests for bump version function"""
 
-from smap import symver
+from abimap import symver
 
 
 def test_bump_version(testcases):

@@ -1297,7 +1297,7 @@ def update(args):
         if args.program:
             name_version = "{0}-{1}".format(args.program, __version__)
         else:
-            name_version = "smap-{0}".format(__version__)
+            name_version = "abimap-{0}".format(__version__)
 
         f.write("# This map file was updated with"
                 " {0}\n\n".format(name_version))
@@ -1413,7 +1413,7 @@ def new(args):
             if args.program:
                 name_version = "{0}-{1}".format(args.program, __version__)
             else:
-                name_version = "smap-{0}".format(__version__)
+                name_version = "abimap-{0}".format(__version__)
 
             f.write("# This map file was created with"
                     " {0}\n\n".format(name_version))
@@ -1446,10 +1446,10 @@ def check(args):
         logger.setLevel(VERBOSITY_MAP[args.verbosity])
 
     # Read the map file
-    smap = Map(filename=args.file, logger=logger)
+    abimap = Map(filename=args.file, logger=logger)
 
     # Check the map file
-    smap.check()
+    abimap.check()
 
 
 def version(args):
@@ -1465,7 +1465,7 @@ def version(args):
     if args.program:
         name_version = "{0}-{1}".format(args.program, __version__)
     else:
-        name_version = "smap-{0}".format(__version__)
+        name_version = "abimap-{0}".format(__version__)
 
     print(name_version)
 

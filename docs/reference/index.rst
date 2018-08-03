@@ -4,5 +4,5 @@ Reference
 .. toctree::
     :glob:
 
-    smap*
+    abimap*
     modules*

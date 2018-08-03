@@ -4,7 +4,7 @@
 
 import pytest
 
-from smap import symver
+from abimap import symver
 
 
 @pytest.mark.skipif(pytest.__version__ < '3.4', reason="caplog not supported")

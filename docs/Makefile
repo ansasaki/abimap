@@ -2,29 +2,29 @@
 all: usage readme
 
 HELP:
-	echo 'Running  ``$ smap -h`` will give::' > HELP
+	echo 'Running  ``$ abimap -h`` will give::' > HELP
 	echo >> HELP
-	smap -h | sed -e 's/^/  /' >> HELP
+	abimap -h | sed -e 's/^/  /' >> HELP
 
 HELP_NEW:
-	echo 'Running ``$ smap new -h`` will give::' > HELP_NEW
+	echo 'Running ``$ abimap new -h`` will give::' > HELP_NEW
 	echo >> HELP_NEW
-	smap new -h | sed -e 's/^/  /' >> HELP_NEW
+	abimap new -h | sed -e 's/^/  /' >> HELP_NEW
 
 HELP_UPDATE:
-	echo 'Running ``$ smap update -h`` will give::' > HELP_UPDATE
+	echo 'Running ``$ abimap update -h`` will give::' > HELP_UPDATE
 	echo >> HELP_UPDATE
-	smap update -h | sed -e 's/^/  /' >> HELP_UPDATE
+	abimap update -h | sed -e 's/^/  /' >> HELP_UPDATE
 
 HELP_CHECK:
-	echo 'Running ``$ smap check -h`` will give::' > HELP_CHECK
+	echo 'Running ``$ abimap check -h`` will give::' > HELP_CHECK
 	echo >> HELP_CHECK
-	smap check -h | sed -e 's/^/  /' >> HELP_CHECK
+	abimap check -h | sed -e 's/^/  /' >> HELP_CHECK
 
 HELP_VERSION:
-	echo 'Running ``$ smap version -h`` will give::' > HELP_VERSION
+	echo 'Running ``$ abimap version -h`` will give::' > HELP_VERSION
 	echo >> HELP_VERSION
-	smap version -h | sed -e 's/^/  /' >> HELP_VERSION
+	abimap version -h | sed -e 's/^/  /' >> HELP_VERSION
 
 usage: HELP HELP_NEW HELP_UPDATE HELP_CHECK HELP_VERSION
 	cp templates/usage.template usage.rst

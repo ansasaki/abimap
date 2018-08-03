@@ -7,7 +7,7 @@ import os
 import pytest
 from conftest import cd
 
-from smap import symver
+from abimap import symver
 
 
 def run_tc(tc, datadir, capsys, caplog):
@@ -36,7 +36,7 @@ def run_tc(tc, datadir, capsys, caplog):
 
         # Add the simulated program name
         ns = C()
-        ns.program = 'smap'
+        ns.program = 'abimap'
 
         # Parse the testcase arguments
         args = parser.parse_args(tc_in["args"], namespace=ns)
