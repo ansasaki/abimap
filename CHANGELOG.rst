@@ -2,6 +2,11 @@
 Changelog
 =========
 
+0.3.0 (2018-08-03)
+------------------
+
+* Complete rename of the project to abimap
+
 0.2.5 (2018-07-26)
 ------------------
 
