@@ -3,15 +3,15 @@ Added:
 
 # This map file was updated with PROGRAM_NAME_VERSION
 
-ONLY_VISIBILITY_1_1_0
-{
-    global:
-        symbol;
-} ONLY_VISIBILITY_1_0_0;
-
 ONLY_VISIBILITY_1_0_0
 {
     global:
     local:
 } ;
+
+ONLY_VISIBILITY_1_1_0
+{
+    global:
+        symbol;
+} ONLY_VISIBILITY_1_0_0;
 

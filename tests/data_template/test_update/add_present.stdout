@@ -3,12 +3,6 @@ Added:
 
 # This map file was updated with PROGRAM_NAME_VERSION
 
-ADD_PRESENT_1_1_0
-{
-    global:
-        symbol;
-} ADD_PRESENT_1_0_0;
-
 ADD_PRESENT_1_0_0
 {
     global:
@@ -16,4 +10,10 @@ ADD_PRESENT_1_0_0
     local:
         *;
 } ;
+
+ADD_PRESENT_1_1_0
+{
+    global:
+        symbol;
+} ADD_PRESENT_1_0_0;
 

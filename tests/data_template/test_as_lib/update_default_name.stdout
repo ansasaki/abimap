@@ -3,12 +3,6 @@ Added:
 
 # This map file was updated with PROGRAM_NAME_VERSION
 
-BASE_1_1_0
-{
-    global:
-        symbol;
-} BASE_1_0_0;
-
 BASE_1_0_0
 {
     global:
@@ -16,4 +10,10 @@ BASE_1_0_0
     local:
         *;
 } ;
+
+BASE_1_1_0
+{
+    global:
+        symbol;
+} BASE_1_0_0;
 
