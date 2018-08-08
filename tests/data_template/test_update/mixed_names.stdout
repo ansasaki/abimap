@@ -3,23 +3,17 @@ Added:
 
 # This map file was updated with PROGRAM_NAME_VERSION
 
-ROGUE_RELEASE_4_6_0
-{
-    global:
-        symbol;
-} ROGUE_RELEASE_4_5_6;
-
 ROGUE_RELEASE_4_5_6
 {
     global:
         three_symbol;
 } ;
 
-OTHER_DIFFERENT_NAME_1_1_0
+ROGUE_RELEASE_4_6_0
 {
     global:
-        two_symbol;
-} NAME_1_0_0;
+        symbol;
+} ROGUE_RELEASE_4_5_6;
 
 NAME_1_0_0
 {
@@ -28,4 +22,10 @@ NAME_1_0_0
     local:
         *;
 } ;
+
+OTHER_DIFFERENT_NAME_1_1_0
+{
+    global:
+        two_symbol;
+} NAME_1_0_0;
 

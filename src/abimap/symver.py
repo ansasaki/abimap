@@ -731,7 +731,7 @@ class Map(object):
             self.logger.error(msg)
             raise Exception(msg)
 
-        self.releases.sort(key=lambda release: release.name)
+        self.releases.sort(key=lambda release: release.name, reverse=True)
         dependencies = self.dependencies()
         top_dependency = next((dependency for dependency in dependencies if
                                dependency[0] == top_release))
