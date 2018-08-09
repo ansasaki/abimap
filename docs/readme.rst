@@ -71,12 +71,6 @@ The ``*`` wildcard in ``local`` catches all other symbols, meaning only ``symbol
 
 If a compatible change is made, it would introduce a new release, like::
 
-  LIB_EXAMPLE_1_1_0
-  {
-      global:
-          new_symbol;
-  } LIB_EXAMPLE_1_0_0;
-
   LIB_EXAMPLE_1_0_0
   {
       global:
@@ -85,6 +79,13 @@ If a compatible change is made, it would introduce a new release, like::
       local:
           *;
   };
+
+  LIB_EXAMPLE_1_1_0
+  {
+      global:
+          new_symbol;
+  } LIB_EXAMPLE_1_0_0;
+
 
 The new release ``LIB_EXAMPLE_1_1_0`` introduces the symbol ``new_symbol``.
 The ``*`` wildcard should be only in one version, usually in the oldest version.
