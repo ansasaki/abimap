@@ -22,9 +22,11 @@ if os.getenv('SPELLCHECK'):
 
 source_suffix = '.rst'
 master_doc = 'index'
+man_index = 'man_index'
+description = 'Generate and update linker version scripts'
 project = u'abimap'
 year = '2018'
-author = u'Anderson Toshiyuki Sasaki'
+author = u'Anderson Toshiyuki Sasaki <ansasaki@redhat.com>'
 copyright = '{0}, {1}'.format(year, author)
 version = release = u'0.3.0'
 
@@ -51,3 +53,9 @@ html_short_title = '%s-%s' % (project, version)
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
+
+# Options for man pages
+# (source start file, name, description, authors, manual section)
+man_pages = [
+             (man_index, project, description, [author], 1)
+            ]

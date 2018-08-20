@@ -88,6 +88,7 @@ docs: usage ## generate Sphinx HTML documentation, including API docs
 	sphinx-build -E -b doctest docs dist/docs
 	sphinx-build -E -b html docs dist/docs
 	sphinx-build -b linkcheck docs dist/docs
+	sphinx-build -E -b man docs dist/man
 
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
