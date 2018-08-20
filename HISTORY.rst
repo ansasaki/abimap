@@ -2,6 +2,13 @@
 History
 =======
 
+0.3.1 (2018-08-20)
+------------------
+
+* Fixed bug when sorting releases: the older come first
+* Added missing runtime requirement for setuptools
+* Added manpage generation
+
 0.3.0 (2018-08-03)
 ------------------
 
