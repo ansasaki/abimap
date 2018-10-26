@@ -92,3 +92,16 @@
     stdout: "with_release_abi_break.stdout"
     warnings:
     exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "-o"
+      - "update_no_changes.map"
+      - "base.map"
+    stdin: "one_symbol.in"
+  output:
+    file:
+    stdout: "update_no_changes.stdout"
+    warnings:
+    exceptions:
