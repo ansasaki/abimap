@@ -193,4 +193,4 @@ References:
 .. [ABI] https://en.wikipedia.org/wiki/Application_binary_interface
 .. [API] https://en.wikipedia.org/wiki/Application_programming_interface
 .. [HOW_TO] https://www.akkadia.org/drepper/dsohowto.pdf, How to write shared libraries by Ulrich Drepper
-.. _Read the docs: http://abimap.readthedocs.io/en/latest/index.html
+.. _Read the docs: https://abimap.readthedocs.io/en/latest/index.html
