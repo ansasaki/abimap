@@ -231,10 +231,10 @@ class Map(object):
                                 msg = "Duplicated Release identifier \'{}\'"\
                                       .format(name)
                                 # This is non-critical, only warning
-                                self.logger.warn(ParserError(self.filename,
-                                                             lines[index],
-                                                             index,
-                                                             column, msg))
+                                self.logger.warning(ParserError(self.filename,
+                                                                lines[index],
+                                                                index,
+                                                                column, msg))
 
                             # Search for the special release marker comment
                             m = re.match(r'\s*#.\s*released.*$',
@@ -317,10 +317,10 @@ class Map(object):
                                       " \'{0}\'. Symbols considered in"\
                                       " 'global:\'".format(identifier)
                                 # Non-critical, only warning
-                                self.logger.warn(ParserError(self.filename,
-                                                             lines[last[0]],
-                                                             last[0], last[1],
-                                                             msg))
+                                self.logger.warning(ParserError(self.filename,
+                                                                lines[last[0]],
+                                                                last[0], last[1],
+                                                                msg))
                             else:
                                 # Symbol found
                                 v.append(identifier)
@@ -513,11 +513,14 @@ class Map(object):
         d = self.duplicates()
         if d:
             for release, duplicates in d:
-                self.logger.warn("Duplicates found in release \'%s\':", release)
+                self.logger.warning("Duplicates found in release \'%s\':",
+                                    release)
                 for scope, symbols in duplicates:
-                    self.logger.warn("    %s:", scope)
-                    self.logger.warn("\n".join(
-                        (" " * 8 + symbol for symbol in symbols)))
+                    self.logger.warning("    %s:", scope)
+                    self.logger.warning("\n".join(
+                                                  (" " * 8 +
+                                                   symbol for symbol in
+                                                   symbols)))
 
         # Check '*' wildcard usage
         for release in self.releases:
@@ -529,13 +532,14 @@ class Map(object):
                                              " wildcard", release.name)
                             if release.previous:
                                 # Predecessor version and local: *; are present
-                                self.logger.warn("%s should not contain the"
-                                                 " local wildcard because it"
-                                                 " is not the base version"
-                                                 " (it refers to version %s"
-                                                 " as its predecessor)",
-                                                 release.name,
-                                                 release.previous)
+                                self.logger.warning("%s should not contain the"
+                                                    " local wildcard because"
+                                                    " it is not the base"
+                                                    " version (it refers to"
+                                                    " version %s"
+                                                    " as its predecessor)",
+                                                    release.name,
+                                                    release.previous)
                             else:
                                 # Release seems to be base: empty predecessor
                                 msg = "{} seems to be the base version"\
@@ -550,40 +554,41 @@ class Map(object):
                     if symbols:
                         if "*" in symbols:
                             # Release contains '*' wildcard in global scope
-                            self.logger.warn("%s contains the \'*\' wildcard"
-                                             " in global scope. It is probably"
-                                             " exporting symbols"
-                                             " it should not.",
-                                             release.name)
+                            self.logger.warning("%s contains the \'*\'"
+                                                " wildcard in"
+                                                " global scope. It is probably"
+                                                " exporting symbols"
+                                                " it should not.",
+                                                release.name)
                             have_wildcard.append((release.name, scope))
                 else:
                     # Release contains unknown visibility scopes (not global or
                     # local)
-                    self.logger.warn("%s contains unknown scope named %s"
-                                     " (different from \'global\' and"
-                                     " \'local\')", release.name, scope)
+                    self.logger.warning("%s contains unknown scope named %s"
+                                        " (different from \'global\' and"
+                                        " \'local\')", release.name, scope)
 
         if have_wildcard:
             if len(have_wildcard) > 1:
                 # The '*' wildcard was found in more than one place
-                self.logger.warn("The \'*\' wildcard was found in more than"
-                                 " one place:")
+                self.logger.warning("The \'*\' wildcard was found in more than"
+                                    " one place:")
                 for name, scope in have_wildcard:
-                    self.logger.warn("    %s: in \'%s\'", name, scope)
+                    self.logger.warning("    %s: in \'%s\'", name, scope)
         else:
-            self.logger.warn("The \'*\' wildcard was not found")
+            self.logger.warning("The \'*\' wildcard was not found")
 
         if seems_base:
             if len(seems_base) > 1:
                 # There is more than one release without predecessor and
                 # containing '*' wildcard in local scope
-                self.logger.warn("More than one release seem to be the base"
-                                 " version (contain the local wildcard and"
-                                 " do not have a predecessor version):")
+                self.logger.warning("More than one release seem to be the base"
+                                    " version (contain the local wildcard and"
+                                    " do not have a predecessor version):")
                 for name in seems_base:
-                    self.logger.warn("    %s", name)
+                    self.logger.warning("    %s", name)
         else:
-            self.logger.warn("No base version release found")
+            self.logger.warning("No base version release found")
 
         dependencies = self.dependencies()
         self.logger.info("Found dependencies:")
@@ -830,11 +835,11 @@ def get_version_from_string(version_string):
 
     if m:
         if len(m) < 2:
-            logger.warn("Provide at least a major and a minor"
-                        " version digit (eg. '1.2.3' or '1_2')")
+            logger.warning("Provide at least a major and a minor"
+                           " version digit (eg. '1.2.3' or '1_2')")
         if len(m) > 3:
-            logger.warn("Version has too many parts; provide 3 or less"
-                        " ( e.g. '0.1.2')")
+            logger.warning("Version has too many parts; provide 3 or less"
+                           " ( e.g. '0.1.2')")
     else:
         msg = "Could not get version parts. Provide digits separated"\
               " by non-alphanumeric characters. (e.g. 0_1_2 or 0.1.2)"
@@ -867,7 +872,7 @@ def get_info_from_release_string(release):
     tail = None
 
     if not release:
-        logger.warn("No release provided")
+        logger.warning("No release provided")
         return None
 
     # Remove eventual white spaces
@@ -886,10 +891,10 @@ def get_info_from_release_string(release):
             prefix = release
         else:
             # If not, reject the prefix
-            logger.warn("Release provided is not well formed"
-                        " (a well formed release contain the library"
-                        " identifier and the version information)."
-                        " Suggested: something like LIBNAME_1_2_3")
+            logger.warning("Release provided is not well formed"
+                           " (a well formed release contain the library"
+                           " identifier and the version information)."
+                           " Suggested: something like LIBNAME_1_2_3")
             return None
 
     if tail:
@@ -967,7 +972,7 @@ def clean_symbols(symbols):
         if duplicates:
             dup_list = "".join((" " * 4 + dup + "\n" for dup in
                                 sorted(duplicates)))
-            logger.warn("Duplicated symbols provided:\n%s", dup_list)
+            logger.warning("Duplicated symbols provided:\n%s", dup_list)
 
     return clean
 
@@ -990,15 +995,15 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
         # Check if given input file is the same as output
         if os.path.isfile(in_name):
             if os.path.samefile(out_name, in_name):
-                logger.warn("Given paths in \'%s\' and \'%s\' are the same.",
-                            str(out_arg), str(in_arg))
+                logger.warning("Given paths in \'%s\' and \'%s\' are the same.",
+                               str(out_arg), str(in_arg))
 
                 # Avoid changing the files if this is a dry run
                 if dry:
                     return
 
-                logger.warn("Moving \'%s\' to \'%s.old\'.", str(in_name),
-                            str(in_name))
+                logger.warning("Moving \'%s\' to \'%s.old\'.", str(in_name),
+                               str(in_name))
                 try:
                     # If it is the case, copy to another file to
                     # preserve the content
@@ -1102,7 +1107,7 @@ def update(args):
     # If output would be overwritten, print a warning
     if args.out:
         if os.path.isfile(args.out):
-            logger.warn("Overwriting existing file \'%s\'", args.out)
+            logger.warning("Overwriting existing file \'%s\'", args.out)
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -1148,10 +1153,10 @@ def update(args):
         # Check the symbols and print a warning if already present
         for symbol in new_set:
             if symbol in all_symbols:
-                logger.warn("The symbol \'%s\' is already"
-                            " present in a previous version. Keep the"
-                            " previous implementation to not break ABI.",
-                            symbol)
+                logger.warning("The symbol \'%s\' is already"
+                               " present in a previous version. Keep the"
+                               " previous implementation to not break ABI.",
+                               symbol)
 
         added_set.update(new_set)
     # If the list of symbols are being removed
@@ -1161,8 +1166,8 @@ def update(args):
             if symbol in all_symbols:
                 removed_set.add(symbol)
             else:
-                logger.warn("Requested to remove \'%s\', but not found.",
-                            symbol)
+                logger.warning("Requested to remove \'%s\', but not found.",
+                               symbol)
     # If the list of all symbols are being compared (the default option)
     else:
         for symbol in new_set:
@@ -1237,7 +1242,7 @@ def update(args):
             logger.error(msg)
             raise Exception(msg)
 
-        logger.warn("ABI break detected: symbols were removed.")
+        logger.warning("ABI break detected: symbols were removed.")
         print("Merging all symbols in a single new release")
         new_map = Map()
         r = Release()
@@ -1252,8 +1257,8 @@ def update(args):
 
         # Remove the '*' wildcard, if present
         if '*' in all_symbols:
-            logger.warn("Wildcard \'*\' found in global. Removed to avoid"
-                        " exporting unexpected symbols.")
+            logger.warning("Wildcard \'*\' found in global. Removed to avoid"
+                           " exporting unexpected symbols.")
             all_symbols.remove('*')
 
         # Remove the symbols to be removed and convert to a list
@@ -1330,7 +1335,7 @@ def new(args):
     # If output would be overwritten, print a warning
     if args.out:
         if os.path.isfile(args.out):
-            logger.warn("Overwriting existing file \'%s\'.", args.out)
+            logger.warning("Overwriting existing file \'%s\'.", args.out)
 
     # If both output and input files were given, check if are the same
     if args.out and args.input:
@@ -1422,7 +1427,7 @@ def new(args):
             if args.out:
                 f.close()
     else:
-        logger.warn("No valid symbols provided. Nothing done.")
+        logger.warning("No valid symbols provided. Nothing done.")
 
 
 def check(args):
