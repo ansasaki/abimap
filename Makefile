@@ -74,8 +74,7 @@ test-all: tox.ini## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	py.test --cov=abimap --cov-config .coveragerc --cov-report=term-missing -vv tests
-	coverage combine --append
+	py.test --cov=abimap --cov-append --cov-config .coveragerc --cov-report=term-missing -vv tests
 	coverage report
 	coverage html
 	$(BROWSER) htmlcov/index.html
