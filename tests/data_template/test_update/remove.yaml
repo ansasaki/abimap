@@ -12,6 +12,7 @@
     stdout: "remove_sanity.stdout"
     warnings:
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
 -
   input:
@@ -27,6 +28,7 @@
     stdout: "remove_final.stdout"
     warnings:
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
 -
   input:
@@ -46,6 +48,7 @@
       - "Given paths in '--out' and 'file' are the same."
       - "Moving 'remove.map' to 'remove.map.old'."
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
 -
   input:
@@ -60,6 +63,7 @@
     stdout: "unexistent_symbol.stdout"
     warnings:
       - "Requested to remove 'symbol', but not found."
+    errors:
     exceptions:
 -
   input:
@@ -81,6 +85,7 @@
       - "ABI break detected: symbols were removed."
       - "Wildcard '*' found in global. Removed to avoid exporting unexpected \
         symbols."
+    errors:
     exceptions:
 -
   input:
@@ -93,5 +98,7 @@
     file:
     stdout: "dont_break_api.stdout"
     warnings:
+    errors:
+      - "ABI break detected: symbols would be removed"
     exceptions:
       - "ABI break detected: symbols would be removed"

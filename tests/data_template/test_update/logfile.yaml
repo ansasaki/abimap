@@ -29,5 +29,7 @@
         local wildcard and do not have a predecessor version):"
       - "   BASE_1_0_0"
       - "   OTHER_BASE_1_0_0"
+    errors:
+      - "ABI break detected: symbols would be removed"
     exceptions:
       - "ABI break detected: symbols would be removed"

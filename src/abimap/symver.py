@@ -970,9 +970,9 @@ def clean_symbols(symbols):
                     duplicates.add(previous)
                 previous = i
         if duplicates:
-            dup_list = "".join((" " * 4 + dup + "\n" for dup in
+            dup_list = "".join((dup + ", " for dup in
                                 sorted(duplicates)))
-            logger.warning("Duplicated symbols provided:\n%s", dup_list)
+            logger.warning("Duplicated symbols provided: %s", dup_list)
 
     return clean
 
@@ -1009,7 +1009,7 @@ def check_files(out_arg, out_name, in_arg, in_name, dry):
                     # preserve the content
                     shutil.copy2(str(in_name), str(in_name) + ".old")
                 except Exception as e:
-                    logger.error("Could no copy \'%s\' to \'%s.old\'."
+                    logger.error("Could not copy \'%s\' to \'%s.old\'."
                                  " Aborting.", str(in_name), str(in_name))
                     raise e
 

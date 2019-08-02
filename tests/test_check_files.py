@@ -6,6 +6,7 @@ import filecmp
 import os
 
 import pytest
+from conftest import is_warning_in_log
 
 from abimap import symver
 
@@ -51,7 +52,7 @@ def test_same_file(datadir, caplog):
     for record in caplog.records:
         assert record.levelname != "CRITICAL"
         assert record.levelname != "ERROR"
-    assert "WARNING  " + expected in caplog.text
+    assert is_warning_in_log(expected, caplog.text)
 
     # Clear the captured log to not affect the following checks
     caplog.clear()
@@ -69,7 +70,7 @@ def test_same_file(datadir, caplog):
     for record in caplog.records:
         assert record.levelname != "CRITICAL"
         assert record.levelname != "ERROR"
-    assert "WARNING  " + expected in caplog.text
+    assert is_warning_in_log(expected, caplog.text)
 
     # Check if the file was created
     created = os.path.join(str(datadir), "in.map.old")

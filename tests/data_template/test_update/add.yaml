@@ -10,6 +10,7 @@
     file:
     stdout: "sanity_add.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -23,6 +24,7 @@
     file:
     stdout: "add_final.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -40,6 +42,7 @@
       - "Overwriting existing file 'add.map'"
       - "Given paths in '--out' and 'file' are the same."
       - "Moving 'add.map' to 'add.map.old'."
+    errors:
     exceptions:
 -
   input:
@@ -54,6 +57,7 @@
     warnings:
       - "The symbol 'symbol' is already present in a previous version. \
         Keep the previous implementation to not break ABI."
+    errors:
     exceptions:
 -
   input:
@@ -66,6 +70,7 @@
     file:
     stdout: "empty.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -81,6 +86,7 @@
       - "Duplicates found in release 'DUPLICATED_1_0_0':"
       - "    global:"
       - "        duplicated"
+    errors:
     exceptions:
 -
   input:
@@ -98,6 +104,7 @@
       - "The '*' wildcard was found in more than one place:"
       - "    WITH_WILDCARD_1_0_0: in 'global'"
       - "    WITH_WILDCARD_1_0_0: in 'local'"
+    errors:
     exceptions:
 -
   input:
@@ -117,6 +124,7 @@
     warnings:
       - "Overwriting existing file 'dry.in'"
       - "Given paths in '--out' and '--in' are the same."
+    errors:
     exceptions:
 -
   input:
@@ -131,6 +139,7 @@
     file:
     stdout: "update_existing.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -145,6 +154,8 @@
     file:
     stdout: "update_released.stdout"
     warnings:
+    errors:
+      - "Released releases cannot be modified. Abort."
     exceptions:
       - "Released releases cannot be modified. Abort."
 -
@@ -161,6 +172,7 @@
     file:
     stdout: "update_existing_final.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -173,6 +185,7 @@
     file:
     stdout: "split.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -185,4 +198,5 @@
     file:
     stdout: "missing_global.stdout"
     warnings:
+    errors:
     exceptions:

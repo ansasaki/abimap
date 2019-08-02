@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from conftest import is_warning_in_log
 
 from abimap import symver
 
@@ -17,13 +18,13 @@ def test_get_version_from_string(testcases, caplog):
                         assert expected in str(e.value)
                     if tc["warnings"]:
                         for expected in tc["warnings"]:
-                            assert "WARNING  " + expected in caplog.text
+                            assert is_warning_in_log(expected, caplog.text)
             else:
                 assert (symver.get_version_from_string(tc["input"]) ==
                         tc["output"])
                 if tc["warnings"]:
                     for expected in tc["warnings"]:
-                        assert "WARNING  " + expected in caplog.text
+                        assert is_warning_in_log(expected, caplog.text)
     else:
         # If no test cases were found, fail
         assert 0
