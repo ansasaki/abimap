@@ -3,6 +3,7 @@
 """Tests for test_get_info_from_release_string()"""
 
 import pytest
+from conftest import is_warning_in_log
 
 from abimap import symver
 
@@ -19,13 +20,13 @@ def test_get_info_from_release_string(testcases, caplog):
                         assert expected in str(e.value)
                     if tc["warnings"]:
                         for expected in tc["warnings"]:
-                            assert "WARNING  " + expected in caplog.text
+                            assert is_warning_in_log(expected, caplog.text)
             else:
                 assert (symver.get_info_from_release_string(tc["input"]) ==
                         tc["output"])
                 if tc["warnings"]:
                     for expected in tc["warnings"]:
-                        assert "WARNING  " + expected in caplog.text
+                        assert is_warning_in_log(expected, caplog.text)
 
             # Clear the captured log and output so far
             caplog.clear()

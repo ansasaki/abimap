@@ -11,6 +11,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Invalid Release identifier"
     exceptions:
       - "Invalid Release identifier"
 -
@@ -28,6 +30,7 @@
     warnings:
       - "Duplicated Release identifier"
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
 -
   input:
@@ -41,6 +44,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Missing '{'"
     exceptions:
       - "Missing '{'"
 -
@@ -55,6 +60,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Invalid identifier"
     exceptions:
       - "Invalid identifier"
 -
@@ -69,6 +76,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Missing ';' or ':' after"
     exceptions:
       - "Missing ';' or ':' after"
 -
@@ -87,6 +96,7 @@
       - "ABI break detected: symbols were removed."
       - "Missing visibility scope before"
       - "Symbols considered in 'global:'"
+    errors:
     exceptions:
 -
   input:
@@ -100,6 +110,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Invalid identifier"
     exceptions:
       - "Invalid identifier"
 -
@@ -114,6 +126,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Missing ';'"
     exceptions:
       - "Missing ';'"
 -
@@ -128,6 +142,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Release 'LIBTC5_8_0_0' not found"
     exceptions:
       - "Release 'LIBTC5_8_0_0' not found"
 -
@@ -143,6 +159,8 @@
     stdout:
     warnings:
       - "Duplicated Release identifier 'LIBTC5_9_0_0'"
+    errors:
+      - "defined more than 1 release 'LIBTC5_9_0_0'"
     exceptions:
       - "defined more than 1 release 'LIBTC5_9_0_0'"
 -
@@ -157,6 +175,8 @@
     file:
     stdout:
     warnings:
+    errors:
+      - "Circular dependency detected!"
     exceptions:
       - "Circular dependency detected!"
 -
@@ -189,6 +209,7 @@
       - "   BASE_1_0_0"
       - "   OTHER_BASE_1_0_0"
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
 -
   input:
@@ -205,6 +226,7 @@
     warnings:
       - "The '*' wildcard was not found"
       - "No base version release found"
+    errors:
     exceptions:
 -
   input:
@@ -217,6 +239,7 @@
     file:
     stdout: "mixed_names.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -231,4 +254,5 @@
     warnings:
       - "The '*' wildcard was not found"
       - "No base version release found"
+    errors:
     exceptions:

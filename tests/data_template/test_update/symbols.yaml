@@ -9,6 +9,7 @@
     file:
     stdout: "symbols_sanity.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -21,6 +22,7 @@
     file:
     stdout: "symbols_final.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -37,6 +39,7 @@
       - "Overwriting existing file 'symbols.map'"
       - "Given paths in '--out' and 'file' are the same."
       - "Moving 'symbols.map' to 'symbols.map.old'."
+    errors:
     exceptions:
 -
   input:
@@ -50,6 +53,7 @@
     file:
     stdout: "update_existing.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -63,6 +67,8 @@
     file:
     stdout: "update_released.stdout"
     warnings:
+    errors:
+      - "Released releases cannot be modified. Abort."
     exceptions:
       - "Released releases cannot be modified. Abort."
 -
@@ -77,6 +83,7 @@
     file:
     stdout: "with_release_info.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -91,6 +98,7 @@
     file:
     stdout: "with_release_abi_break.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -104,4 +112,5 @@
     file:
     stdout: "update_no_changes.stdout"
     warnings:
+    errors:
     exceptions:

@@ -1,5 +1,6 @@
 import filecmp
 import os
+import re
 from distutils import dir_util
 
 import pytest
@@ -56,7 +57,8 @@ def testcases(datadir, capsys):
             if file_type.lower() == ".yml" or file_type.lower() == ".yaml":
                 with open(str(test_input), 'r') as stream:
                     try:
-                        all_tests.extend(yaml.load(stream))
+                        all_tests.extend(yaml.load(stream,
+                                                   Loader=yaml.FullLoader))
                     except yaml.YAMLError as e:
                         with capsys.disabled():
                             print(e)
@@ -85,6 +87,50 @@ class cd:
 
     def __exit__(self, etype, value, traceback):
         os.chdir(self.saved_path)
+
+
+def is_warning_in_log(expected, log):
+    """
+    Search for a warning containing the expected message in the log. Returns
+    True if found; False otherwise.
+
+    :param expected: The regular expression
+    "param log: The input string
+    """
+
+    # Escape possibly existing special characters
+    escaped = re.escape(expected)
+
+    regex = "WARNING.*" + escaped
+
+    to_match = re.compile(regex)
+    found = to_match.search(log)
+    if found:
+        return True
+
+    return False
+
+
+def is_error_in_log(expected, log):
+    """
+    Search for an error containing the expected message in the log. Returns
+    True if found; False otherwise.
+
+    :param expected: The regular expression
+    "param log: The input string
+    """
+
+    # Escape possibly existing special characters
+    escaped = re.escape(expected)
+
+    regex = "ERROR.*" + escaped
+
+    to_match = re.compile(regex)
+    found = to_match.search(log)
+    if found:
+        return True
+
+    return False
 
 
 def run_tc(tc, datadir, capsys, caplog):
@@ -166,10 +212,15 @@ def run_tc(tc, datadir, capsys, caplog):
                 # Fail
                 assert 0
 
-        # Check if the expected messages are in the log
+        # Check if the expected warning messages are in the log
         if tc_out["warnings"]:
             for expected in tc_out["warnings"]:
-                assert expected in caplog.text
+                assert is_warning_in_log(expected, caplog.text)
+
+        # Check if the expected error messages are in the log
+        if tc_out["errors"]:
+            for expected in tc_out["errors"]:
+                assert is_error_in_log(expected, caplog.text)
 
         # If a log file was supposed to exist, check the content
         if args.logfile:
@@ -178,7 +229,10 @@ def run_tc(tc, datadir, capsys, caplog):
                     logged = log.read()
                     if tc_out["warnings"]:
                         for expected in tc_out["warnings"]:
-                            assert expected in logged
+                            assert is_warning_in_log(expected, caplog.text)
+                    if tc_out["errors"]:
+                        for expected in tc_out["errors"]:
+                            assert is_error_in_log(expected, caplog.text)
                     if tc_out["exceptions"]:
                         for expected in tc_out["exceptions"]:
                             assert expected in logged

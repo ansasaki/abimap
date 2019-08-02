@@ -16,7 +16,8 @@
       - "Overwriting existing file 'overwrite_protected.in'"
       - "Given paths in '--out' and '--in' are the same."
       - "Moving 'overwrite_protected.in' to 'overwrite_protected.in.old'."
-      - "Could no copy 'overwrite_protected.in' to \
+    errors:
+      - "Could not copy 'overwrite_protected.in' to \
         'overwrite_protected.in.old'. Aborting."
     exceptions:
       - "Permission denied: 'overwrite_protected.in.old'"

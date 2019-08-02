@@ -10,6 +10,7 @@
     file:
     stdout: "separated.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -21,6 +22,7 @@
     file:
     stdout: "given_release.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -33,6 +35,7 @@
     file:
     stdout: "release_and_version.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -47,6 +50,7 @@
     file:
     stdout: "release_and_name.stdout"
     warnings:
+    errors:
     exceptions:
 -
   input:
@@ -61,5 +65,7 @@
       - "Release provided is not well formed (a well formed release contain
         the library identifier and the version information). \
         Suggested: something like LIBNAME_1_2_3"
+    errors:
+      - "Please provide the release name."
     exceptions:
       - "Please provide the release name."

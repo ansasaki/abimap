@@ -16,4 +16,5 @@
       - "Given paths in '--out' and 'file' are the same."
       - "Moving 'overwrite.map' to 'overwrite.map.old'."
       - "ABI break detected: symbols were removed."
+    errors:
     exceptions:
