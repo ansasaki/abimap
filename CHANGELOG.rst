@@ -2,6 +2,14 @@
 Changelog
 =========
 
+0.3.2 (2019-08-05)
+------------------
+
+* Fixed broken builds due to changes in warning output
+* Changed tests to check error messages
+* Added python 3.7 to testing matrix
+* Added requirement to verify SNI when checking URLs in docs
+
 0.3.1 (2018-08-20)
 ------------------
 
