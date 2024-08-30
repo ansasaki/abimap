@@ -8,8 +8,6 @@ import shutil
 import sys
 from itertools import chain
 
-from natsort import natsorted
-
 from ._version import __version__
 
 VERBOSITY_MAP = {"debug": logging.DEBUG,
@@ -76,6 +74,27 @@ class Single_Logger(object):
             Single_Logger.__instance.addHandler(file_handler)
 
         return Single_Logger.__instance
+
+
+def _natural_sort_key(s, regex=re.compile(r'(\d+)')):
+    """
+    Split the string into a list of substrings where those substrings made of
+    digits are replaced by the respective integer values.
+
+    Use this as 'key' for buitin sorting using 'sort' or 'sorted' to order a
+    list of strings in natural order.
+
+    Note that this will order a_b_c_00010_0_0 after a_b_c_2
+
+    :param s:       Input string
+    :param regex:   Regex to detect substrings made of digits
+    :returns:       A list of the substrings of the original string where the
+                    letters are converted to respective lower case and the
+                    substrings made by digits are interpreted as integers
+    """
+
+    return [int(substring) if substring.isdigit() else substring.lower()
+            for substring in regex.split(s)]
 
 
 class ParserError(Exception):
@@ -738,7 +757,8 @@ class Map(object):
             self.logger.error(msg)
             raise Exception(msg)
 
-        self.releases = natsorted(self.releases, key=lambda release: release.name, reverse=True)
+        # Use natural sorting
+        self.releases = sorted(self.releases, key=lambda release: _natural_sort_key(release.name), reverse=True)
         dependencies = self.dependencies()
         top_dependency = next((dependency for dependency in dependencies if
                                dependency[0] == top_release))
