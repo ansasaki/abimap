@@ -8,6 +8,8 @@ import shutil
 import sys
 from itertools import chain
 
+from natsort import natsorted
+
 from ._version import __version__
 
 VERBOSITY_MAP = {"debug": logging.DEBUG,
@@ -736,7 +738,7 @@ class Map(object):
             self.logger.error(msg)
             raise Exception(msg)
 
-        self.releases.sort(key=lambda release: release.name, reverse=True)
+        self.releases = natsorted(self.releases, key=lambda release: release.name, reverse=True)
         dependencies = self.dependencies()
         top_dependency = next((dependency for dependency in dependencies if
                                dependency[0] == top_release))
