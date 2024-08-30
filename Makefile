@@ -68,7 +68,7 @@ lint: ## check style with flake8
 	flake8 src/abimap tests
 
 test: bootstrap-tests## run tests quickly with the default Python
-	pytest -vv --ignore=src/
+	PYTHONPATH=src/ pytest -vv --ignore=src/
 
 test-all: tox.ini## run tests on every Python version with tox
 	tox
