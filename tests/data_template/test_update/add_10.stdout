@@ -1,0 +1,19 @@
+Added:
+    symbol
+
+# This map file was updated with PROGRAM_NAME_VERSION
+
+LIBTC1_1_9_0
+{
+    global:
+        another_symbol;
+    local:
+        *;
+} ;
+
+LIBTC1_1_10_0
+{
+    global:
+        symbol;
+} LIBTC1_1_9_0;
+
