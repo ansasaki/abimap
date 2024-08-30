@@ -200,3 +200,16 @@
     warnings:
     errors:
     exceptions:
+-
+  input:
+    args:
+      - "update"
+      - "--add"
+      - "add_10.map"
+    stdin: "symbol.in"
+  output:
+    file:
+    stdout: "add_10.stdout"
+    warnings:
+    errors:
+    exceptions:
