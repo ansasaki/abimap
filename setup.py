@@ -10,6 +10,7 @@ from os.path import splitext
 
 from setuptools import find_packages
 from setuptools import setup
+
 from version import get_version
 
 package_name = "abimap"
@@ -21,7 +22,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['setuptools']
+requirements = ['setuptools', 'natsort']
 
 setup_requirements = ['pytest-runner']
 
