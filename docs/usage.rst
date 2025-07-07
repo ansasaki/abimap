@@ -54,7 +54,7 @@ Running  ``abimap -h`` will give::
   
   Helper tools for linker version script maintenance
   
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
   
   Subcommands:
@@ -72,100 +72,83 @@ There are four subcommands, ``update``, ``new``, ``check``, and ``version``
 
 Running ``abimap update -h`` will give::
 
-  usage: abimap update [-h] [-o OUT] [-i INPUT] [-d]
-                       [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                       [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
-                       [--no_guess] [--allow-abi-break] [-f] [-a | --remove]
+  usage: abimap update [-h] [-o OUT] [-i INPUT] [-d] [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug] [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE] [--no_guess]
+                       [--allow-abi-break] [-f] [-a | --remove]
                        file
   
   positional arguments:
     file                  The map file being updated
   
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
-    -o OUT, --out OUT     Output file (defaults to stdout)
-    -i INPUT, --in INPUT  Read from this file instead of stdio
+    -o, --out OUT         Output file (defaults to stdout)
+    -i, --in INPUT        Read from this file instead of stdio
     -d, --dry             Do everything, but do not modify the files
     --verbosity {quiet,error,warning,info,debug}
                           Set the program verbosity
     --quiet               Makes the program quiet
     --debug               Makes the program print debug info
-    -l LOGFILE, --logfile LOGFILE
+    -l, --logfile LOGFILE
                           Log to this file
-    -n NAME, --name NAME  The name of the library (e.g. libx)
-    -v VERSION, --version VERSION
+    -n, --name NAME       The name of the library (e.g. libx)
+    -v, --version VERSION
                           The release version (e.g. 1_0_0 or 1.0.0)
-    -r RELEASE, --release RELEASE
-                          The full name of the release to be used (e.g.
-                          LIBX_1_0_0)
+    -r, --release RELEASE
+                          The full name of the release to be used (e.g. LIBX_1_0_0)
     --no_guess            Disable next release name guessing
     --allow-abi-break     Allow removing symbols, and to break ABI
-    -f, --final           Mark the modified release as final, preventing later
-                          changes.
+    -f, --final           Mark the modified release as final, preventing later changes.
     -a, --add             Adds the symbols to the map file.
-    --remove              Remove the symbols from the map file. This breaks the
-                          ABI.
+    --remove              Remove the symbols from the map file. This breaks the ABI.
   
-  A list of symbols is expected as the input. If a file is provided with '-i',
-  the symbols are read from the given file. Otherwise the symbols are read from
-  stdin.
+  A list of symbols is expected as the input. If a file is provided with '-i', the symbols are read from the given file. Otherwise the symbols are read from stdin.
 
 Running ``abimap new -h`` will give::
 
-  usage: abimap new [-h] [-o OUT] [-i INPUT] [-d]
-                    [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                    [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE]
-                    [--no_guess] [-f]
+  usage: abimap new [-h] [-o OUT] [-i INPUT] [-d] [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug] [-l LOGFILE] [-n NAME] [-v VERSION] [-r RELEASE] [--no_guess] [-f]
   
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
-    -o OUT, --out OUT     Output file (defaults to stdout)
-    -i INPUT, --in INPUT  Read from this file instead of stdio
+    -o, --out OUT         Output file (defaults to stdout)
+    -i, --in INPUT        Read from this file instead of stdio
     -d, --dry             Do everything, but do not modify the files
     --verbosity {quiet,error,warning,info,debug}
                           Set the program verbosity
     --quiet               Makes the program quiet
     --debug               Makes the program print debug info
-    -l LOGFILE, --logfile LOGFILE
+    -l, --logfile LOGFILE
                           Log to this file
-    -n NAME, --name NAME  The name of the library (e.g. libx)
-    -v VERSION, --version VERSION
+    -n, --name NAME       The name of the library (e.g. libx)
+    -v, --version VERSION
                           The release version (e.g. 1_0_0 or 1.0.0)
-    -r RELEASE, --release RELEASE
-                          The full name of the release to be used (e.g.
-                          LIBX_1_0_0)
+    -r, --release RELEASE
+                          The full name of the release to be used (e.g. LIBX_1_0_0)
     --no_guess            Disable next release name guessing
-    -f, --final           Mark the new release as final, preventing later
-                          changes.
+    -f, --final           Mark the new release as final, preventing later changes.
   
-  A list of symbols is expected as the input. If a file is provided with '-i',
-  the symbols are read from the given file. Otherwise the symbols are read from
-  stdin.
+  A list of symbols is expected as the input. If a file is provided with '-i', the symbols are read from the given file. Otherwise the symbols are read from stdin.
 
 Running ``abimap check -h`` will give::
 
-  usage: abimap check [-h]
-                      [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug]
-                      [-l LOGFILE]
-                      file
+  usage: abimap check [-h] [--verbosity {quiet,error,warning,info,debug} | --quiet | --debug] [-l LOGFILE] file
   
   positional arguments:
     file                  The map file to be checked
   
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
     --verbosity {quiet,error,warning,info,debug}
                           Set the program verbosity
     --quiet               Makes the program quiet
     --debug               Makes the program print debug info
-    -l LOGFILE, --logfile LOGFILE
+    -l, --logfile LOGFILE
                           Log to this file
 
 Running ``abimap version -h`` will give::
 
   usage: abimap version [-h]
   
-  optional arguments:
+  options:
     -h, --help  show this help message and exit
 
 Import as a library:

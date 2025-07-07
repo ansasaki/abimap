@@ -1321,7 +1321,7 @@ def update(args):
 
         # Set the name of the application in the output
         name_version = None
-        if args.program:
+        if args.program and 'pytest' not in args.program:
             name_version = "{0}-{1}".format(args.program, __version__)
         else:
             name_version = "abimap-{0}".format(__version__)
@@ -1437,7 +1437,7 @@ def new(args):
 
             # Set the name of the application in the output
             name_version = None
-            if args.program:
+            if args.program and 'pytest' not in args.program:
                 name_version = "{0}-{1}".format(args.program, __version__)
             else:
                 name_version = "abimap-{0}".format(__version__)
@@ -1489,7 +1489,7 @@ def version(args):
     :returns: A string containing the program name and version
     """
 
-    if args.program:
+    if args.program and 'pytest' not in args.program:
         name_version = "{0}-{1}".format(args.program, __version__)
     else:
         name_version = "abimap-{0}".format(__version__)

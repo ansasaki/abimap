@@ -1,14 +1,16 @@
 .. start-badges
 
-|docs| |travis| |coveralls| |codecov|
+|docs| |ci| |coveralls| |codecov|
 
 .. |docs| image:: https://readthedocs.org/projects/abimap/badge/?style=flat
     :target: https://readthedocs.org/projects/abimap
     :alt: Documentation Status
 
-.. |travis| image:: https://travis-ci.org/ansasaki/abimap.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/ansasaki/abimap
+.. |ci| image:: https://github.com/ansasaki/abimap/workflows/CI/badge.svg
+    :target: https://github.com/ansasaki/abimap/actions
+    :alt: GitHub Actions CI Status
+
+
 
 .. |coveralls| image:: https://coveralls.io/repos/github/ansasaki/abimap/badge.svg?branch=master
     :alt: Coverage Status

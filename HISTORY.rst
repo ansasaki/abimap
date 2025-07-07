@@ -2,6 +2,19 @@
 History
 =======
 
+0.4.0 (2025-07-07)
+------------------
+
+* Fixed Makefile clean targets to properly handle both files and directories
+* Updated build system to use modern ``python -m build`` instead of deprecated ``python setup.py`` commands
+* Fixed linting target to use ``python -m flake8`` for better reliability
+* Added flake8 to development dependencies and requirements-test.txt
+* Fixed documentation build by adding Sphinx dependencies and using ``python -m sphinx``
+* Made Makefile portable by using dynamic make command detection with ``$(shell command -v make)``
+* Updated development dependencies to include build tools (build, sphinx, sphinx-rtd-theme, watchdog)
+* Made documentation linkcheck non-fatal to handle broken external links gracefully
+* Improved development workflow with proper dependency management
+
 0.3.2 (2019-08-05)
 ------------------
 

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abimap"
+description = "A helper for library maintainers to use symbol versioning"
+dynamic = ["version"]
+readme = "README.rst"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    {name = "Anderson Toshiyuki Sasaki", email = "ansasaki@redhat.com"}
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
+]
+keywords = ["symver", "abimap", "symbol", "version", "versioning", "linker", "script", "library", "maintenance"]
+dependencies = ["setuptools"]
+
+[project.optional-dependencies]
+dev = ["flake8", "build", "sphinx>=6.0.0", "sphinx-rtd-theme>=1.2.0", "watchdog>=2.0.0"]
+test = ["pytest", "pyyaml", "pytest-cov", "pytest-console-scripts"]
+
+[project.scripts]
+abimap = "abimap.main:main"
+
+[tool.setuptools]
+packages = {find = {where = ["src"]}}
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.dynamic]
+version = {attr = "abimap._version.__version__"}
+
+
+
+[project.urls]
+homepage = "https://github.com/ansasaki/abimap"
+

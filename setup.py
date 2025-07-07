@@ -11,8 +11,6 @@ from os.path import splitext
 from setuptools import find_packages
 from setuptools import setup
 
-from version import get_version
-
 package_name = "abimap"
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,14 +20,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['setuptools']
-
-setup_requirements = ['pytest-runner']
-
-test_requirements = ['pytest', 'pyyaml', 'pytest-cov', 'pytest-console-scripts']
-
-version = get_version()
-
 setup(
     author="Anderson Toshiyuki Sasaki",
     author_email='ansasaki@redhat.com',
@@ -37,18 +27,15 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
     ],
     description="A helper for library maintainers to use symbol versioning ",
-    install_requires=requirements,
-    license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='symver abimap symbol version versioning linker script library maintenance',
@@ -60,10 +47,6 @@ setup(
     entry_points={
         'console_scripts': ['abimap=abimap.main:main']
     },
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/ansasaki/abimap',
-    version=version,
     zip_safe=False,
 )

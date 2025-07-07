@@ -1,0 +1,27 @@
+# Test requirements for abimap
+# These are needed to run the test suite
+
+# Core testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-console-scripts>=1.4.0
+
+# Test data and configuration
+pyyaml>=6.0.0
+
+# Coverage reporting
+coverage>=7.0.0
+
+# Code quality and linting
+flake8>=6.0.0
+
+# Build tools
+build>=0.10.0
+
+# Documentation tools
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+watchdog>=2.0.0
+
+# Install package in development mode for testing
+-e .
