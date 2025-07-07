@@ -25,6 +25,7 @@ endef
 export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
+MAKE := $(shell command -v make)
 
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -46,7 +47,7 @@ clean-build: ## remove build artifacts
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+	find . -name '*.egg' -exec rm -rf {} +
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
@@ -65,16 +66,16 @@ clean-docs: ## remove generated docs files
 	$(MAKE) -C docs clean
 
 lint: ## check style with flake8
-	flake8 src/abimap tests
+	python -m flake8 src/abimap tests
 
-test: bootstrap-tests## run tests quickly with the default Python
+test: bootstrap-tests ## run tests quickly with the default Python
 	PYTHONPATH=src/ pytest -vv --ignore=src/
 
-test-all: tox.ini## run tests on every Python version with tox
+test-all: tox.ini ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	py.test --cov=abimap --cov-append --cov-config .coveragerc --cov-report=term-missing -vv tests
+	python -m pytest --cov=abimap --cov-append --cov-config .coveragerc --cov-report=term-missing -vv tests
 	coverage report
 	coverage html
 	$(BROWSER) htmlcov/index.html
@@ -84,21 +85,20 @@ usage: ## generate usage content by calling the program
 	cp docs/readme.rst README.rst
 
 docs: usage ## generate Sphinx HTML documentation, including API docs
-	sphinx-build -E -b doctest docs dist/docs
-	sphinx-build -E -b html docs dist/docs
-	sphinx-build -b linkcheck docs dist/docs
-	sphinx-build -E -b man docs dist/man
+	python -m sphinx -E -b doctest docs dist/docs
+	python -m sphinx -E -b html docs dist/docs
+	-python -m sphinx -b linkcheck docs dist/docs
+	python -m sphinx -E -b man docs dist/man
 
 servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+	watchmedo shell-command -p '*.rst' -c 'python -m sphinx -E -b html docs dist/docs' -R -D .
 
 release: dist ## package and upload a release
 	twine upload dist/*
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python -m build
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	pip install -e .

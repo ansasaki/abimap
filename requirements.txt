@@ -1,0 +1,8 @@
+# Runtime dependencies for abimap
+# These are the minimal requirements needed to run abimap
+
+# Core dependency for package functionality
+setuptools>=67.0.0
+
+# Note: abimap has minimal runtime dependencies by design
+# Most functionality depends only on Python standard library and setuptools

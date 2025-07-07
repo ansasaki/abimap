@@ -1,0 +1,8 @@
+# Minimal requirements for abimap
+# These are the absolute minimum requirements to run abimap
+
+# Only dependency: setuptools for package functionality
+setuptools
+
+# Note: abimap is designed to have minimal dependencies
+# and mostly uses Python standard library functionality
