@@ -25,10 +25,10 @@ master_doc = 'index'
 man_index = 'man_index'
 description = 'Generate and update linker version scripts'
 project = u'abimap'
-year = '2018'
+year = '2025'
 author = u'Anderson Toshiyuki Sasaki <ansasaki@redhat.com>'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'0.3.2'
+version = release = u'0.4.0'
 
 pygments_style = 'trac'
 templates_path = ['.']
